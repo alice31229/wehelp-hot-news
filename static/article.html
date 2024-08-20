@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文章</title>
+    <link rel="stylesheet" href="/static/css/article.css">
+    <script src="/static/js/article.js"></script>
+</head>
+<body>
+    
+    <div class='header'>
+        <div class="thousand_twoHundred_navbar">
+          <div class='home'>熱門資訊通</div> 
+          <div class='items'>
+            <div class='item' id="readCollections"><img class="collect_heart" src="/static/photo_icon/collect_yy.png" alt="">收藏文章</div>
+            <div class='item' id="signInEnroll"><img class="signIn-enroll-icon" src="/static/photo_icon/log-in.png" alt="">登入/註冊</div>
+          </div>
+        </div>
+        <hr class="line" id="upper_line">
+    </div>
+    
+    <div class="pop-background-color-sign-in" id="fade-sign-in">
+        <div class="pop-up-sign-in">
+          <div class="decorator_bar"></div>
+          <img src="/static/photo_icon/close.png" class="close-pop-sign-in" alt="close_sign_in">
+          <div class="sign_in_title">登入會員帳號</div>
+          <form id="signin">
+            <input type="text" id="usernameID" name="username" placeholder="輸入使用者名稱">
+            <br>
+            <input type="password" id="passwordID" name="password" placeholder="輸入密碼" autocomplete="off">
+            <br>
+            <button type="submit" class="logInBtn">登入帳戶</button>
+          </form>
+          <div class="error-message-sign-in"></div>
+          <div class="enroll-dialog">還沒有帳戶？點此註冊～</div>
+        </div>
+    </div>
+      
+    <div class="pop-background-color-enroll">
+        <div class="pop-up-enroll">
+            <div class="decorator_bar"></div>
+            <img src="/static/photo_icon/close.png" class="close-pop-enroll" alt="close_enroll">
+            <div class="enroll_title">註冊會員帳號</div>
+            <form id="enroll">
+            <input type="text" id="usernameID-enroll" name="username-enroll" placeholder="輸入使用者名稱" autocomplete="off">
+            <br>
+            <input type="password" id="passwordID-enroll" name="password-enroll" placeholder="輸入密碼" autocomplete="off">
+            <br>
+            <input type="text" id="nameID-enroll" name="name" placeholder="輸入姓名">
+            <br>
+            <input type="text" id="emailID-enroll" name="email-enroll" placeholder="輸入電子信箱">
+            <br>
+            <button type="submit" class="enrollBtn">註冊新帳戶</button>
+            </form>
+            <div class="message-enroll"></div>
+            <div class="sign-in-dialog">已經有帳戶了？點此登入～</div>
+        </div>
+    </div>
+
+    <div class="imgs_article">
+        <div class="thousand_twoHundred">
+            <div class="banner_container">
+                
+            <div class="img_box"> <!--圖片元素-->
+                <!-- <img src="" alt="" class="article_imgs"> -->
+            </div>
+            <div class="dot_box"> <!--選擇按鈕 根據景點圖片數量 新增多少點點-->
+                <!-- <img src="" alt="" class="dot"> -->
+            </div>
+
+            <img src="/static/photo_icon/left arrow.png" class="arrow_btn_left" onclick="minusSlides(counter)" alt="arrow_btn_left"> <!--左切換按鈕-->
+            <img src="/static/photo_icon/right arrow.png" class="arrow_btn_right" onclick="plusSlides(counter)" alt="arrow_btn_right"> <!--右切換按鈕-->
+                
+            </div>
+            <div class="article_info">
+                <div class="title"></div>
+                <div class="forum_reference">
+                    <div class="category_at_forum"></div>
+                    <a class="article_link" href="">文章出處<img src="/static/photo_icon/article_link.png" class="link-icon" alt="articleLink"></a>
+            </div>
+            
+            <div class="summary">
+                <div class="common_style">輕瞥文章重點</div>
+                <div class="no_bold_style">以此重點決定是否深讀，為您提升掌握時事的效率</div>
+
+                <div class="detail">
+                    <div class="common_style">文章來源：</div> 
+                    <div class="resource"></div>
+                </div>
+
+                <div class="detail">
+                    <div class="common_style">發佈日期：</div>
+                    <div class="date"></div>
+                </div>
+                
+                <button class="start_collect">喜歡嘛？收藏起來吧～</button>
+            </div>
+            </div>
+        </div>
+    </div>
+    
+    <hr class="line" id="lower_line">
+
+    <div class="simple_style">文章摘要：</div>
+
+    <p class="overview"></p>
+
+    <div class="simple_style">文章內容：</div>
+
+    <p class="content"></p>
+    
+    
+    <footer class="copyRight">
+        <div class="CR_words">COPYRIGHT © 2024 熱門資訊通</div>
+        <div class="copy_right"></div>
+    </footer>
+
+</body>
+</html>

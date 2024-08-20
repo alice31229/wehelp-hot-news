@@ -1,0 +1,112 @@
+#匯入套件
+from bs4 import BeautifulSoup
+
+# 操作 browser 的 API
+from selenium import webdriver
+
+# 強制等待 (執行期間休息一下)
+from time import sleep
+import pandas as pd
+from tools import generate_image_upload_s3, get_summary_of_article, insert_into_articles
+
+import os
+from dotenv import load_dotenv
+
+# get .env under config directory
+dotenv_path = os.path.join(os.path.dirname(__file__), '../config/.env')
+load_dotenv(dotenv_path)
+
+
+def get_storm(pages):
+
+    storm_url = "https://www.storm.mg/articles/"
+    
+    # selenium settings
+    options = webdriver.ChromeOptions()
+    options.add_argument('--user-agent=%s' % os.getenv('USER_AGENT'))
+    options.add_argument('disable-infobars')
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_argument("--disable-extensions")
+    options.add_argument("--profile-directory=Default")
+    options.add_argument("--incognito")
+    options.add_argument("--disable-plugins-discovery")
+    options.add_argument("--start-maximized")
+    options.chrome_executable_path='./chromedriver'
+    driver = webdriver.Chrome(options=options)
+
+    forum = []
+    title = []
+    date = []
+    url = []
+    content = []
+
+    for i in range(pages):
+        base_url = storm_url+str(i+1)
+        driver.get(base_url)
+        sleep(5)
+        soup = BeautifulSoup(driver.page_source, "html.parser")
+        elements = soup.find_all("div", {"class": "category_card card_thumbs_left"})
+    
+        for element in elements:
+
+            t = element.find('h3').getText().strip()
+            title.append(t)
+            time = element.find("span", {'class': 'info_time'}).getText().strip()
+            date.append(time)
+            category = element.find('div', {'class': 'tags_wrapper'}).getText().strip()
+            category = category.replace('\n', ' ')
+            forum.append(category)
+            website = element.find('a')['href']
+            url.append(website)
+
+            driver.get(website)
+            sleep(5)
+            soup = BeautifulSoup(driver.page_source, "html.parser")
+            ps = soup.find_all('p', attrs={'aid': True})
+
+            txt = ''
+            for p in ps:
+                txt+=p.text
+
+            content.append(txt)
+
+            
+    driver.quit()
+
+    final = pd.DataFrame()
+    final['文章類別'] = forum
+    final['文章標題'] = title
+    final['文章內容'] = content
+    final['文章來源'] = '風傳媒'
+    final['日期'] = date
+    final['文章網址'] = url
+
+    final['日期'] = pd.to_datetime(final['日期'], format='%Y-%m-%d %H:%M', errors='coerce')
+
+    # wordcloud operations
+    wordcloud = []
+    network = []
+    overview = []
+    for i in range(final.shape[0]):
+
+        s3_uuid_wc, s3_uuid_nw = generate_image_upload_s3(final['文章標題'][i], final['文章內容'][i])
+        wordcloud.append(s3_uuid_wc)
+        network.append(s3_uuid_nw)
+        summary = get_summary_of_article(final['文章標題'][i], final['文章內容'][i])
+        overview.append(summary)
+
+    final['文字雲'] = wordcloud
+    final['關係圖'] = network
+    final['文章摘要'] = overview
+
+    if insert_into_articles(final):
+
+        print('Storm \Y/')
+
+    else:
+
+        print('Storm error...')
+    
+    #return final
+
+get_storm(1)

@@ -1,0 +1,5 @@
+.env
+chromedriver
+dict.txt.big.txt
+stop_words_ch_filter.txt
+stopwords.txt
