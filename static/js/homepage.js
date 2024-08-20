@@ -425,8 +425,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         } catch (error) {
-            console.error("Login failed:", error);
             //alert("登入失敗，請確認使用者名稱與密碼是否正確、已註冊");
+            console.error("Login failed:", error);
         }
 
     })
