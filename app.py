@@ -66,7 +66,13 @@ async def handle_articles_page(page: int = Query(0), keyword: str = Query('')):
 @app.get("/api/article/{id}")
 async def get_target_article_info(id: int):
 	
-    from tools import db
+    from tools import db, Cache
+
+    # 如果快取有資料 就直接拿 沒有就去資料庫抓
+    result = Cache.get("article-"+str(id))
+    if result != None:
+         
+         return {'data': result}
 
     try:
 
@@ -81,7 +87,11 @@ async def get_target_article_info(id: int):
 
         if target_article != []:
             
-            article_json = {'data': target_article[0]}
+            query_result = target_article[0]
+            article_json = {'data': query_result}
+
+            # 快取沒抓到 去資料庫抓的放到快取預備
+            Cache.put('article-'+str(id), query_result)
 
             return article_json
 

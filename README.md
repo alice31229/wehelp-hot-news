@@ -1,6 +1,8 @@
 It's a platform gathering popular articles from pttbrain, storm, businesstoday and udn.
 
-Using the following techniques:
+Website: https://aliceta.cloud/
+
+Use the following techniques:
 1. HTML/CSS/JavaScript
 2. Python FastAPI
 3. Python Selenium, BeautifulSoup

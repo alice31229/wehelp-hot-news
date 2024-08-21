@@ -121,6 +121,33 @@ def get_12_articles_by_page(page):
 
 
 ######################################
+# article page Cache 
+# 順序上 資料由舊到新
+class Cache():
+    def __init__(self):
+          self.data = []
+          self.max = 10
+    
+    def get(self, key):
+        for i in range(len(self.data)-1, -1, -1):
+            if self.data[i]['key'] == key:
+                item = self.data[i]
+                del self.data[i]
+                self.data.append(item)
+                return item['value']
+        return None
+    
+    def put(self, key, value):
+        if len(self.data) > self.max:
+            self.data = self.data[self.max//2:]
+        self.data.append({
+             "key": key, "value": value
+        })
+
+Cache = Cache()                
+
+
+######################################
 # member collect article [dynamodb]
 
 def get_all_collection_member(member_id):
