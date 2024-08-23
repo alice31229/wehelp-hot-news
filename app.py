@@ -90,7 +90,7 @@ async def get_target_article_info(id: int):
             query_result = target_article[0]
             article_json = {'data': query_result}
 
-            # 快取沒抓到 去資料庫抓的放到快取預備
+            # 快取沒抓到 這邊把去資料庫抓的放到快取預備
             Cache.put('article-'+str(id), query_result)
 
             return article_json

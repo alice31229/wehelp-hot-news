@@ -3,7 +3,7 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from tools import generate_image_upload_s3, get_summary_of_article, insert_into_articles
+from tools import generate_image_upload_s3, get_summary_of_article, insert_into_articles, clean_content
 
 import os
 from dotenv import load_dotenv

@@ -1,4 +1,5 @@
 import os
+import re
 import uuid
 import pandas as pd
 from dotenv import load_dotenv
@@ -33,27 +34,84 @@ db = mysql.connector.pooling.MySQLConnectionPool(
 #         password=os.getenv("AWS_RDS_PASSWORD"),
 #         database="messagePhoto")
 
+# article content clean
+def clean_content(content):
+    '''
+    清理文章內容，去除網址
+    '''
+    url_pattern = r'https?://[^\s]+'
+    result_content = re.sub(url_pattern, '', content)
+
+    return result_content
 
 # unique forum column
-def unify_forum_category(source, row):
+def unify_forum_category():
 
-    if source == 'ptt':
+    from langchain_openai import ChatOpenAI
+    from langchain.prompts import PromptTemplate
 
-        final_row = row
+    try:
+        con = db.get_connection()
+        Cursor = con.cursor(dictionary=True)
 
-    elif source == 'udn':
+        # 查詢過往已統一的類別
+        prev_forum_query = '''SELECT DISTINCT forum 
+                            FROM articles 
+                            WHERE DATE(date) != CURDATE() - INTERVAL 1 DAY;'''
+        Cursor.execute(prev_forum_query)
+        prev_forum_result = Cursor.fetchall()
 
-        final_row = row
+        # 新文章尚未統一的類別
+        new_forum_query = '''SELECT DISTINCT forum 
+                            FROM articles 
+                            WHERE DATE(date) = CURDATE() - INTERVAL 1 DAY;'''
+        Cursor.execute(new_forum_query)
+        new_forum_result = Cursor.fetchall()
 
-    elif source == 'storm':
+        ###
 
-        final_row = row
+        chat_model = ChatOpenAI(model_name="gpt-4o", temperature=0.7)
 
-    elif source == 'businessToday':
+        # 創建 PromptTemplate
+        prompt_template = PromptTemplate(
+            input_variables=["prev_forum_result", "new_forum_result"],
+            template="""
+            請根據提供的先前文章類別來對新的文章類別進行歸類。
+            我希望得到一個dictionary，其中key是先前的文章類別，value是歸類後的文章類別。
+            先前文章類別: {prev_forum_result}
+            新的文章類別: {new_forum_result}
+            """
+        )
 
-        final_row = row
+        # 創建 LLMChain
+        summary_chain = prompt_template | chat_model
 
-    return final_row
+        input_data = {
+            "prev_forum_result": prev_forum_result,
+            "new_forum_result": new_forum_result
+        }
+
+        # 文章類別生成鏈
+        forum_unify = summary_chain.invoke(input_data)
+        # print('摘要')
+        # print(overview.content)
+        # print('原文')
+        # print(content)
+
+
+        return forum_unify.content
+
+        ###
+
+    except mysql.connector.Error as e:
+
+        print(f"An error occurred: {str(e)}")
+        return False
+
+    finally:
+        con.close()
+        Cursor.close()
+
 
 
 # local mysql insert test
