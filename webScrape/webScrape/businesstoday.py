@@ -6,8 +6,9 @@ from selenium import webdriver
 
 # 強制等待 (執行期間休息一下)
 from time import sleep
+from datetime import datetime, timedelta
 import pandas as pd
-from tools import generate_image_upload_s3, get_summary_of_article, insert_into_articles
+from tools import generate_image_upload_s3, get_summary_of_article, insert_into_articles, clean_content
 
 import os
 from dotenv import load_dotenv
@@ -74,7 +75,9 @@ def get_businesstoday(pages):
                 if p.text != '&nbsp;' and p.text != '':
                     txt+=p.text
 
-            content.append(txt)
+            clean_txt = clean_content(txt)
+
+            content.append(clean_txt)
 
     driver.quit()
 
@@ -87,6 +90,9 @@ def get_businesstoday(pages):
     final['文章網址'] = url
 
     final['日期'] = pd.to_datetime(final['日期'], format='%Y-%m-%d %H:%M:%S', errors='coerce')
+
+    yesterday = datetime.now() - timedelta(days=1)
+    final = final[final['日期']==yesterday]
     
     # wordcloud operations
     wordcloud = []
@@ -115,4 +121,4 @@ def get_businesstoday(pages):
     
     #return final
 
-get_businesstoday(2)
+get_businesstoday(5)

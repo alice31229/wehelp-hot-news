@@ -7,15 +7,6 @@ from webScrape.udn import get_udn
 from webScrape.storm import get_storm
 from webScrape.businesstoday import get_businesstoday
 
-# def crawler1():
-#     # 爬虫1的逻辑
-#     print("Crawler 1 is running...")
-#     # ...
-
-# def crawler2():
-#     # 爬虫2的逻辑
-#     print("Crawler 2 is running...")
-#     # ...
 
 def main():
     scheduler = sched.scheduler(time.time, time.sleep)

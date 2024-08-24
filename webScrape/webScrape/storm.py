@@ -107,6 +107,9 @@ def get_storm():
 
     final['日期'] = pd.to_datetime(final['日期'], format='%Y-%m-%d %H:%M', errors='coerce')
 
+    yesterday = datetime.now() - timedelta(days=1)
+    final = final[final['日期']==yesterday]
+
     # wordcloud operations
     wordcloud = []
     network = []

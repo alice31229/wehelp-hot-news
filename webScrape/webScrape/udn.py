@@ -1,5 +1,6 @@
 
 import pandas as pd
+from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -89,7 +90,9 @@ def get_udn(scroll_time):
             if p.text != '&nbsp;' and p.text != '':
                 txt+=p.text
 
-        content.append(txt)
+        clean_txt = clean_content(txt)
+
+        content.append(clean_txt)
     
     driver.quit()
     
@@ -103,6 +106,9 @@ def get_udn(scroll_time):
     final['文章網址'] = link
 
     final['日期'] = pd.to_datetime(final['日期'], format='%Y-%m-%d %H:%M', errors='coerce')
+
+    yesterday = datetime.now() - timedelta(days=1)
+    final = final[final['日期']==yesterday]
     
     # wordcloud operations
     wordcloud = []
@@ -130,4 +136,4 @@ def get_udn(scroll_time):
 
     #return final
 
-get_udn(1)
+get_udn(3)
