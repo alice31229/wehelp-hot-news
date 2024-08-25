@@ -1,5 +1,6 @@
 import os
 import re
+import json
 import uuid
 import pandas as pd
 from dotenv import load_dotenv
@@ -77,7 +78,10 @@ def unify_forum_category():
             input_variables=["prev_forum_result", "new_forum_result"],
             template="""
             請根據提供的先前文章類別來對新的文章類別進行歸類。
-            我希望得到一個dictionary，其中key是先前的文章類別，value是歸類後的文章類別。
+            我希望得到一個dictionary，其中key是歸類後的文章類別，value是先前的文章類別，且統一的類別不要出現英文。
+            像是 風生活 國內 理財 時事話題 對應 生活
+            風生活 財經 對應 財經...。
+            不用解釋整理過程，我只需要整理結果即可。
             先前文章類別: {prev_forum_result}
             新的文章類別: {new_forum_result}
             """
@@ -93,13 +97,20 @@ def unify_forum_category():
 
         # 文章類別生成鏈
         forum_unify = summary_chain.invoke(input_data)
-        # print('摘要')
-        # print(overview.content)
-        # print('原文')
-        # print(content)
+        forum_unify = forum_unify.content
+        forum_unify = forum_unify.replace('python', '')
+        forum_unify = forum_unify.replace('\n', '')
+        forum_unify = forum_unify.replace("'", '"')
+
+        start = forum_unify.find('{')
+        end = forum_unify.find('}') + 1
+
+        json_str = forum_unify[start:end]
+        json_str = json_str.replace(r'\n', '')
+        forum_dict = json.loads(json_str)
 
 
-        return forum_unify.content
+        return forum_dict
 
         ###
 
