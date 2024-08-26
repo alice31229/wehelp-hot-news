@@ -47,6 +47,12 @@ def clean_content(content):
 
 # unique forum column
 def unify_forum_category():
+    '''
+    use previous unified forum to unify new webscrape articles forums:
+    new articles 
+    -> openai new category 
+    -> update category table 
+    '''
 
     from langchain_openai import ChatOpenAI
     from langchain.prompts import PromptTemplate
@@ -56,16 +62,17 @@ def unify_forum_category():
         Cursor = con.cursor(dictionary=True)
 
         # 查詢過往已統一的類別
-        prev_forum_query = '''SELECT DISTINCT forum 
-                            FROM articles 
-                            WHERE DATE(date) != CURDATE() - INTERVAL 1 DAY;'''
+        prev_forum_query = '''SELECT category FROM category;'''
+        # '''SELECT DISTINCT forum 
+        #     FROM articles 
+        #     WHERE DATE(date) != CURDATE() - INTERVAL 1 DAY;'''
         Cursor.execute(prev_forum_query)
         prev_forum_result = Cursor.fetchall()
 
         # 新文章尚未統一的類別
         new_forum_query = '''SELECT DISTINCT forum 
-                            FROM articles 
-                            WHERE DATE(date) = CURDATE() - INTERVAL 1 DAY;'''
+                             FROM articles 
+                             WHERE DATE(date) = CURDATE() - INTERVAL 1 DAY;'''
         Cursor.execute(new_forum_query)
         new_forum_result = Cursor.fetchall()
 
@@ -109,6 +116,17 @@ def unify_forum_category():
         json_str = json_str.replace(r'\n', '')
         forum_dict = json.loads(json_str)
 
+        # new category unique
+        unique_forum_value = set(forum_dict.values())
+
+        # update category table with new unified result
+        #format_strings = ','.join(['%s'] * len(unique_forum_value))
+        category_values = ', '.join(["('{}')".format(category) for category in unique_forum_value])
+        #sql_query = f"SELECT id, forum, title, resource, date, url, wordcloud FROM articles WHERE id IN ({format_strings})"
+        update_category = f'''INSERT IGNORE INTO category (category)
+                              VALUES {category_values}'''
+        Cursor.execute(update_category)
+        con.commit()
 
         return forum_dict
 
@@ -122,6 +140,45 @@ def unify_forum_category():
     finally:
         con.close()
         Cursor.close()
+
+
+def unify_forum_to_db(new_df):
+    '''
+    -> mapping original to new
+    -> update articles table with category_id
+    -> insert into articles with new data and unified category_id
+    '''
+
+    forum_mapping_dict = unify_forum_category()
+
+    try:
+        con = db.get_connection()
+        Cursor = con.cursor(dictionary=True)
+
+        sql_category_id_mapping = 'SELECT id, category FROM category;'
+        Cursor.execute(sql_category_id_mapping)
+        category_id_mapping = Cursor.fetchall()
+
+        category_id_mapping_df = pd.DataFrame(category_id_mapping)
+
+        new_df['統一文章類別'] = new_df['文章類別'].map(forum_mapping_dict)
+        final_df = new_df.merge(category_id_mapping_df, left_on='統一文章類別', right_on='category', how='left')
+
+        final_df = final_df[['id','文章標題','文章內容','文章來源','日期','文章網址','文字雲','關係圖','文章摘要']]
+        final_df = final_df.rename(columns={'id': '文章類別'})
+
+        return final_df
+    
+
+    except mysql.connector.Error as e:
+
+        print(f"An error occurred: {str(e)}")
+        return False
+
+    finally:
+        con.close()
+        Cursor.close()
+
 
 
 

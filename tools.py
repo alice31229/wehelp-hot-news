@@ -327,8 +327,8 @@ def update_member_info_rds(new_info):
 
 
         update_info = '''UPDATE articlesLand.members 
-                        SET name = %s, email = %s, selfie = %s
-                        WHERE username = %s;'''
+                         SET name = %s, email = %s, selfie = %s
+                         WHERE username = %s;'''
         member_info = (new_info['name'], new_info['email'], str(new_info['selfie']), new_info['username'])
 
         Cursor.execute(update_info, member_info)
