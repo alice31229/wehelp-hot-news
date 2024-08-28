@@ -215,7 +215,9 @@ body {
     cursor: pointer;
 }
 
-#nameID-enroll, #emailID, #usernameID, #usernameID-enroll, #passwordID, #emailID-enroll, #passwordID-enroll, #nameID-enroll {
+#usernameID, #passwordID,
+#usernameID-enroll, #nameID-enroll, 
+#emailID-enroll, #passwordID-enroll {
     width: 310px;
     height: 47px;
     font-size: 16px;
@@ -231,11 +233,13 @@ body {
     margin-top: 5px;
 }
 
-#nameID-enroll, #emailID, #passwordID, #emailID-enroll, #passwordID-enroll {
+#nameID-enroll, #passwordID, #emailID-enroll, #passwordID-enroll {
     margin-top: 10px;
 }
 
-#emailID:focus, #usernameID:focus, #usernameID-enroll:focus, #emailID-enroll:focus, #passwordID:focus, #passwordID-enroll:focus, #nameID-enroll:focus {
+#usernameID:focus, #usernameID-enroll:focus, 
+#passwordID:focus, #passwordID-enroll:focus, 
+#emailID-enroll:focus,#nameID-enroll:focus {
     border: 2px solid #f0a747;
 }
 
@@ -305,14 +309,17 @@ body {
     margin-top: 20px;
 }
 
+.expandFilter {
+    width: 30px;
+    height: 30px;
+    margin-left: 5px;
+}
+
 .form-keyword-search {
     position: relative;
     z-index: 20;
     margin-top: 25px; 
     margin-bottom: 86px; 
-
-    /* display: flex;
-    justify-content: flex-end; */
 }
 
 .searchKeyword_input {
@@ -349,20 +356,17 @@ body {
     margin-left: 10px;
 }
 
-.optionAlign {
+.articlesFilterSameLine {
     display: flex;
     align-items: center;
 }
 
-select {
-    width: 200px; /* 設定寬度 */
-    height: 30px; /* 設定高度 */
-    padding: 5px 10px; /* 設定內邊距 */
-    border: 1px solid #ccc; /* 設定邊框 */
-    border-radius: 4px; /* 設定圓角 */
-    background-color: #fff; /* 設定背景顏色 */
-    color: #666666; /* 設定文字顏色 */
-}
+/* .optionAlign {
+    display: flex;
+    align-items: center;
+    background-color: white;
+    width: 130px;
+} */
 
 .back_img {
     position: absolute;

@@ -79,57 +79,50 @@
         <div class="vertical">
           <div class="relax">歡迎光臨，一同享受探索文章的喜悅</div> <!-- 變成篩選器 -->
           <div class="form-keyword-search">
-            <form action="/api/articles">
+            <form action="/api/articles" class="articlesFilterSameLine">
+
+              <input type="text" name='keyword' class="searchKeyword_input" placeholder="輸入文章關鍵字查詢">
 
               <div class="optionAlign">
-                <label for="categories" class="optionTitle">文章類別、來源、日期</label>
-                <div class="filter-category">
-                  <img src="" alt="">
+                <label for="categories" class="optionTitle">進階篩選</label>
+                <div class="filter-category"> 
+                  <img src="/static/photo_icon/down-chevron.png" class="expandFilter" alt="filter">
 
                   <div class="pop-background-color-filter">
                     <div class="pop-up-filter">
                       <div class="decorator_bar_filter"></div>
                       <img src="/static/photo_icon/close.png" class="close-pop-filter" alt="close_filter">
                       <div class="filter_title">篩選文章條件</div>
-                      
+                      <form id="filter">
+                        <label for="resources" class="optionTitle">文章來源：
+                          <input type="checkbox" id="resources" name="resource" value="ptt"> PTT
+                          <input type="checkbox" id="resources" name="resource" value="storm"> 風傳媒
+                          <input type="checkbox" id="resources" name="resource" value="udn"> 聯合新聞網
+                          <input type="checkbox" id="resources" name="resource" value="businesstoday"> 今周刊
+                        </label>
+                        <br>
+                        <label for="categories" class="optionTitle">文章類別：
+                          
+                          <!-- <input type="checkbox" id="categories" name="category" value="id"> 生活
+                          <input type="checkbox" id="categories" name="category" value=""> 財經
+                          <input type="checkbox" id="categories" name="category" value=""> 體育 -->
+                         
+                        </label>
+                        <br>
+                        <label for="dates" class="optionTitle">文章時間：
+                          <input type="checkbox" id="dates" name="date" value="yesterday"> 昨日
+                          <input type="checkbox" id="dates" name="date" value="threedays"> 三日內
+                          <input type="checkbox" id="dates" name="date" value="oneWeek"> 一週內 
+                        </label>
+                        <br>
+                        <button type="submit" class="filterBtn">送出</button>
+                      </form>
                     </div>
                   </div>
                   
                 </div>
-                <select name="categories" id="category">
-                  <!-- <option value="volvo">Volvo</option>  value should be category_id
-                  <option value="mercedes">Mercedes</option>
-                  <option value="audi">Audi</option> -->
-                </select>
+                <button class="searchKeyword_button"><img src="/static/photo_icon/search.png" alt="iconSearch" style="width: 30px; height: 30px;"></button>
               </div>
-              
-              <br>
-
-              <div class="optionAlign">
-                <label for="resources" class="optionTitle">文章來源：</label>
-                <select name="resources" id="resource" multiple>
-                  <option value="ptt">PTT</option>
-                  <option value="storm">風傳媒</option>
-                  <option value="udn">聯合新聞網</option>
-                  <option value="businesstoday">今周刊</option>
-                </select>
-              </div>
-              
-              <br>
-
-              <div class="optionAlign">
-                <label for="dates" class="optionTitle">文章時間：</label>
-                <select name="dates" id="date" multiple>
-                  <option value="yesterday">昨日</option>
-                  <option value="3days">三天內</option>
-                  <option value="1week">一週內</option>
-                </select>
-              </div>
-              
-              <br>
-
-              <input type="text" name='keyword' class="searchKeyword_input" placeholder="輸入文章關鍵字查詢">
-              <button class="searchKeyword_button"><img src="/static/photo_icon/search.png" alt="iconSearch" style="width: 30px; height: 30px;"></button>
             </form>
           </div>
         </div>
