@@ -49,6 +49,21 @@ function eventsDomTree(events) {
     });
 }
 
+// append hot keywords to recommend users
+function AppendHotKwd() {
+
+}
+
+// add article category to the filter options
+function AddArticleCategory() {
+
+}
+
+// provide overall and each resource category distribution
+function ProvideCategoryDist() {
+    
+} 
+
 let nextPage = 0;
 let isLoading = false;
 

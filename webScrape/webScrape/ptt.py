@@ -18,7 +18,7 @@ dotenv_path = os.path.join(os.path.dirname(__file__), '../config/.env')
 load_dotenv(dotenv_path)
 
 
-def get_pttbrain(pages):
+def get_pttbrain(pages=20):
 
     options = Options()
     options.add_argument('disable-infobars')
@@ -117,6 +117,8 @@ def get_pttbrain(pages):
     yesterday = datetime.now() - timedelta(days=1)
     final = final[final['日期']==yesterday]
 
+    return final
+
     # wordcloud operations
     wordcloud = []
     network = []
@@ -143,5 +145,5 @@ def get_pttbrain(pages):
 
     #return final
 
-get_pttbrain(20)
+get_pttbrain()
 

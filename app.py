@@ -404,7 +404,7 @@ async def edit_member_info(name: str = Form(""),  email: str = Form(""), file: U
             if match:
                 s3_selfie_id = match.group()
             
-        else:
+        else:  # 本來的大頭照要刪掉
             aws_settings = os.getenv('AWS_CLOUDFRONT_DOMAIN')
             s3_selfie_id = str(uuid.uuid4())
             s3_selfie_id_url = f'https://{aws_settings}/member_selfie/' + s3_selfie_id

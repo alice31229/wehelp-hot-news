@@ -102,7 +102,7 @@ body {
 }
 
 /* sign in, enroll settings */
-.pop-background-color-sign-in, .pop-background-color-enroll {
+.pop-background-color-sign-in, .pop-background-color-enroll, .pop-background-color-favoriteSurvey, .pop-background-color-filter {
     background: rgba(0, 0, 0, 0.5);
     width: 100%;
     height: 100%;
@@ -123,13 +123,13 @@ body {
     animation-duration: 1.5s;
 } */
 
-#fade-sign-in, #fade-enroll {
+#fade-sign-in, #fade-enroll, #fade-survey, #fade-filter {
     visibility: hidden;
     opacity: 0;
     transition: visibility 0s, opacity 1.5s linear;
 }
 
-#fade-sign-in.show, #fade-enroll.show {
+#fade-sign-in.show, #fade-enroll.show, #fade-survey.show, #fade-filter.show {
     visibility: visible;
     opacity: 1;
     -webkit-animation: fadeIn 1.5s;
@@ -154,6 +154,14 @@ body {
     background: white;
 }
 
+.pop-up-survey, .pop-up-filter {
+    text-align: center;
+    width: 500px;
+    position: relative;
+    border-radius: 5px;
+    background: white;
+}
+
 .pop-up-sign-in {
     height: 275px;
     top: -31%;
@@ -162,6 +170,11 @@ body {
 .pop-up-enroll {
     height: 392px;
     top: -25%;
+}
+
+.pop-up-filter, .pop-up-survey {
+    height: 500px;
+    top: -15%;
 }
 
 .decorator_bar {
@@ -174,14 +187,24 @@ body {
     border-top-right-radius: 5px;
 }
 
-.sign_in_title, .enroll_title {
+.decorator_bar_survey, .decorator_bar_filter {
+    width: 500px;
+    height: 10px;
+    background: linear-gradient(50deg, #f0f073, 30%, #f0a747);
+    position: absolute;
+    top: 0;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+.sign_in_title, .enroll_title, .survey_title {
     margin-top: 20px;
     margin-bottom: 10px;
     color: #666666;
     font-size: 24px;
 }
 
-.close-pop-sign-in, .close-pop-enroll {
+.close-pop-sign-in, .close-pop-enroll, .close-pop-survey {
     position: absolute;
     top: 0;
     right: 0;
@@ -216,7 +239,7 @@ body {
     border: 2px solid #f0a747;
 }
 
-.logInBtn, .enrollBtn {
+.logInBtn, .enrollBtn, .surveyBtn {
     cursor: pointer;
     width: 310px;
     height: 47px;
@@ -230,7 +253,7 @@ body {
     text-align: center;
 }
 
-.logInBtn:hover, .enrollBtn:hover {
+.logInBtn:hover, .enrollBtn:hover, .surveyBtn:hover {
     opacity: 0.75;
     margin-bottom: 10px;
 }
@@ -241,7 +264,7 @@ body {
     margin-bottom: 10px;
 }
 
-.message-enroll {
+.message-enroll, .message-survey {
     display: none;
     margin-bottom: 10px;
 }
@@ -259,7 +282,7 @@ body {
     margin-top: 54px;
     position: relative; 
     object-fit: cover;
-    overflow: hidden;
+    /* overflow: hidden; */
 }
 
 .thousand_twoHundred {
@@ -278,14 +301,8 @@ body {
 
 .relax {
     color: #bd5c0c;
-    font-size: 28px; 
-    margin-top: 65px;
-}
-
-.explore {
-    color: #bd5c0c;
-    font-size: 16px; 
-    margin-top: 15px;
+    font-size: 20px; 
+    margin-top: 20px;
 }
 
 .form-keyword-search {
@@ -293,17 +310,21 @@ body {
     z-index: 20;
     margin-top: 25px; 
     margin-bottom: 86px; 
+
+    /* display: flex;
+    justify-content: flex-end; */
 }
 
 .searchKeyword_input {
     border: 1px solid transparent;
-    width: 400px; 
+    width: 350px; 
     padding-left: 10px; 
     border-top-left-radius: 5px; 
     border-bottom-left-radius: 5px; 
-    height: 46px;
+    height: 39px;
     font-size: 16px;
     outline: none;
+    margin-top: 5px;
 }
 
 .searchKeyword_input:focus {
@@ -314,14 +335,34 @@ body {
     border: 1px solid transparent;
     width: 60px; 
     background-color: #f0a747; 
-    padding: 7px 8px 15px 8px; 
+    padding-top: 3px;
     cursor: pointer; 
     border-top-right-radius: 5px; 
     border-bottom-right-radius: 5px; 
-    height: 46px;
+    height: 39px;
     position: absolute;
+    margin-top: 5px;
 }
 
+.optionTitle {
+    color: #bd5c0c;
+    margin-left: 10px;
+}
+
+.optionAlign {
+    display: flex;
+    align-items: center;
+}
+
+select {
+    width: 200px; /* 設定寬度 */
+    height: 30px; /* 設定高度 */
+    padding: 5px 10px; /* 設定內邊距 */
+    border: 1px solid #ccc; /* 設定邊框 */
+    border-radius: 4px; /* 設定圓角 */
+    background-color: #fff; /* 設定背景顏色 */
+    color: #666666; /* 設定文字顏色 */
+}
 
 .back_img {
     position: absolute;
@@ -333,6 +374,7 @@ body {
     background-size: cover;
     height: 320px;
     width: 100%;
+    background: rgb(238, 223, 110);
 }
 
 .forum_sorted {

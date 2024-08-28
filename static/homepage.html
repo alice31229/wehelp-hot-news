@@ -56,24 +56,86 @@
         <div class="sign-in-dialog">已經有帳戶了？點此登入～</div>
       </div>
     </div>
+
+    <div class="pop-background-color-favoriteSurvey">
+      <div class="pop-up-survey">
+        <div class="decorator_bar_survey"></div>
+        <img src="/static/photo_icon/close.png" class="close-pop-survey" alt="close_survey">
+        <div class="survey_title">會員喜好調查</div>
+        <form id="survey">
+          <!-- checkbox options by category table -->
+          <button type="submit" class="surveyBtn">提交類別愛好</button>
+        </form>
+        <div class="message-survey"></div>
+      </div>
+    </div>
     
     <div class='middle'>
   
-      <img class="back_img" src="/static/photo_icon/background.jpg" alt="webcrawlImg">
+      <div class="back_img"></div>
   
       <div class="thousand_twoHundred">
   
         <div class="vertical">
-          <div class="relax">現在話題在熱什麼？</div> 
-          <div class="explore">探索文章、走在熱門話題的尖端～</div>
+          <div class="relax">歡迎光臨，一同享受探索文章的喜悅</div> <!-- 變成篩選器 -->
           <div class="form-keyword-search">
             <form action="/api/articles">
+
+              <div class="optionAlign">
+                <label for="categories" class="optionTitle">文章類別、來源、日期</label>
+                <div class="filter-category">
+                  <img src="" alt="">
+
+                  <div class="pop-background-color-filter">
+                    <div class="pop-up-filter">
+                      <div class="decorator_bar_filter"></div>
+                      <img src="/static/photo_icon/close.png" class="close-pop-filter" alt="close_filter">
+                      <div class="filter_title">篩選文章條件</div>
+                      
+                    </div>
+                  </div>
+                  
+                </div>
+                <select name="categories" id="category">
+                  <!-- <option value="volvo">Volvo</option>  value should be category_id
+                  <option value="mercedes">Mercedes</option>
+                  <option value="audi">Audi</option> -->
+                </select>
+              </div>
+              
+              <br>
+
+              <div class="optionAlign">
+                <label for="resources" class="optionTitle">文章來源：</label>
+                <select name="resources" id="resource" multiple>
+                  <option value="ptt">PTT</option>
+                  <option value="storm">風傳媒</option>
+                  <option value="udn">聯合新聞網</option>
+                  <option value="businesstoday">今周刊</option>
+                </select>
+              </div>
+              
+              <br>
+
+              <div class="optionAlign">
+                <label for="dates" class="optionTitle">文章時間：</label>
+                <select name="dates" id="date" multiple>
+                  <option value="yesterday">昨日</option>
+                  <option value="3days">三天內</option>
+                  <option value="1week">一週內</option>
+                </select>
+              </div>
+              
+              <br>
+
               <input type="text" name='keyword' class="searchKeyword_input" placeholder="輸入文章關鍵字查詢">
               <button class="searchKeyword_button"><img src="/static/photo_icon/search.png" alt="iconSearch" style="width: 30px; height: 30px;"></button>
             </form>
           </div>
         </div>
-          
+        
+        <div class="hot-keywords"></div>
+
       </div>
     </div>
 
@@ -85,6 +147,10 @@
         <div class="forums"></div>
       <img src="/static/photo_icon/mrt_right_Default.png" alt="right-arrow" class="right-arrow">
       
+    </div>
+
+    <div class="block" id="favoriteGuess">
+
     </div>
     
     <h3 class="noArticle">查無相關文章，請再試試別的～</h3>
