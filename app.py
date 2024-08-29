@@ -112,7 +112,40 @@ async def get_target_article_info(id: int):
         Cursor.close()
         con.close()
 		
+@app.get("/api/hotkeywords") # elastic?
+async def get_hot_keywords():
+     
+     from tools import db
 
+     hot_keywords = []
+
+     try:
+        sql = '''SELECT forum, COUNT(*) AS forum_cnt
+                    FROM articles
+                    WHERE forum IS NOT NULL
+                    GROUP BY forum
+                    ORDER BY 2 DESC;'''
+        con = db.get_connection()
+        Cursor = con.cursor(dictionary=True)
+        Cursor.execute(sql)
+        sorted_forums = Cursor.fetchall()
+
+        for sm in sorted_forums:
+            hot_keywords.append(sm['forum'])
+
+        forums_json = {'data':hot_keywords}
+
+        return forums_json
+     
+     except mysql.connector.Error as err:
+        
+        return {'error': True,
+                'message': err}
+     
+     finally:
+
+        con.close()
+        Cursor.close()
 
 # homepage mrt click keyword search api router
 @app.get("/api/forums")

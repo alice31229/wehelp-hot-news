@@ -57,10 +57,14 @@ def get_storm():
 
             time = element.find("span", {'class': 'info_time'}).getText().strip()
 
+            time = time[:10]
             date_judge = datetime.strptime(time, '%Y-%m-%d').date()
+            #today = datetime.now().date()
             yesterday = (datetime.now() - timedelta(days=1)).date()
+            #yesterday = yesterday.strftime('%Y-%m-%d')
             
             if date_judge == yesterday:
+            #if date_judge == today:
 
                 date.append(time)
 
@@ -92,6 +96,8 @@ def get_storm():
 
         if stop_scraping:
             break
+        else:
+            page+=1
 
 
             
@@ -105,10 +111,18 @@ def get_storm():
     final['日期'] = date
     final['文章網址'] = url
 
-    final['日期'] = pd.to_datetime(final['日期'], format='%Y-%m-%d %H:%M', errors='coerce')
+    final['日期'] = pd.to_datetime(final['日期'], format='%Y-%m-%d', errors='coerce')
+    final['日期'] = final['日期'].dt.strftime('%Y-%m-%d')
+    print(final['日期'].unique())
 
     yesterday = datetime.now() - timedelta(days=1)
+    yesterday = yesterday.strftime('%Y-%m-%d')
+    print(yesterday)
     final = final[final['日期']==yesterday]
+
+    final.to_csv(f'storm-test_{yesterday}.csv', index=False)
+
+    return final
 
     # wordcloud operations
     wordcloud = []
@@ -136,4 +150,4 @@ def get_storm():
     
     #return final
 
-get_storm(1)
+get_storm()

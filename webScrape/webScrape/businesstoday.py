@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 dotenv_path = os.path.join(os.path.dirname(__file__), '../config/.env')
 load_dotenv(dotenv_path)
 
-def get_businesstoday(pages):
+def get_businesstoday(pages=5):
 
     # selenium settings
     options = webdriver.ChromeOptions()
@@ -89,10 +89,18 @@ def get_businesstoday(pages):
     final['日期'] = date
     final['文章網址'] = url
 
-    final['日期'] = pd.to_datetime(final['日期'], format='%Y-%m-%d %H:%M:%S', errors='coerce')
+    final['日期'] = pd.to_datetime(final['日期'], format='%Y-%m-%d', errors='coerce')
+    final['日期'] = final['日期'].dt.strftime('%Y-%m-%d')
+    print(final['日期'].unique())
 
     yesterday = datetime.now() - timedelta(days=1)
+    yesterday = yesterday.strftime('%Y-%m-%d')
+    print(yesterday)
     final = final[final['日期']==yesterday]
+
+    final.to_csv(f'businesstoday-test_{yesterday}.csv', index=False)
+
+    return final
     
     # wordcloud operations
     wordcloud = []
@@ -121,4 +129,4 @@ def get_businesstoday(pages):
     
     #return final
 
-get_businesstoday(5)
+get_businesstoday()

@@ -54,14 +54,14 @@ function AppendHotKwd() {
 
 }
 
-// add article category to the filter options
+// add article category to the filter options -> call /api/forums
 function AddArticleCategory() {
 
 }
 
 // provide overall and each resource category distribution
 function ProvideCategoryDist() {
-    
+
 } 
 
 let nextPage = 0;

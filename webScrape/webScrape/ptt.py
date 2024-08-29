@@ -113,9 +113,16 @@ def get_pttbrain(pages=20):
     final['文章網址'] = url
 
     final['日期'] = pd.to_datetime(final['日期'], format='%Y-%m-%d', errors='coerce')
+    final['日期'] = final['日期'].dt.strftime('%Y-%m-%d')
+    #print(final['日期'].unique())
 
     yesterday = datetime.now() - timedelta(days=1)
+    yesterday = yesterday.strftime('%Y-%m-%d')
+    #print(yesterday)
     final = final[final['日期']==yesterday]
+
+    final.to_csv(f'ptt-test_{yesterday}.csv', index=False)
+    print('done')
 
     return final
 
