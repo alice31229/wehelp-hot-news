@@ -79,7 +79,13 @@ async def get_target_article_info(id: int):
         con = db.get_connection()
         Cursor = con.cursor(dictionary=True)
 
-        search_article = '''SELECT * FROM articles WHERE id = %s;'''
+        search_article = '''SELECT a.title, c.category, a.overview, a.content, r.resource, a.date, a.url, a.wordcloud, a.network
+                            FROM articles AS a
+                            INNER JOIN category AS c
+                            ON a.category_id = c.id
+                            INNER JOIN resource AS r
+                            ON a.resource_id = r.id
+                            WHERE a.id = %s;'''
         target_ID = (id,)
         Cursor.execute(search_article, target_ID)
         target_article = Cursor.fetchall()
@@ -113,25 +119,25 @@ async def get_target_article_info(id: int):
         con.close()
 		
 @app.get("/api/hotkeywords") # elastic?
-async def get_hot_keywords():
+async def get_hot_keywords(resource: str):
      
      from tools import db
 
      hot_keywords = []
 
      try:
-        sql = '''SELECT forum, COUNT(*) AS forum_cnt
-                    FROM articles
-                    WHERE forum IS NOT NULL
-                    GROUP BY forum
-                    ORDER BY 2 DESC;'''
+        sql = '''SELECT h.keyword
+                 FROM hotKeywords AS h
+                 INNER JOIN resource AS r
+                 ON h.resource_id = r.id
+                 WHERE r.resource = %s;'''
         con = db.get_connection()
         Cursor = con.cursor(dictionary=True)
-        Cursor.execute(sql)
-        sorted_forums = Cursor.fetchall()
+        Cursor.execute(sql, (resource,))
+        hot_keywords_result = Cursor.fetchall()
 
-        for sm in sorted_forums:
-            hot_keywords.append(sm['forum'])
+        for hk in hot_keywords_result:
+            hot_keywords.append(hk['keyword'])
 
         forums_json = {'data':hot_keywords}
 
@@ -156,10 +162,12 @@ async def get_forum_info():
     forums = []
 
     try:
-        sql = '''SELECT forum, COUNT(*) AS forum_cnt
-                    FROM articles
-                    WHERE forum IS NOT NULL
-                    GROUP BY forum
+        sql = '''SELECT c.category, COUNT(a.*) AS category_cnt
+                    FROM articles AS a
+                    INNER JOIN category AS c
+                    ON a.category_id = c.id
+                    WHERE a.category IS NOT NULL
+                    GROUP BY c.category
                     ORDER BY 2 DESC;'''
         con = db.get_connection()
         Cursor = con.cursor(dictionary=True)
@@ -167,7 +175,7 @@ async def get_forum_info():
         sorted_forums = Cursor.fetchall()
 
         for sm in sorted_forums:
-            forums.append(sm['forum'])
+            forums.append(sm['category'])
 
         forums_json = {'data':forums}
 
@@ -399,7 +407,7 @@ async def enroll_account(user_info: user_info):
         con.close()
 
 
-# 更改資訊、大頭貼  *記得修不更新大頭照的狀況
+# 更改資訊、大頭貼  *記得修不更新大頭照的狀況 *第一次以後的更新大頭照要把本來的圖檔刪掉
 @app.put("/api/member")
 #async def edit_member_info(name: str = Form(""),  email: str = Form(""), file: Optional[UploadFile] = File(None), payload: dict = Depends(login_required)):
 async def edit_member_info(name: str = Form(""),  email: str = Form(""), file: UploadFile = File(...), payload: dict = Depends(login_required)):
@@ -515,7 +523,11 @@ async def get_previous_collection(payload: dict = Depends(login_required)):
             con = db.get_connection()
             Cursor = con.cursor(dictionary=True)
             format_strings = ','.join(['%s'] * len(article_ids))
-            sql_query = f"SELECT id, forum, title, resource, date, url, wordcloud FROM articles WHERE id IN ({format_strings})"
+            sql_query = f"SELECT a.id, a.category, a.title, r.resource, a.date, a.url, a.wordcloud 
+                          FROM articles AS a
+                          INNER JOIN resource AS r
+                          ON a.resource_id = r.id
+                          WHERE id IN ({format_strings})"
             Cursor.execute(sql_query, tuple(article_ids))
             
             articles_info = Cursor.fetchall()

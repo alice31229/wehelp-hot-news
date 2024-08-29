@@ -52,7 +52,7 @@ async function LoadArticle() {
 
         // details for correspondiing article info
         let title = document.querySelector('.title');
-        let category_at_forum = document.querySelector('.category_at_forum');
+        let category = document.querySelector('.category_at_forum');
         let content = document.querySelector('.content');
         let resource = document.querySelector('.resource');
         let date = document.querySelector('.date');
@@ -62,11 +62,11 @@ async function LoadArticle() {
         if (!article_result.error) {
             title.textContent = info.title;
             
-            // handle null forum information
-            if (info.forum != null) {
-                category_at_forum.textContent = `${info.forum} from ${info.resource}`;
+            // handle null category information
+            if (info.category != null) {
+                category.textContent = `${info.category} from ${info.resource}`;
             } else {
-                category_at_forum.textContent = `${info.forum}`;
+                category.textContent = `${info.category}`;
             }
             
             overview.textContent = info.overview;

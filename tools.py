@@ -33,7 +33,11 @@ def get_12_articles_by_keyword(kw, page=0):
 	# sql = "SELECT * FROM articles WHERE title like %s OR content like %s;"
 
 	# 用來完全比對文章類別名稱、或模糊比對文章名稱或文章內文的關鍵字，沒有給定則不做篩選
-	sql = '''SELECT * FROM (SELECT forum, title, wordcloud, resource, id FROM articles WHERE title like %s OR content like %s OR forum = %s ) AS subquery LIMIT %s, %s;'''
+	sql = '''SELECT * FROM 
+            (SELECT a.forum, a.title, a.wordcloud, r.resource, a.id 
+            FROM articles AS a
+            INNER JOIN resource AS r ON a.resource_id = r.id
+            WHERE a.title like %s OR a.content like %s OR a.forum = %s ) AS subquery LIMIT %s, %s;'''
 
 	page_size = 24 # judge the nextPage
 	start = page * 12
@@ -87,7 +91,9 @@ def get_12_articles_by_page(page):
 		page_size = 24 # judge the nextPage
 		start = page * 12
 
-		sql_12 = '''SELECT forum, title, wordcloud, resource, id FROM articles LIMIT %s, %s;'''
+		sql_12 = '''SELECT a.forum, a.title, a.wordcloud, r.resource, a.id 
+                    FROM articles AS a INNER JOIN resource AS r ON a.resource_id = r.id 
+                    LIMIT %s, %s;'''
 		Cursor.execute(sql_12, (start, page_size))
 		demand_articles = Cursor.fetchall()
 
@@ -333,43 +339,6 @@ def update_member_info_rds(new_info):
 
         Cursor.execute(update_info, member_info)
         con.commit()
-
-        return True
-
-    except Exception as e:
-
-        return False
-    
-    finally:
-
-        con.close()
-        Cursor.close()
-
-
-# insert message and image url into rds db
-def save_data_to_db(df, type):
-
-    try:
-        con = db.get_connection()
-        Cursor = con.cursor(dictionary=True)
-
-        if type == 'article':
-
-            insert_sql = '''INSERT INTO articlesLand.articles (forum, title, content, resource, date, url, wordcloud) VALUES (%s, %s, %s, %s, %s, %s, %s);'''
-
-            with con.cursor(dictionary=True) as cursor:
-                for row in df.itertuples(index=False):
-                    cursor.execute(insert_sql, row)
-                con.commit()
-
-
-        elif type == 'member':
-
-            insert_member = '''INSERT INTO articlesLand.members (name, username, password, email) VALUES (%s, %s, %s, %s);'''
-            member_data = (df['name'], df['username'], df['password'], df['email'])
-
-            Cursor.execute(insert_member, member_data)
-            con.commit()
 
         return True
 
