@@ -45,6 +45,7 @@ def get_businesstoday(pages=5):
         sleep(5)
         soup = BeautifulSoup(driver.page_source, "html.parser")
         elements = soup.find_all("a", {"class": "article__item"})
+        #elements = soup.find_all("div", {"class": "article__itembox"})
         
         #print(elements)
     
@@ -54,7 +55,7 @@ def get_businesstoday(pages=5):
 
             title = element.find("h4").getText().strip()
             today.append(title)
-            time = element.find("p").getText().strip()
+            time = element.find("p", {'class': 'article__item-date'}).getText().strip()
             date.append(time)
             website = element['href']
             url.append('https://www.businesstoday.com.tw'+website)
@@ -89,13 +90,12 @@ def get_businesstoday(pages=5):
     final['日期'] = date
     final['文章網址'] = url
 
-    final['日期'] = pd.to_datetime(final['日期'], format='%Y-%m-%d', errors='coerce')
+    final['日期'] = pd.to_datetime(final['日期'], format='%Y-%m-%d %H:%M:%S', errors='coerce')
+
     final['日期'] = final['日期'].dt.strftime('%Y-%m-%d')
-    print(final['日期'].unique())
 
     yesterday = datetime.now() - timedelta(days=1)
     yesterday = yesterday.strftime('%Y-%m-%d')
-    print(yesterday)
     final = final[final['日期']==yesterday]
 
     final.to_csv(f'businesstoday-test_{yesterday}.csv', index=False)

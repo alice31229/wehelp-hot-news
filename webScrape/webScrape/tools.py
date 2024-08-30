@@ -4,6 +4,7 @@ import json
 import uuid
 import pandas as pd
 from dotenv import load_dotenv
+from datetime import datetime, timedelta
 
 import boto3
 import mysql.connector
@@ -70,11 +71,21 @@ def unify_forum_category():
         prev_forum_result = Cursor.fetchall()
 
         # 新文章尚未統一的類別
-        new_forum_query = '''SELECT DISTINCT forum 
-                             FROM articles 
-                             WHERE DATE(date) = CURDATE() - INTERVAL 1 DAY;'''
-        Cursor.execute(new_forum_query)
-        new_forum_result = Cursor.fetchall()
+        # new_forum_query = '''SELECT DISTINCT forum 
+        #                      FROM articles 
+        #                      WHERE DATE(date) = CURDATE() - INTERVAL 1 DAY;'''
+        # Cursor.execute(new_forum_query)
+        # new_forum_result = Cursor.fetchall()
+
+        # read csv of ptt, udn, storm, businesstoday
+        yesterday = datetime.now() - timedelta(days=1)
+        yesterday = yesterday.strftime('%Y-%m-%d')
+        ptt = pd.read_csv(f'ptt-test_{yesterday}.csv', usecols=['文章類別'])
+        storm = pd.read_csv(f'storm-test_{yesterday}.csv', usecols=['文章類別'])
+        udn = pd.read_csv(f'udn-test_{yesterday}.csv', usecols=['文章類別'])
+        businesstoday = pd.read_csv(f'businesstoday-test_{yesterday}.csv', usecols=['文章類別'])
+
+        new_forum_result = list(ptt['文章類別'].unique()) + list(storm['文章類別'].unique()) + list(udn['文章類別'].unique()) + list(businesstoday['文章類別'].unique())
 
         ###
 
@@ -123,6 +134,8 @@ def unify_forum_category():
         #format_strings = ','.join(['%s'] * len(unique_forum_value))
         category_values = ', '.join(["('{}')".format(category) for category in unique_forum_value])
         #sql_query = f"SELECT id, forum, title, resource, date, url, wordcloud FROM articles WHERE id IN ({format_strings})"
+        
+        # ignore -> will not insert into those already exist category previously in the category table
         update_category = f'''INSERT IGNORE INTO category (category)
                               VALUES {category_values}'''
         Cursor.execute(update_category)
@@ -155,14 +168,18 @@ def unify_forum_to_db(new_df):
         con = db.get_connection()
         Cursor = con.cursor(dictionary=True)
 
-        sql_category_id_mapping = 'SELECT id, category FROM category;'
-        Cursor.execute(sql_category_id_mapping)
+        sql = 'SELECT id, category FROM category;'
+        Cursor.execute(sql)
         category_id_mapping = Cursor.fetchall()
 
         category_id_mapping_df = pd.DataFrame(category_id_mapping)
 
-        new_df['統一文章類別'] = new_df['文章類別'].map(forum_mapping_dict)
+        # resource id remember
+
+        new_df['統一文章類別'] = new_df['文章類別'].map(forum_mapping_dict) 
         final_df = new_df.merge(category_id_mapping_df, left_on='統一文章類別', right_on='category', how='left')
+
+        # rename column names
 
         final_df = final_df[['id','文章標題','文章內容','文章來源','日期','文章網址','文字雲','關係圖','文章摘要']]
         final_df = final_df.rename(columns={'id': '文章類別'})
@@ -188,7 +205,7 @@ def insert_into_articles(df):
     #data = list(df.to_records(index=False))
     
     try:
-        # 建立插入語句
+        # 建立插入語句  update current columns
         sql = '''INSERT INTO articlesLand.articles (forum, title, content, resource, date, url, wordcloud, network, overview) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);'''
 
         # 執行插入操作

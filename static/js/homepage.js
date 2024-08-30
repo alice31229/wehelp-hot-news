@@ -25,7 +25,7 @@ function eventsDomTree(events) {
         // attraction_mrt
         const articleForum = document.createElement('div');
         articleForum.setAttribute('class', 'article_forum');
-        articleForum.textContent = event.forum;
+        articleForum.textContent = event.category;
 
         // attraction_category
         const articleResource = document.createElement('div');
@@ -50,7 +50,7 @@ function eventsDomTree(events) {
 }
 
 // append hot keywords to recommend users
-function AppendHotKwd() {
+async function AppendHotKwd() {
 
 }
 
@@ -60,7 +60,7 @@ function AddArticleCategory() {
 }
 
 // provide overall and each resource category distribution
-function ProvideCategoryDist() {
+async function ProvideCategoryDist() {
 
 } 
 

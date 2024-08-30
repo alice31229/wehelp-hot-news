@@ -14,7 +14,7 @@ dotenv_path = os.path.join(os.path.dirname(__file__), '../config/.env')
 load_dotenv(dotenv_path)
 
 
-def get_udn(scroll_time=10):
+def get_udn(scroll_time=3):
 
     opt = webdriver.ChromeOptions()
     opt.chrome_executable_path='./chromedriver'
@@ -105,7 +105,8 @@ def get_udn(scroll_time=10):
     final['日期'] = date
     final['文章網址'] = link
 
-    final['日期'] = pd.to_datetime(final['日期'], format='%Y-%m-%d', errors='coerce')
+    # make sure the date format at webpage
+    final['日期'] = pd.to_datetime(final['日期'], format='%Y-%m-%d %H:%M', errors='coerce')
     final['日期'] = final['日期'].dt.strftime('%Y-%m-%d')
     print(final['日期'].unique())
 

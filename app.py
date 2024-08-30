@@ -153,6 +153,40 @@ async def get_hot_keywords(resource: str):
         con.close()
         Cursor.close()
 
+# filter category
+@app.get("/api/filter-category")
+async def get_all_category():
+     
+    from tools import db
+    
+    category = []
+
+    try:
+        sql = '''SELECT category
+                 FROM category;'''
+        con = db.get_connection()
+        Cursor = con.cursor(dictionary=True)
+        Cursor.execute(sql)
+        category_result = Cursor.fetchall()
+
+        for c in category_result:
+            category.append(c['category'])
+
+        category_json = {'data':category}
+
+        return category_json
+
+    except mysql.connector.Error as err:
+        
+        return {'error': True,
+                'message': err}
+
+    finally:
+
+        con.close()
+        Cursor.close()
+
+
 # homepage mrt click keyword search api router
 @app.get("/api/forums")
 async def get_forum_info():
@@ -163,12 +197,12 @@ async def get_forum_info():
 
     try:
         sql = '''SELECT c.category, COUNT(a.*) AS category_cnt
-                    FROM articles AS a
-                    INNER JOIN category AS c
-                    ON a.category_id = c.id
-                    WHERE a.category IS NOT NULL
-                    GROUP BY c.category
-                    ORDER BY 2 DESC;'''
+                 FROM articles AS a
+                 INNER JOIN category AS c
+                 ON a.category_id = c.id
+                 WHERE a.category IS NOT NULL
+                 GROUP BY c.category
+                 ORDER BY 2 DESC;'''
         con = db.get_connection()
         Cursor = con.cursor(dictionary=True)
         Cursor.execute(sql)

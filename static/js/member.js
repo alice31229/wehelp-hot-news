@@ -78,7 +78,7 @@ function eventsDomTree(events) {
         }
 
         // forum
-        const marginBottomForum = createMarginBottomDiv('類型：', event.forum, 'forum');
+        const marginBottomForum = createMarginBottomDiv('類型：', event.category, 'forum');
         // resource
         const marginBottomResource = createMarginBottomDiv('來源：', event.resource, 'resource');
         // date
