@@ -14,7 +14,7 @@ import mysql.connector
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime, timedelta, timezone
-from BaseModel.json_info import user_info, member_log_in_info, collect_info
+from BaseModel.json_info import user_info, member_log_in_info, collect_info, member_update_info, articles_requirements
 
 app = FastAPI()
 
@@ -186,6 +186,35 @@ async def get_all_category():
         con.close()
         Cursor.close()
 
+
+# filter articles requirements query
+@app.get("/api/filter-articles-search")
+async def get_demanded_articles(articles_requirements: articles_requirements):
+
+    from tools import db
+
+    try:
+         
+        con = db.get_connection()
+        Cursor = con.cursor(dictionary=True)
+
+        # keyword, resources, categories, dates
+        sql = '''SELECT '''
+
+        Cursor.execute(sql)
+        category_result = Cursor.fetchall()
+
+    except mysql.connector.Error as err:
+         
+        return {'error': True,
+                'message': err}
+    
+    finally:
+         
+         con.close()
+         Cursor.close()
+
+    return True
 
 # homepage mrt click keyword search api router
 @app.get("/api/forums")
@@ -444,7 +473,7 @@ async def enroll_account(user_info: user_info):
 # 更改資訊、大頭貼  *記得修不更新大頭照的狀況 *第一次以後的更新大頭照要把本來的圖檔刪掉
 @app.put("/api/member")
 #async def edit_member_info(name: str = Form(""),  email: str = Form(""), file: Optional[UploadFile] = File(None), payload: dict = Depends(login_required)):
-async def edit_member_info(name: str = Form(""),  email: str = Form(""), file: UploadFile = File(...), payload: dict = Depends(login_required)):
+async def edit_member_info(member_update_info: member_update_info, payload: dict = Depends(login_required)):
 	
     import re
     import uuid
@@ -459,17 +488,17 @@ async def edit_member_info(name: str = Form(""),  email: str = Form(""), file: U
     # BMP: image/bmp
     # WebP: image/webp
 
-    if file:
+    if member_update_info.file:
 
         ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/gif", "image/bmp", "image/webp"]
-        if file.content_type not in ALLOWED_IMAGE_TYPES:
+        if member_update_info.file.content_type not in ALLOWED_IMAGE_TYPES:
 
             result_json['error'] = True
             result_json['message'] = '請提供正確的圖檔形式檔案'
 
             return result_json
         
-        img_input = await file.read()
+        img_input = await member_update_info.file.read()
         if 'default_selfie' not in payload['selfie']:
             s3_selfie_id_url = payload['selfie']
             uuid_pattern = r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
@@ -486,6 +515,9 @@ async def edit_member_info(name: str = Form(""),  email: str = Form(""), file: U
 
         #print(s3_selfie_id)    
 
+        name = member_update_info.name
+        email = member_update_info.email
+
         if name == '':
             name = payload['name']
 
@@ -494,7 +526,7 @@ async def edit_member_info(name: str = Form(""),  email: str = Form(""), file: U
 
         member_data = {'name': name, 'username': payload['username'], 'email': email, 'selfie': s3_selfie_id_url}
         
-        if update_selfie_s3(s3_selfie_id, img_input, file.content_type) and update_member_info_rds(member_data):
+        if update_selfie_s3(s3_selfie_id, img_input, member_update_info.file.content_type) and update_member_info_rds(member_data):
             
             result_json['ok'] = True
             result_json['member_update'] = {'name': name, 'selfie': s3_selfie_id_url}
@@ -511,8 +543,8 @@ async def edit_member_info(name: str = Form(""),  email: str = Form(""), file: U
     else:
          
         s3_selfie_id_url = payload['selfie']
-        name = name or payload['name']
-        email = email or payload['email']
+        name = member_update_info.name or payload['name']
+        email = member_update_info.email or payload['email']
 
         # 更新用户信息
         member_data = {'name': name, 'username': payload['username'], 'email': email, 'selfie': s3_selfie_id_url}

@@ -168,6 +168,7 @@ def unify_forum_to_db(new_df):
         con = db.get_connection()
         Cursor = con.cursor(dictionary=True)
 
+        # category id 
         sql = 'SELECT id, category FROM category;'
         Cursor.execute(sql)
         category_id_mapping = Cursor.fetchall()
@@ -175,13 +176,18 @@ def unify_forum_to_db(new_df):
         category_id_mapping_df = pd.DataFrame(category_id_mapping)
 
         # resource id remember
+        sql = 'SELECT id, resource FROM resource;'
+        Cursor.execute(sql)
+        category_id_mapping = Cursor.fetchall()
+
+        category_id_mapping_df = pd.DataFrame(category_id_mapping)
 
         new_df['統一文章類別'] = new_df['文章類別'].map(forum_mapping_dict) 
         final_df = new_df.merge(category_id_mapping_df, left_on='統一文章類別', right_on='category', how='left')
 
         # rename column names
 
-        final_df = final_df[['id','文章標題','文章內容','文章來源','日期','文章網址','文字雲','關係圖','文章摘要']]
+        final_df = final_df[['id','文章類別','文章標題','文章內容','文章來源','日期','文章網址','文字雲','關係圖','文章摘要']]
         final_df = final_df.rename(columns={'id': '文章類別'})
 
         return final_df
@@ -206,7 +212,7 @@ def insert_into_articles(df):
     
     try:
         # 建立插入語句  update current columns
-        sql = '''INSERT INTO articlesLand.articles (forum, title, content, resource, date, url, wordcloud, network, overview) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);'''
+        sql = '''INSERT INTO articlesLand.articles (category_id, forum, title, content, resource_id, date, url, wordcloud, network, overview) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);'''
 
         # 執行插入操作
         con = db.get_connection()
@@ -233,6 +239,107 @@ def insert_into_articles(df):
 
         con.close()
         cursor.close()
+
+
+
+
+
+def generate_hot_keywords():
+
+    '''
+    after saving articles data into db
+    generate hot keywords from it
+    '''
+
+    try:
+
+        hot_kwds_sql = '''SELECT title, content, resource
+                          FROM articles AS a
+                          INNER JOIN resource AS r
+                          ON a.resource_id = r.id
+                          WHERE DATE(date) = CURDATE() - INTERVAL 1 DAY;'''
+        con = db.get_connection()
+        Cursor = con.cursor(dictionary=True)
+        Cursor.execute(hot_kwds_sql)
+        yesterday_words = Cursor.fetchall()
+        articles_df = pd.DataFrame(yesterday_words)
+
+        # nx2 -> nx1
+        articles_df['combined_text'] = articles_df.apply(lambda x: ' '.join([x['title'], x['content']]), axis=1)
+
+        # nx1 -> 1
+        all_text = ' '.join(articles_df['combined_text'])
+
+        STOP_ch2 = []
+        with open("./stop_words_ch_filer.txt", 'r', encoding='utf-8') as f:
+            for line in f:
+                STOP_ch2.append(line.strip())
+
+        stop2 = pd.DataFrame()
+        stop2['stop_word'] = STOP_ch2
+
+        stop_txt = []
+        with open('./stopwords.txt', 'r', encoding='utf-8') as f:
+            for line in f:
+                stop_txt.append(line.strip())
+
+
+        combine_stop = STOP_ch2 + stop_txt
+
+        #result_string = title + content
+
+        jieba.set_dictionary('./dict.txt.big.txt')
+        #titleTxt_jb1 = jieba.cut_for_search(result_string)
+
+        titleTxt_jb1 = jieba.lcut(all_text)
+
+        # 篩選出長度大於1且不在停用詞列表中的詞彙
+        titleTxt_jb1 = [word for word in titleTxt_jb1 if len(word) > 1 and word not in combine_stop]
+
+        # 生成詞頻字典
+        word_freq = Counter(titleTxt_jb1)
+
+        # 將 Counter 轉換為 list of tuples，方便排序
+        word_freq_list = word_freq.most_common()
+        # word_freq_list 現在是一個 list，每個元素是一個 tuple (word, count)，按照 count 降序排列
+
+
+
+        return 
+    
+    except mysql.connector.Error as e:
+
+        print(f"An error occurred: {str(e)}")
+
+        return False
+    
+    finally:
+
+        con.close()
+        Cursor.close()
+
+
+
+# keywords nlp process
+
+
+# each resource and overall category calculation
+sql_each_resource = '''SELECT resource, category, COUNT(*) AS cnt
+                        FROM articles AS a
+                        LEFT JOIN category AS c
+                        ON a.category_id = c.id
+                        LEFT JOIN resource AS r
+                        ON a.resource_id = r.id
+                        GROUP BY resource, category
+                        ORDER BY resource, category'''
+
+sql_overall_category = '''SELECT category, COUNT(*) AS cnt
+                            FROM articles AS a
+                            LEFT JOIN category AS c
+                            ON a.category_id = c.id
+                            GROUP BY category
+                            '''
+
 
 
 ######################################

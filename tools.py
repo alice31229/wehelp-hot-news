@@ -27,58 +27,61 @@ db = mysql.connector.pooling.MySQLConnectionPool(
 #         database=os.getenv("AWS_RDS_DB"))
 
 # homepage keyword search data 
-def get_12_articles_by_keyword(kw, page=0):
+def get_12_articles_by_filter(filter_requirements, page=0):
 
 	# sql = 'SELECT * FROM articles WHERE MATCH(title) AGAINST (%s) OR MATCH(content) AGAINST (%s)'
 	# sql = "SELECT * FROM articles WHERE title like %s OR content like %s;"
+     
+    start = page * 12
+    page_size = 24
 
 	# 用來完全比對文章類別名稱、或模糊比對文章名稱或文章內文的關鍵字，沒有給定則不做篩選
-	sql = '''SELECT * FROM 
-            (SELECT a.forum, a.title, a.wordcloud, r.resource, a.id 
+    sql = '''SELECT * FROM 
+            (SELECT c.category, a.title, a.wordcloud, r.resource, a.id 
             FROM articles AS a
-            INNER JOIN resource AS r ON a.resource_id = r.id
-            WHERE a.title like %s OR a.content like %s OR a.forum = %s ) AS subquery LIMIT %s, %s;'''
+            LEFT JOIN resource AS r ON a.resource_id = r.id
+            LEFT JOIN category AS c ON a.category_id = c.id
+            WHERE a.title like %s OR a.content like %s OR a.forum = %s) AS subquery LIMIT %s, %s;'''
 
-	page_size = 24 # judge the nextPage
-	start = page * 12
+    kw = filter_requirements.keyword
 
-	# Escaping wildcards in the parameter
-	search_param = f"%{kw}%"
-	keyword = (search_param, search_param, kw, start, page_size)
+    # Escaping wildcards in the parameter
+    search_param = f"%{kw}%"
+    keyword = (search_param, search_param, kw, start, page_size)
 
-	try:
-		
-		con = db.get_connection()
-		Cursor = con.cursor(dictionary=True)
-		Cursor.execute(sql, keyword)
-		query_result = Cursor.fetchall()
-		next_page_judge = len(query_result)
+    try:
+        
+        con = db.get_connection()
+        Cursor = con.cursor(dictionary=True)
+        Cursor.execute(sql, keyword)
+        query_result = Cursor.fetchall()
+        next_page_judge = len(query_result)
 
-		if next_page_judge < 13 and next_page_judge > 0:
+        if next_page_judge < 13 and next_page_judge > 0:
 
-			return {'nextPage': None,
-					'data': query_result[:next_page_judge]}
-		
-		elif next_page_judge > 12:
+            return {'nextPage': None,
+                    'data': query_result[:next_page_judge]}
+        
+        elif next_page_judge > 12:
 
-			return {'nextPage': page+1,
-					'data': query_result[:12]}
+            return {'nextPage': page+1,
+                    'data': query_result[:12]}
 
-		else:
+        else:
 
-			return {'error': True,
-					'message': '文章資料超出頁數'}
+            return {'error': True,
+                    'message': '文章資料超出頁數'}
 
-	except mysql.connector.Error as err:
+    except mysql.connector.Error as err:
 
-		print(f"Error: {err}")
-		return {'error': True,
-				'message': '文章資料輸出錯誤'}
+        print(f"Error: {err}")
+        return {'error': True,
+                'message': '文章資料輸出錯誤'}
 
-	finally:
+    finally:
 
-		con.close()
-		Cursor.close()
+        con.close()
+        Cursor.close()
 
 
 # homepage infinite scroll data
@@ -91,8 +94,10 @@ def get_12_articles_by_page(page):
 		page_size = 24 # judge the nextPage
 		start = page * 12
 
-		sql_12 = '''SELECT a.forum, a.title, a.wordcloud, r.resource, a.id 
-                    FROM articles AS a INNER JOIN resource AS r ON a.resource_id = r.id 
+		sql_12 = '''SELECT c.category, a.title, a.wordcloud, r.resource, a.id 
+                    FROM articles AS a 
+                    LEFT JOIN resource AS r ON a.resource_id = r.id 
+                    LEFT JOIN category AS c ON a.resource_id = c.id 
                     LIMIT %s, %s;'''
 		Cursor.execute(sql_12, (start, page_size))
 		demand_articles = Cursor.fetchall()

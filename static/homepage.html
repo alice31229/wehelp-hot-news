@@ -79,7 +79,8 @@
         <div class="vertical">
           <div class="relax">歡迎光臨，一同享受探索文章的喜悅</div> <!-- 變成篩選器 -->
           <div class="form-keyword-search">
-            <form action="/api/articles" class="articlesFilterSameLine">
+            <!-- <form action="/api/articles" class="articlesFilterSameLine"> -->
+            <form class="articlesFilterSameLine">
 
               <input type="text" name='keyword' class="searchKeyword_input" placeholder="輸入文章關鍵字查詢">
 
@@ -121,7 +122,7 @@
                   </div>
                   
                 </div>
-                <button class="searchKeyword_button"><img src="/static/photo_icon/search.png" alt="iconSearch" style="width: 30px; height: 30px;"></button>
+                <button class="searchKeyword_button" onclick="submitSelection()"><img src="/static/photo_icon/search.png" alt="iconSearch" style="width: 30px; height: 30px;"></button>
               </div>
             </form>
           </div>
@@ -133,12 +134,20 @@
     </div>
 
     <div class="loader"></div>
+
+    <div class="hotKeywords_sorted">
+      
+      <img src="/static/photo_icon/left_Default.png" alt="left-arrow" class="left-arrow" id="kwds-left">
+        <div class="keywords"></div>
+      <img src="/static/photo_icon/right_Default.png" alt="right-arrow" class="right-arrow" id="kwds-right">
+    
+    </div>
     
     <div class="forum_sorted">
   
-      <img src="/static/photo_icon/mrt_left_Default.png" alt="left-arrow" class="left-arrow">
+      <img src="/static/photo_icon/left_Default.png" alt="left-arrow" class="left-arrow" id="category-left">
         <div class="forums"></div>
-      <img src="/static/photo_icon/mrt_right_Default.png" alt="right-arrow" class="right-arrow">
+      <img src="/static/photo_icon/right_Default.png" alt="right-arrow" class="right-arrow" id="category-right">
       
     </div>
 
@@ -150,15 +159,30 @@
   
     <div class="load_articles">
 
-      <!-- <div class="wcAndInfo">
-        <img src="" alt="wc">
+      <!-- original article tags structure
+      <div class="picture_word" id="">
+        <div class="picture">
+          <img src="wc" alt="" class="content">
+        </div>
+        <div class="title"></div>
+        <div class="word">
+          <div class="article_forum"></div>
+          <div class="article_resource"></div>
+        </div>
+      </div>
+      -->
+
+      <!-- new article tags structure
+      <div class="wcAndInfo" article id>
+        <img src="" alt="wc" class="wc-img">
         <div class="articleInfo">
           <div class="title"></div>
           <div class="category"></div>
           <div class="resource"></div>
           <div class="date"></div>
         </div>
-      </div> -->
+      </div> 
+      -->
 
     </div>
   

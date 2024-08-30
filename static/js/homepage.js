@@ -3,59 +3,55 @@ function eventsDomTree(events) {
 
     events.forEach(event => {
         // Create picture div
-        const picture = document.createElement('div');
-        picture.setAttribute('class', 'picture');
+        const wcAndInfo = document.createElement('div');
+        wcAndInfo.setAttribute('class', 'wcAndInfo');
+        wcAndInfo.setAttribute('id', event.id);
 
-        // img
-        const eventP = document.createElement('img');
-        eventP.src = event.wordcloud;
-        eventP.setAttribute('class', 'content');
+        // img at left part relative to article info
+        const wc = document.createElement('img');
+        wc.src = event.wordcloud;
+        wc.setAttribute('class', 'wc-img');
 
-        const articleName = document.createElement('div');
-        articleName.setAttribute('class', 'title');
-        articleName.textContent = event.title;
+        // article info at right part relative to wc-img
+        const articleInfo = document.createElement('div');
+        articleInfo.setAttribute('class', 'articleInfo');
 
-        picture.appendChild(eventP);
-        //picture.appendChild(articleName);
+        let title = document.createElement('div');
+        title.setAttribute('class', 'title');
+        title.textContent = event.title;
 
-        // Create word div
-        const word = document.createElement('div');
-        word.setAttribute('class', 'word');
+        let category = document.createElement('div');
+        category.setAttribute('class', 'category');
+        category.textContent = event.category;
 
-        // attraction_mrt
-        const articleForum = document.createElement('div');
-        articleForum.setAttribute('class', 'article_forum');
-        articleForum.textContent = event.category;
+        let resource = document.createElement('div');
+        resource.setAttribute('class', 'resource');
+        resource.textContent = event.resource;
 
-        // attraction_category
-        const articleResource = document.createElement('div');
-        articleResource.setAttribute('class', 'article_resource');
-        articleResource.textContent = event.resource;
+        let date = document.createElement('div');
+        date.setAttribute('class', 'date');
+        date.textContent = event.date;
 
-        word.appendChild(articleForum);
-        word.appendChild(articleResource);
+        articleInfo.appendChild(title);
+        articleInfo.appendChild(category);
+        articleInfo.appendChild(resource);
+        articleInfo.appendChild(date);
 
-        // Unite picture and word into picture_word
-        const picture_word = document.createElement('div');
-        picture_word.setAttribute('class', 'picture_word');
-        picture_word.setAttribute('id', event.id);
+        // append img and article info under wcAndInfo
+        wcAndInfo.appendChild(wc);
+        wcAndInfo.appendChild(articleInfo);
 
-        // Append picture and word divs to the load_articles div
-        picture_word.appendChild(picture);
-        picture_word.appendChild(articleName);
-        picture_word.appendChild(word);
-
-        more_articles.appendChild(picture_word);
+        more_articles.appendChild(wcAndInfo);
     });
 }
 
 // append hot keywords to recommend users
-async function AppendHotKwd() {
+async function AppendHotKwd() { // /api/hotkeywords
 
 }
 
 // add article category to the filter options -> call /api/forums
-function AddArticleCategory() {
+function AddArticleCategory() { 
 
 }
 
@@ -63,6 +59,42 @@ function AddArticleCategory() {
 async function ProvideCategoryDist() {
 
 } 
+
+function submitSelection() {
+
+    const keyword = document.querySelector('.searchKeyword_input').value;
+    const resources = Array.from(document.querySelectorAll('input[name="resource"]:checked')).map(input => input.value);
+    const categories = Array.from(document.querySelectorAll('input[name="category"]:checked')).map(input => input.value);
+    const dates = Array.from(document.querySelectorAll('input[name="date"]:checked')).map(input => input.value);
+
+    // resources -> ptt storm businesstoday udn
+    // dates -> 當日 三天內 一週內
+    
+
+    const data = {
+        keyword,
+        resources,
+        categories,
+        dates
+    };
+
+    fetch('/api/filter', {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        
+        console.log(data);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+
+}
 
 let nextPage = 0;
 let isLoading = false;
