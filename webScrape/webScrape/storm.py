@@ -119,6 +119,7 @@ def get_storm():
     yesterday = yesterday.strftime('%Y-%m-%d')
     print(yesterday)
     final = final[final['日期']==yesterday]
+    final = final[final['日期']!=''] # 排除非會員點擊顯示的行銷文章頁面
 
     final.to_csv(f'storm-test_{yesterday}.csv', index=False)
 

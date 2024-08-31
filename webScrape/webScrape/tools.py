@@ -254,10 +254,8 @@ def generate_hot_keywords():
 
     try:
 
-        hot_kwds_sql = '''SELECT title, content, resource
-                          FROM articles AS a
-                          INNER JOIN resource AS r
-                          ON a.resource_id = r.id
+        hot_kwds_sql = '''SELECT title, content, resource_id
+                          FROM articles
                           WHERE DATE(date) = CURDATE() - INTERVAL 1 DAY;'''
         con = db.get_connection()
         Cursor = con.cursor(dictionary=True)
@@ -265,12 +263,15 @@ def generate_hot_keywords():
         yesterday_words = Cursor.fetchall()
         articles_df = pd.DataFrame(yesterday_words)
 
+        resource_type_sql = '''SELECT * FROM resource;'''
+        Cursor.execute(resource_type_sql)
+        resource_type = Cursor.fetchall()
+        resource_type_df = pd.DataFrame(resource_type)
+
         # nx2 -> nx1
         articles_df['combined_text'] = articles_df.apply(lambda x: ' '.join([x['title'], x['content']]), axis=1)
 
-        # nx1 -> 1
-        all_text = ' '.join(articles_df['combined_text'])
-
+        # load stop words
         STOP_ch2 = []
         with open("./stop_words_ch_filer.txt", 'r', encoding='utf-8') as f:
             for line in f:
@@ -287,24 +288,43 @@ def generate_hot_keywords():
 
         combine_stop = STOP_ch2 + stop_txt
 
-        #result_string = title + content
+        resource_lst = [i for i in articles_df['resource'].unique()]
+        resource_lst = resource_lst.append('all')
 
-        jieba.set_dictionary('./dict.txt.big.txt')
-        #titleTxt_jb1 = jieba.cut_for_search(result_string)
+        final_lst = []
 
-        titleTxt_jb1 = jieba.lcut(all_text)
+        # each resource and overall 
+        for r in resource_type_df['id'].unique():
 
-        # 篩選出長度大於1且不在停用詞列表中的詞彙
-        titleTxt_jb1 = [word for word in titleTxt_jb1 if len(word) > 1 and word not in combine_stop]
+            if r != 5:
+                target_df = articles_df[articles_df['resource_id']==r]
+            else:
+                target_df = articles_df
 
-        # 生成詞頻字典
-        word_freq = Counter(titleTxt_jb1)
+            # nx1 -> 1
+            all_text = ' '.join(target_df['combined_text'])
+        
 
-        # 將 Counter 轉換為 list of tuples，方便排序
-        word_freq_list = word_freq.most_common()
-        # word_freq_list 現在是一個 list，每個元素是一個 tuple (word, count)，按照 count 降序排列
+            #result_string = title + content
+
+            jieba.set_dictionary('./dict.txt.big.txt')
+
+            titleTxt_jb1 = jieba.lcut(all_text)
+
+            # 篩選出長度大於1且不在停用詞列表中的詞彙
+            titleTxt_jb1 = [word for word in titleTxt_jb1 if len(word) > 1 and word not in combine_stop]
+
+            # 生成詞頻字典
+            word_freq = Counter(titleTxt_jb1)
+
+            # 將 Counter 轉換為 list of tuples，方便排序
+            word_freq_list = word_freq.most_common()
+            # word_freq_list 現在是一個 list，每個元素是一個 tuple (word, count)，按照 count 降序排列
 
 
+            for ind in range(len(word_freq_list[:10])):
+
+                final_lst.append({'resource_id': r, 'keyword': word_freq_list[ind], 'hot_rank': ind+1})
 
         return 
     
@@ -558,3 +578,35 @@ def generate_image_upload_s3(title, content):
     cloudfront = os.getenv('AWS_CLOUDFRONT_DOMAIN')
 
     return f"https://{cloudfront}/wordcloud/" + str(uni_name_wc), f"https://{cloudfront}/network/" + str(uni_name_nw)
+
+
+def handle_wordcloud_network_overview(df):
+
+    # wordcloud operations
+    wordcloud = []
+    network = []
+    overview = []
+    for i in range(df.shape[0]):
+
+        title = df['文章標題'][i]
+        content = df['文章內容'][i]
+
+        if content.strip() != '':
+
+            s3_uuid_wc, s3_uuid_nw = generate_image_upload_s3(title, content)
+            wordcloud.append(s3_uuid_wc)
+            network.append(s3_uuid_nw)
+            summary = get_summary_of_article(title, content)
+            overview.append(summary)
+        
+        else:
+
+            wordcloud.append('')
+            network.append('')
+            overview.append('')
+
+    df['文字雲'] = wordcloud
+    df['關係圖'] = network
+    df['文章摘要'] = overview
+
+    return df

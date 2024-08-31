@@ -11,6 +11,8 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 #from tools import generate_image_upload_s3, get_summary_of_article, insert_into_articles, clean_content
 from tools import clean_content
 
@@ -19,7 +21,7 @@ dotenv_path = os.path.join(os.path.dirname(__file__), '../../config/.env')
 load_dotenv(dotenv_path)
 
 
-def get_pttbrain(pages=20):
+def get_pttbrain(pages=1):
 
     options = Options()
     options.add_argument('disable-infobars')
@@ -92,7 +94,13 @@ def get_pttbrain(pages=20):
     for u in url:
         
         driver.get(u)
+
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//*[@id='__next']/div[2]/div[2]/div[1]/div/div/p"))
+        )
+
         time.sleep(5)
+
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
         h2 = soup.find('h2')
@@ -101,6 +109,7 @@ def get_pttbrain(pages=20):
         except:
             target_div = ''
 
+        #print(target_div.text)
         clean_target = clean_content(target_div.text)
 
         content.append(clean_target)
@@ -122,10 +131,11 @@ def get_pttbrain(pages=20):
 
     yesterday = datetime.now() - timedelta(days=1)
     yesterday = yesterday.strftime('%Y-%m-%d')
-    #print(yesterday)
+    
     final = final[final['日期']==yesterday]
 
     final.to_csv(f'ptt-test_{yesterday}.csv', index=False)
+    #final.to_csv(f'ptt-test.csv', index=False)
     print('done')
 
     return final
@@ -157,4 +167,3 @@ def get_pttbrain(pages=20):
     #return final
 
 get_pttbrain()
-
