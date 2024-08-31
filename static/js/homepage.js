@@ -47,10 +47,27 @@ function eventsDomTree(events) {
 
 // append hot keywords to recommend users
 async function AppendHotKwd() { // /api/hotkeywords
+    try {
+        const postResponse = await fetch('/api/hotkeywords');
+        const postData = await postResponse.text();
+        const forum_result = JSON.parse(postData);
+        let infos = forum_result.data;
 
+        let appendHere = document.querySelector('.hotWords');
+
+        infos.forEach(f => {
+            const newForumDiv = document.createElement('div');
+            newForumDiv.textContent = f;
+            newForumDiv.className = 'hotWord';
+
+            appendHere.appendChild(newForumDiv);
+        });
+    } catch (e) {
+        console.error('Error fetching Forums:', e);
+    }
 }
 
-// add article category to the filter options -> call /api/forums
+// add article category to the filter options -> call /api/filter-category
 function AddArticleCategory() { 
 
 }
@@ -69,7 +86,6 @@ function submitSelection() {
 
     // resources -> ptt storm businesstoday udn
     // dates -> 當日 三天內 一週內
-    
 
     const data = {
         keyword,
@@ -78,7 +94,7 @@ function submitSelection() {
         dates
     };
 
-    fetch('/api/filter', {
+    fetch('/api/filter-articles-search', {
         method: 'POST',
         headers: {
         'Content-Type': 'application/json'
@@ -88,7 +104,8 @@ function submitSelection() {
     .then(response => response.json())
     .then(data => {
         
-        console.log(data);
+        eventsDomTree(data);
+        //console.log(data);
     })
     .catch(error => {
         console.error('Error:', error);
@@ -135,6 +152,7 @@ async function addArticle(page = 0) {
     }
 }
 
+// change to filter type
 async function addKwdArticle(page = 0, keyword) {
     if (isLoading) return; // Prevent multiple fetch requests
     isLoading = true;

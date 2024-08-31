@@ -11,10 +11,11 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from tools import generate_image_upload_s3, get_summary_of_article, insert_into_articles, clean_content
+#from tools import generate_image_upload_s3, get_summary_of_article, insert_into_articles, clean_content
+from tools import clean_content
 
 # get .env under config directory
-dotenv_path = os.path.join(os.path.dirname(__file__), '../config/.env')
+dotenv_path = os.path.join(os.path.dirname(__file__), '../../config/.env')
 load_dotenv(dotenv_path)
 
 
@@ -95,7 +96,10 @@ def get_pttbrain(pages=20):
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
         h2 = soup.find('h2')
-        target_div = h2.find_next_sibling()
+        try:
+            target_div = h2.find_next_sibling()
+        except:
+            target_div = ''
 
         clean_target = clean_content(target_div.text)
 

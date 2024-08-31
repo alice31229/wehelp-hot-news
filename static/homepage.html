@@ -111,9 +111,9 @@
                         </label>
                         <br>
                         <label for="dates" class="optionTitle">文章時間：
-                          <input type="checkbox" id="dates" name="date" value="yesterday"> 昨日
-                          <input type="checkbox" id="dates" name="date" value="threedays"> 三日內
-                          <input type="checkbox" id="dates" name="date" value="oneWeek"> 一週內 
+                          <input type="radio" id="dates" name="date" value="yesterday"> 昨日
+                          <input type="radio" id="dates" name="date" value="threedays"> 三日內
+                          <input type="radio" id="dates" name="date" value="oneWeek"> 一週內 
                         </label>
                         <br>
                         <button type="submit" class="filterBtn">送出</button>
@@ -138,7 +138,7 @@
     <div class="hotKeywords_sorted">
       
       <img src="/static/photo_icon/left_Default.png" alt="left-arrow" class="left-arrow" id="kwds-left">
-        <div class="keywords"></div>
+        <div class="hotWords"></div>
       <img src="/static/photo_icon/right_Default.png" alt="right-arrow" class="right-arrow" id="kwds-right">
     
     </div>

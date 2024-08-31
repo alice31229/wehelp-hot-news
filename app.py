@@ -42,24 +42,16 @@ async def member(request: Request):
 
 # api for other web page data retrieve
 @app.get("/api/articles")
-async def handle_articles_page(page: int = Query(0), keyword: str = Query('')):
+async def handle_articles_page(page: int = Query(0)):
 
-    from tools import get_12_articles_by_page, get_12_articles_by_keyword
+    from tools import get_12_articles_by_page
 
-	#print(page, keyword)
-    if keyword == '':
+	#print(page)
 
-        # call only get_12_attractions_by_page
-        status_json = get_12_articles_by_page(page)
-		
-        return status_json
-	
-    else:
-
-        # judge page or keyword
-        keyword_attractions = get_12_articles_by_keyword(keyword, page)
-
-        return keyword_attractions	
+    # call only get_12_attractions_by_page
+    status_json = get_12_articles_by_page(page)
+    
+    return status_json
 
 
 # article content, wordcloud, analysis charts
@@ -117,6 +109,7 @@ async def get_target_article_info(id: int):
         
         Cursor.close()
         con.close()
+
 		
 @app.get("/api/hotkeywords") # elastic?
 async def get_hot_keywords(resource: str):
@@ -152,6 +145,7 @@ async def get_hot_keywords(resource: str):
 
         con.close()
         Cursor.close()
+
 
 # filter category
 @app.get("/api/filter-category")
@@ -191,30 +185,26 @@ async def get_all_category():
 @app.get("/api/filter-articles-search")
 async def get_demanded_articles(articles_requirements: articles_requirements):
 
-    from tools import db
+    from tools import get_12_articles_by_filter
 
-    try:
+    input_requirement = {'keyword': articles_requirements.keyword,
+                         'resource': articles_requirements.resources,
+                         'category': articles_requirements.categories,
+                         'date': articles_requirements.dates}
+    
+    result = get_12_articles_by_filter(input_requirement)
+
+    if result[0]:
          
-        con = db.get_connection()
-        Cursor = con.cursor(dictionary=True)
+        result_json = {'data': result[1]}
+        
+        return result_json
 
-        # keyword, resources, categories, dates
-        sql = '''SELECT '''
-
-        Cursor.execute(sql)
-        category_result = Cursor.fetchall()
-
-    except mysql.connector.Error as err:
+    else:
          
         return {'error': True,
-                'message': err}
+                'message': '文章擷取問題'}
     
-    finally:
-         
-         con.close()
-         Cursor.close()
-
-    return True
 
 # homepage mrt click keyword search api router
 @app.get("/api/forums")

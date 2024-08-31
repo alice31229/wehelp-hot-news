@@ -176,19 +176,20 @@ def unify_forum_to_db(new_df):
         category_id_mapping_df = pd.DataFrame(category_id_mapping)
 
         # resource id remember
-        sql = 'SELECT id, resource FROM resource;'
+        sql = 'SELECT id AS resource_id, resource FROM resource;'
         Cursor.execute(sql)
-        category_id_mapping = Cursor.fetchall()
+        resource_id_mapping = Cursor.fetchall()
 
-        category_id_mapping_df = pd.DataFrame(category_id_mapping)
+        resource_id_mapping_df = pd.DataFrame(resource_id_mapping)
 
         new_df['統一文章類別'] = new_df['文章類別'].map(forum_mapping_dict) 
         final_df = new_df.merge(category_id_mapping_df, left_on='統一文章類別', right_on='category', how='left')
+        final_df = final_df.merge(resource_id_mapping_df, left_on='文章來源', right_on='resource', how='left')
 
         # rename column names
 
-        final_df = final_df[['id','文章類別','文章標題','文章內容','文章來源','日期','文章網址','文字雲','關係圖','文章摘要']]
-        final_df = final_df.rename(columns={'id': '文章類別'})
+        final_df = final_df[['id','文章類別','文章標題','文章內容','resource_id','日期','文章網址','文字雲','關係圖','文章摘要']]
+        final_df = final_df.rename(columns={'id': '文章類別編號', 'resource_id': '文章來源編號'})
 
         return final_df
     
@@ -318,9 +319,6 @@ def generate_hot_keywords():
         con.close()
         Cursor.close()
 
-
-
-# keywords nlp process
 
 
 # each resource and overall category calculation

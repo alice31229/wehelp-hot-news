@@ -1,5 +1,4 @@
 import os
-import uuid
 from dotenv import load_dotenv
 
 import boto3
@@ -26,7 +25,7 @@ db = mysql.connector.pooling.MySQLConnectionPool(
 #         password=os.getenv("AWS_RDS_PASSWORD"),
 #         database=os.getenv("AWS_RDS_DB"))
 
-# homepage keyword search data 
+# homepage filter search articles 
 def get_12_articles_by_filter(filter_requirements, page=0):
 
 	# sql = 'SELECT * FROM articles WHERE MATCH(title) AGAINST (%s) OR MATCH(content) AGAINST (%s)'
@@ -41,13 +40,27 @@ def get_12_articles_by_filter(filter_requirements, page=0):
             FROM articles AS a
             LEFT JOIN resource AS r ON a.resource_id = r.id
             LEFT JOIN category AS c ON a.category_id = c.id
-            WHERE a.title like %s OR a.content like %s OR a.forum = %s) AS subquery LIMIT %s, %s;'''
-
-    kw = filter_requirements.keyword
+            WHERE (a.title LIKE %s OR a.content LIKE %s)
+            AND (c.category IN (%s) OR %s IS NULL) 
+            AND (r.resource IN (%s) OR %s IS NULL)
+            AND (a.date >= %s OR %s IS NULL)) AS subquery LIMIT %s, %s;'''
 
     # Escaping wildcards in the parameter
-    search_param = f"%{kw}%"
-    keyword = (search_param, search_param, kw, start, page_size)
+    kw = filter_requirements.keyword
+    if kw != '':
+        search_param = f"%{kw}%"
+    else:
+        search_param = ''
+    
+    category_lst = filter_requirements.category
+    category_str = ','.join(['%s'] * len(category_lst))
+
+    resource_lst = filter_requirements.resource
+    resource_str = ','.join(['%s'] * len(resource_lst))
+
+    date = filter_requirements.date if filter_requirements.date is not None else ''
+    
+    keyword = (search_param, search_param, category_str, category_str, resource_str, resource_str, date, date, start, page_size)
 
     try:
         
