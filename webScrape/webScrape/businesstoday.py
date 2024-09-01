@@ -33,7 +33,7 @@ def get_businesstoday(pages=5):
     options.chrome_executable_path='./chromedriver'
     driver = webdriver.Chrome(options=options)
 
-    today = []
+    title = []
     date = []
     url = []
     content = []
@@ -46,45 +46,47 @@ def get_businesstoday(pages=5):
         soup = BeautifulSoup(driver.page_source, "html.parser")
         elements = soup.find_all("a", {"class": "article__item"})
         #elements = soup.find_all("div", {"class": "article__itembox"})
-        
-        #print(elements)
     
         for element in elements:
 
             #if 'businesstoday' in element['href']: # 過濾廣告
-
-            title = element.find("h4").getText().strip()
-            today.append(title)
             time = element.find("p", {'class': 'article__item-date'}).getText().strip()
-            date.append(time)
-            website = element['href']
-            url.append('https://www.businesstoday.com.tw'+website)
-            driver.get('https://www.businesstoday.com.tw'+website)
-            sleep(3)
-            soup = BeautifulSoup(driver.page_source, "html.parser")
-            category = soup.find('p',{'class': 'context__info-item context__info-item--type'}).getText().strip()
-            forum.append(category)
-            #print(category)
-            
-            target_div = soup.find('div', class_='Zi_ad_ar_iR')
-            content_ps = target_div.find_all("p")
-            #content_ps = ps.find_all_previous('div', id_='fb-root')
+            yesterday = datetime.now() - timedelta(days=1)
+            yesterday = yesterday.strftime('%Y-%m-%d')
+            if time == yesterday:
 
-            txt = ''
-            for p in content_ps:
+                article_title = element.find("h4").getText().strip()
+                title.append(article_title)
                 
-                if p.text != '&nbsp;' and p.text != '':
-                    txt+=p.text
+                date.append(time)
+                website = element['href']
+                url.append('https://www.businesstoday.com.tw'+website)
+                driver.get('https://www.businesstoday.com.tw'+website)
+                sleep(3)
+                soup = BeautifulSoup(driver.page_source, "html.parser")
+                category = soup.find('p',{'class': 'context__info-item context__info-item--type'}).getText().strip()
+                forum.append(category)
+                #print(category)
+                
+                target_div = soup.find('div', class_='Zi_ad_ar_iR')
+                content_ps = target_div.find_all("p")
+                #content_ps = ps.find_all_previous('div', id_='fb-root')
 
-            clean_txt = clean_content(txt)
+                txt = ''
+                for p in content_ps:
+                    
+                    if p.text != '&nbsp;' and p.text != '':
+                        txt+=p.text
 
-            content.append(clean_txt)
+                clean_txt = clean_content(txt)
+
+                content.append(clean_txt)
 
     driver.quit()
 
     final = pd.DataFrame()
     final['文章類別'] = forum
-    final['文章標題'] = today
+    final['文章標題'] = title
     final['文章內容'] = content
     final['文章來源'] = '今周刊'
     final['日期'] = date
@@ -94,9 +96,9 @@ def get_businesstoday(pages=5):
 
     final['日期'] = final['日期'].dt.strftime('%Y-%m-%d')
 
-    yesterday = datetime.now() - timedelta(days=1)
-    yesterday = yesterday.strftime('%Y-%m-%d')
-    final = final[final['日期']==yesterday]
+    # yesterday = datetime.now() - timedelta(days=1)
+    # yesterday = yesterday.strftime('%Y-%m-%d')
+    # final = final[final['日期']==yesterday]
 
     final.to_csv(f'businesstoday-test_{yesterday}.csv', index=False)
 

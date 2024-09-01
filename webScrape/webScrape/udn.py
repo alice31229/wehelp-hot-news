@@ -38,6 +38,7 @@ def get_udn(scroll_time=3):
 
         if driver.find_elements(By.XPATH, "//section[@class='story-list__holder--append']//div[@class='story-list__text']//h2")!=[]:
             #time.sleep(1)
+
             titles = driver.find_elements(By.XPATH, "//section[@class='story-list__holder--append']//div[@class='story-list__text']//h2")
             hrefs = driver.find_elements(By.XPATH, "//section[@class='story-list__holder--append']//div[@class='story-list__text']//h2//a")
             #views = driver.find_elements(By.XPATH, "//section[@class='story-list__holder--append']//div[@class='story-list__info']//span[@class = 'story-list__view']")
@@ -46,11 +47,18 @@ def get_udn(scroll_time=3):
 
             
             for i in range(len(titles)):
-                title.append(titles[i].text)
-                link.append(hrefs[i].get_attribute('href'))
-                #view.append(views[i].text)
-                date.append(times[i].text)
-                forum.append(category[i].text)
+
+                time_judge = times[i].text
+                yesterday = datetime.now() - timedelta(days=1)
+                yesterday = yesterday.strftime('%Y-%m-%d')
+
+                if time_judge == yesterday:
+
+                    title.append(titles[i].text)
+                    link.append(hrefs[i].get_attribute('href'))
+                    #view.append(views[i].text)
+                    date.append(time_judge)
+                    forum.append(category[i].text)
 
             js = "window.scrollTo(0, document.body.scrollHeight);"
             driver.execute_script(js)
@@ -67,11 +75,18 @@ def get_udn(scroll_time=3):
 
             
             for i in range(len(titles)):
-                title.append(titles[i].text)
-                link.append(hrefs[i].get_attribute('href'))
-                #view.append(views[i].text)
-                date.append(times[i].text)
-                forum.append(category[i].text)
+
+                time_judge = times[i].text
+                yesterday = datetime.now() - timedelta(days=1)
+                yesterday = yesterday.strftime('%Y-%m-%d')
+
+                if time_judge == yesterday:
+
+                    title.append(titles[i].text)
+                    link.append(hrefs[i].get_attribute('href'))
+                    #view.append(views[i].text)
+                    date.append(time_judge)
+                    forum.append(category[i].text)
 
 
             js = "window.scrollTo(0, document.body.scrollHeight);"
@@ -108,12 +123,7 @@ def get_udn(scroll_time=3):
     # make sure the date format at webpage
     final['日期'] = pd.to_datetime(final['日期'], format='%Y-%m-%d %H:%M', errors='coerce')
     final['日期'] = final['日期'].dt.strftime('%Y-%m-%d')
-    print(final['日期'].unique())
-
-    yesterday = datetime.now() - timedelta(days=1)
-    yesterday = yesterday.strftime('%Y-%m-%d')
-    print(yesterday)
-    final = final[final['日期']==yesterday]
+    #print(final['日期'].unique())
 
     final.to_csv(f'udn-test_{yesterday}.csv', index=False)
 

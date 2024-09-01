@@ -43,7 +43,9 @@ def get_12_articles_by_filter(filter_requirements, page=0):
             WHERE (a.title LIKE %s OR a.content LIKE %s)
             AND (c.category IN (%s) OR %s IS NULL) 
             AND (r.resource IN (%s) OR %s IS NULL)
-            AND (a.date >= %s OR %s IS NULL)) AS subquery LIMIT %s, %s;'''
+            AND (a.date >= %s OR %s IS NULL)) AS subquery
+            ORDER BY date DESC
+            LIMIT %s, %s;'''
 
     # Escaping wildcards in the parameter
     kw = filter_requirements.keyword
@@ -111,6 +113,7 @@ def get_12_articles_by_page(page):
                     FROM articles AS a 
                     LEFT JOIN resource AS r ON a.resource_id = r.id 
                     LEFT JOIN category AS c ON a.resource_id = c.id 
+                    ORDER BY date DESC
                     LIMIT %s, %s;'''
 		Cursor.execute(sql_12, (start, page_size))
 		demand_articles = Cursor.fetchall()
@@ -200,13 +203,15 @@ def get_all_collection_member(member_id):
     try:
         response = dynamodb.query(
             TableName=table_name,
+            IndexName='member_id-index',  # 如果有局部索引，可以利用
             KeyConditionExpression='#member_id = :member_id',
             ExpressionAttributeNames={
                 '#member_id': 'member_id'
             },
             ExpressionAttributeValues={
                 ':member_id': {'S': member_id}
-            }
+            },
+            ScanIndexForward=False
         )
 
         items = response['Items']

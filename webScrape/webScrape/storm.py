@@ -99,7 +99,6 @@ def get_storm():
         else:
             page+=1
 
-
             
     driver.quit()
 
@@ -113,12 +112,8 @@ def get_storm():
 
     final['日期'] = pd.to_datetime(final['日期'], format='%Y-%m-%d', errors='coerce')
     final['日期'] = final['日期'].dt.strftime('%Y-%m-%d')
-    print(final['日期'].unique())
+    #print(final['日期'].unique())
 
-    yesterday = datetime.now() - timedelta(days=1)
-    yesterday = yesterday.strftime('%Y-%m-%d')
-    print(yesterday)
-    final = final[final['日期']==yesterday]
     final = final[final['日期']!=''] # 排除非會員點擊顯示的行銷文章頁面
 
     final.to_csv(f'storm-test_{yesterday}.csv', index=False)

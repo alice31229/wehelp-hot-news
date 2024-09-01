@@ -60,30 +60,24 @@ def get_pttbrain(pages=1):
         div_section = soup.find_all('div', class_='ui attached segment')[0]
         a_section = div_section.find_all('a', href=True)
 
-        # stop_scraping = False
 
         for article in a_section:
 
-            # date_judge = article.find('div', {'class': 'description'}).getText().strip()
-            # date_judge = datetime.strptime(date_judge, '%Y-%m-%d').date()
-            # yesterday = (datetime.now() - timedelta(days=1)).date()
-            
-            # if date_judge == yesterday:
+            target_date = article.find('div', {'class': 'description'}).getText().strip()
+            #today = datetime.now().strftime('%Y-%m-%d')
+            yesterday = datetime.now() - timedelta(days=1)
+            yesterday = yesterday.strftime('%Y-%m-%d')
 
-            url.append(ptt_url[:-1]+article.get('href'))
-            #print(article.get('href'), article.find('div', class_="ui teal small label").getText().strip(), article.find('div', {'class': 'header'}).getText().strip(), article.find('div', {'class': 'description'}).getText().strip())
-            forum.append(article.find('div', class_="ui teal small label").getText().strip())
+            if target_date == yesterday: # 只抓目標日期的資訊
 
-            title.append(article.find('div', {'class': 'header'}).getText().strip())
-            #print(article.find('div', {'class': 'description'}).getText().strip())
-            date.append(article.find('div', {'class': 'description'}).getText().strip())
+                url.append(ptt_url[:-1]+article.get('href'))
+                #print(article.get('href'), article.find('div', class_="ui teal small label").getText().strip(), article.find('div', {'class': 'header'}).getText().strip(), article.find('div', {'class': 'description'}).getText().strip())
+                forum.append(article.find('div', class_="ui teal small label").getText().strip())
 
-        #     else:
-        #         stop_scraping = True
-        #         break
-            
-        # if stop_scraping:
-        #     break
+                title.append(article.find('div', {'class': 'header'}).getText().strip())
+                #print(article.find('div', {'class': 'description'}).getText().strip())
+                date.append(article.find('div', {'class': 'description'}).getText().strip())
+
 
         cnt+=1
         next_page = driver.find_element(By.XPATH, '//*[@id="__next"]/div[2]/div[2]/div/div[3]/div/div[2]/a[13]')
@@ -129,13 +123,16 @@ def get_pttbrain(pages=1):
     final['日期'] = final['日期'].dt.strftime('%Y-%m-%d')
     #print(final['日期'].unique())
 
-    yesterday = datetime.now() - timedelta(days=1)
-    yesterday = yesterday.strftime('%Y-%m-%d')
+    # yesterday = datetime.now() - timedelta(days=1)
+    # yesterday = yesterday.strftime('%Y-%m-%d')
     
-    final = final[final['日期']==yesterday]
+    # final = final[final['日期']==yesterday]
+
+    #today = datetime.now().strftime('%Y-%m-%d')
 
     final.to_csv(f'ptt-test_{yesterday}.csv', index=False)
-    #final.to_csv(f'ptt-test.csv', index=False)
+    #final.to_csv(f'ptt-test_{today}.csv', index=False)
+    
     print('done')
 
     return final
