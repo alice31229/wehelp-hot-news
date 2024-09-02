@@ -13,7 +13,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-#from tools import generate_image_upload_s3, get_summary_of_article, insert_into_articles, clean_content
 from tools import clean_content
 
 # get .env under config directory
@@ -21,7 +20,7 @@ dotenv_path = os.path.join(os.path.dirname(__file__), '../../config/.env')
 load_dotenv(dotenv_path)
 
 
-def get_pttbrain(pages=1):
+def get_pttbrain(pages=20):
 
     options = Options()
     options.add_argument('disable-infobars')
@@ -130,37 +129,9 @@ def get_pttbrain(pages=1):
 
     #today = datetime.now().strftime('%Y-%m-%d')
 
-    final.to_csv(f'ptt-test_{yesterday}.csv', index=False)
+    final.to_csv(f'./data_ETL/ptt-test_{yesterday}.csv', index=False)
     #final.to_csv(f'ptt-test_{today}.csv', index=False)
     
-    print('done')
-
-    return final
-
-    # wordcloud operations
-    wordcloud = []
-    network = []
-    overview = []
-    for i in range(final.shape[0]):
-
-        s3_uuid_wc, s3_uuid_nw = generate_image_upload_s3(final['文章標題'][i], final['文章內容'][i])
-        wordcloud.append(s3_uuid_wc)
-        network.append(s3_uuid_nw)
-        summary = get_summary_of_article(final['文章標題'][i], final['文章內容'][i])
-        overview.append(summary)
-
-    final['文字雲'] = wordcloud
-    final['關係圖'] = network
-    final['文章摘要'] = overview
-
-    if insert_into_articles(final):
-
-        print('ptt \Y/')
-
-    else:
-
-        print('ptt error...')
-
-    #return final
-
+    print('ptt done')
+    
 get_pttbrain()

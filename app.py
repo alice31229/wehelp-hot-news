@@ -112,21 +112,21 @@ async def get_target_article_info(id: int):
 
 		
 @app.get("/api/hotkeywords") # elastic?
-async def get_hot_keywords(resource: str):
+async def get_hot_keywords():
      
      from tools import db
 
      hot_keywords = []
 
      try:
-        sql = '''SELECT h.keyword
+        sql = '''SELECT DISTINCT h.keyword
                  FROM hotKeywords AS h
                  INNER JOIN resource AS r
-                 ON h.resource_id = r.id
-                 WHERE r.resource = %s;'''
+                 ON h.resource_id = r.id;'''
         con = db.get_connection()
         Cursor = con.cursor(dictionary=True)
-        Cursor.execute(sql, (resource,))
+        Cursor.execute(sql)
+        #Cursor.execute(sql, (resource,))
         hot_keywords_result = Cursor.fetchall()
 
         for hk in hot_keywords_result:
@@ -152,21 +152,15 @@ async def get_hot_keywords(resource: str):
 async def get_all_category():
      
     from tools import db
-    
-    category = []
 
     try:
-        sql = '''SELECT category
-                 FROM category;'''
+        sql = '''SELECT * FROM category;'''
         con = db.get_connection()
         Cursor = con.cursor(dictionary=True)
         Cursor.execute(sql)
         category_result = Cursor.fetchall()
 
-        for c in category_result:
-            category.append(c['category'])
-
-        category_json = {'data':category}
+        category_json = {'data': category_result}
 
         return category_json
 
@@ -215,13 +209,52 @@ async def get_forum_info():
     forums = []
 
     try:
-        sql = '''SELECT c.category, COUNT(a.*) AS category_cnt
+        sql = '''SELECT c.category, COUNT(*) AS category_cnt
                  FROM articles AS a
                  INNER JOIN category AS c
                  ON a.category_id = c.id
-                 WHERE a.category IS NOT NULL
                  GROUP BY c.category
                  ORDER BY 2 DESC;'''
+        con = db.get_connection()
+        Cursor = con.cursor(dictionary=True)
+        Cursor.execute(sql)
+        sorted_forums = Cursor.fetchall()
+
+        for sm in sorted_forums:
+            forums.append(sm['category'])
+
+        forums_json = {'data':forums}
+
+        return forums_json
+
+    except mysql.connector.Error as err:
+        
+        return {'error': True,
+                'message': err}
+
+    finally:
+
+        con.close()
+        Cursor.close()
+
+
+# homepage mrt click keyword search api router
+@app.get("/api/resource-category-distribution")
+async def get_resource_category_info():
+
+    from tools import db
+    
+    forums = []
+
+    try:
+        sql = '''SELECT r.resource, c.category, COUNT(*) AS category_cnt
+                 FROM articles AS a
+                 LEFT JOIN category AS c
+                 ON a.category_id = c.id
+                 LEFT JOIN resource AS r
+                 ON a.resource_id = r.id
+                 where DATE(date) = CURDATE() - INTERVAL 1 DAY
+                 GROUP BY r.resource, c.category;'''
         con = db.get_connection()
         Cursor = con.cursor(dictionary=True)
         Cursor.execute(sql)
@@ -579,11 +612,11 @@ async def get_previous_collection(payload: dict = Depends(login_required)):
             con = db.get_connection()
             Cursor = con.cursor(dictionary=True)
             format_strings = ','.join(['%s'] * len(article_ids))
-            sql_query = f"SELECT a.id, a.category, a.title, r.resource, a.date, a.url, a.wordcloud 
+            sql_query = f'''SELECT a.id, a.category, a.title, r.resource, a.date, a.url, a.wordcloud 
                           FROM articles AS a
                           INNER JOIN resource AS r
                           ON a.resource_id = r.id
-                          WHERE id IN ({format_strings})"
+                          WHERE id IN ({format_strings})'''
             Cursor.execute(sql_query, tuple(article_ids))
             
             articles_info = Cursor.fetchall()

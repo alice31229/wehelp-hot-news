@@ -68,8 +68,33 @@ async function AppendHotKwd() { // /api/hotkeywords
 }
 
 // add article category to the filter options -> call /api/filter-category
-function AddArticleCategory() { 
+async function AddArticleCategory() { 
+    try {
+        const postResponse = await fetch('/api/filter-category');
+        const postData = await postResponse.text();
+        const category_result = JSON.parse(postData);
+        let infos = category_result.data;
 
+        let AppendCategory = document.querySelector('.AppendCategory');
+        infos.forEach(event => {
+            let inputCheckbox = document.createElement('input');
+            inputCheckbox.setAttribute('type', 'checkbox');
+            inputCheckbox.setAttribute('id', 'categories');
+            inputCheckbox.setAttribute('name', 'category');
+            inputCheckbox.setAttribute('value', event.id);
+
+            let CheckboxLabel = document.createElement('label');
+            CheckboxLabel.setAttribute('for', 'resources');
+            CheckboxLabel.setAttribute('class', 'innerLabel');
+            CheckboxLabel.textContent = event.category;
+
+            AppendCategory.appendChild(inputCheckbox);
+            AppendCategory.appendChild(CheckboxLabel);
+        })
+
+    } catch (e) {
+        console.error('Error fetching Category:', e);
+    }
 }
 
 // provide overall and each resource category distribution
@@ -240,6 +265,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // } else{
 
     addForum();
+    AppendHotKwd();
     addArticle();
     checkLogin();
 
@@ -639,28 +665,8 @@ document.addEventListener("DOMContentLoaded", function () {
         createObserver(keywordObserverCallback);
     });
 
-    // article click event
-    let articles = document.querySelector('.load_articles');
-    articles.addEventListener('click', async (event) => {
-        // Check if the clicked element or its parent has the 'picture_word' class
-        let targetElement = event.target;
-        while (targetElement && !targetElement.classList.contains('picture_word')) {
-            targetElement = targetElement.parentElement;
-        }
 
-        if (targetElement && targetElement.classList.contains('picture_word')) {
-            let articleID = targetElement.id;
-            console.log(`Navigating to article/${articleID}`); // For debugging
-
-            // Ensure attrID is valid before navigating
-            if (articleID) {
-                window.location.assign(`article/${articleID}`);
-            }
-            return;
-        }
-    })
-
-    // Forum click event
+    // Category click event
     let forums = document.querySelector('.forums');
     forums.addEventListener('click', async (event) => {
         if (event.target.classList.contains('forum')) {
@@ -691,8 +697,8 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // forum Arrow click event
-    let leftArrow = document.querySelector('.left-arrow');
-    let rightArrow = document.querySelector('.right-arrow');
+    let leftArrow = document.querySelector('#category-left');
+    let rightArrow = document.querySelector('#category-right');
     const forumList = document.querySelector('.forums');
 
     if (leftArrow && rightArrow && forumList) {
@@ -708,10 +714,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Arrow hover effect
-    const leftDefaultSrc = '/static/photo_icon/mrt_left_Default.png';
-    const leftHoverSrc = '/static/photo_icon/mrt_left_Hovered.png';
-    const rightDefaultSrc = '/static/photo_icon/mrt_right_Default.png';
-    const rightHoverSrc = '/static/photo_icon/mrt_right_Hovered.png';
+    const leftDefaultSrc = '/static/photo_icon/left_Default.png';
+    const leftHoverSrc = '/static/photo_icon/left_Hovered.png';
+    const rightDefaultSrc = '/static/photo_icon/right_Default.png';
+    const rightHoverSrc = '/static/photo_icon/right_Hovered.png';
 
     leftArrow.addEventListener('mouseover', () => {
         leftArrow.src = leftHoverSrc;
@@ -728,6 +734,101 @@ document.addEventListener("DOMContentLoaded", function () {
     rightArrow.addEventListener('mouseout', () => {
         rightArrow.src = rightDefaultSrc;
     });
+
+    ///////////////////
+
+    // HotKeywords click event
+    let hotWords = document.querySelector('.hotWords');
+    hotWords.addEventListener('click', async (event) => {
+        if (event.target.classList.contains('hotWord')) {
+            const keyword = event.target.textContent;
+            let searchKeyword_input = document.querySelector('.searchKeyword_input');
+            searchKeyword_input.value = keyword;
+
+            let originalArticles = document.querySelector('.load_articles');
+            originalArticles.innerHTML = '';
+
+            addKwdArticle(0, keyword);
+
+            const hotKeywordObserverCallback = entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !isLoading) {
+                        if (nextPage) {
+                            addKwdArticle(nextPage, keyword);
+                        } else {
+                            const footer = document.querySelector('.copyRight');
+                            footer.style.display = 'flex';
+                        }
+                    }
+                });
+            };
+
+            createObserver(hotKeywordObserverCallback);
+        }
+    });
+
+    // forum Arrow click event
+    let hotKwdleftArrow = document.querySelector('#kwds-left');
+    let hotKwdrightArrow = document.querySelector('#kwds-right');
+    const hotKwdList = document.querySelector('.hotWords');
+
+    if (hotKwdleftArrow && hotKwdrightArrow && hotKwdList) {
+        hotKwdleftArrow.addEventListener('click', () => {
+            hotKwdList.scrollBy({ left: -300, behavior: 'smooth' });
+        });
+
+        hotKwdrightArrow.addEventListener('click', () => {
+            hotKwdList.scrollBy({ left: 300, behavior: 'smooth' });
+        });
+    } else {
+        console.log("One or more elements not found:", { hotKwdleftArrow, hotKwdrightArrow, hotKwdList });
+    }
+
+    // Arrow hover effect
+    const hotKwdleftDefaultSrc = '/static/photo_icon/left_Default.png';
+    const hotKwdleftHoverSrc = '/static/photo_icon/left_Hovered.png';
+    const hotKwdrightDefaultSrc = '/static/photo_icon/right_Default.png';
+    const hotKwdrightHoverSrc = '/static/photo_icon/right_Hovered.png';
+
+    hotKwdleftArrow.addEventListener('mouseover', () => {
+        hotKwdleftArrow.src = hotKwdleftHoverSrc;
+    });
+
+    hotKwdleftArrow.addEventListener('mouseout', () => {
+        hotKwdleftArrow.src = hotKwdleftDefaultSrc;
+    });
+
+    hotKwdrightArrow.addEventListener('mouseover', () => {
+        hotKwdrightArrow.src = hotKwdrightHoverSrc;
+    });
+
+    hotKwdrightArrow.addEventListener('mouseout', () => {
+        hotKwdrightArrow.src = hotKwdrightDefaultSrc;
+    });
+
+
+    ///////////////////
+
+    // article click event
+    let articles = document.querySelector('.load_articles');
+    articles.addEventListener('click', async (event) => {
+        // Check if the clicked element or its parent has the 'picture_word' class
+        let targetElement = event.target;
+        while (targetElement && !targetElement.classList.contains('picture_word')) {
+            targetElement = targetElement.parentElement;
+        }
+
+        if (targetElement && targetElement.classList.contains('picture_word')) {
+            let articleID = targetElement.id;
+            console.log(`Navigating to article/${articleID}`); // For debugging
+
+            // Ensure attrID is valid before navigating
+            if (articleID) {
+                window.location.assign(`article/${articleID}`);
+            }
+            return;
+        }
+    })
 
     // back to home page by clicking 熱門資訊通
     let home = document.querySelector('.home');

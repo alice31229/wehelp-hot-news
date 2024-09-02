@@ -116,34 +116,7 @@ def get_storm():
 
     final = final[final['日期']!=''] # 排除非會員點擊顯示的行銷文章頁面
 
-    final.to_csv(f'storm-test_{yesterday}.csv', index=False)
-
-    return final
-
-    # wordcloud operations
-    wordcloud = []
-    network = []
-    overview = []
-    for i in range(final.shape[0]):
-
-        s3_uuid_wc, s3_uuid_nw = generate_image_upload_s3(final['文章標題'][i], final['文章內容'][i])
-        wordcloud.append(s3_uuid_wc)
-        network.append(s3_uuid_nw)
-        summary = get_summary_of_article(final['文章標題'][i], final['文章內容'][i])
-        overview.append(summary)
-
-    final['文字雲'] = wordcloud
-    final['關係圖'] = network
-    final['文章摘要'] = overview
-
-    if insert_into_articles(final):
-
-        print('Storm \Y/')
-
-    else:
-
-        print('Storm error...')
-    
-    #return final
+    final.to_csv(f'./data_ETL/storm-test_{yesterday}.csv', index=False)
+    print('storm done')
 
 get_storm()

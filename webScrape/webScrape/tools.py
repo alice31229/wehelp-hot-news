@@ -64,28 +64,15 @@ def unify_forum_category():
 
         # 查詢過往已統一的類別
         prev_forum_query = '''SELECT category FROM category;'''
-        # '''SELECT DISTINCT forum 
-        #     FROM articles 
-        #     WHERE DATE(date) != CURDATE() - INTERVAL 1 DAY;'''
         Cursor.execute(prev_forum_query)
         prev_forum_result = Cursor.fetchall()
-
-        # 新文章尚未統一的類別
-        # new_forum_query = '''SELECT DISTINCT forum 
-        #                      FROM articles 
-        #                      WHERE DATE(date) = CURDATE() - INTERVAL 1 DAY;'''
-        # Cursor.execute(new_forum_query)
-        # new_forum_result = Cursor.fetchall()
 
         # read csv of ptt, udn, storm, businesstoday
         yesterday = datetime.now() - timedelta(days=1)
         yesterday = yesterday.strftime('%Y-%m-%d')
-        ptt = pd.read_csv(f'ptt-test_{yesterday}.csv', usecols=['文章類別'])
-        storm = pd.read_csv(f'storm-test_{yesterday}.csv', usecols=['文章類別'])
-        udn = pd.read_csv(f'udn-test_{yesterday}.csv', usecols=['文章類別'])
-        businesstoday = pd.read_csv(f'businesstoday-test_{yesterday}.csv', usecols=['文章類別'])
+        all = pd.read_csv(f'./data_ETL/wordcloud_network_overview/all_{yesterday}.csv', usecols=['文章類別'])
 
-        new_forum_result = list(ptt['文章類別'].unique()) + list(storm['文章類別'].unique()) + list(udn['文章類別'].unique()) + list(businesstoday['文章類別'].unique())
+        new_forum_result = all['文章類別'].unique()
 
         ###
 
@@ -155,7 +142,7 @@ def unify_forum_category():
         Cursor.close()
 
 
-def unify_forum_to_db(new_df):
+def unify_forum_to_db():
     '''
     -> mapping original to new
     -> update articles table with category_id
@@ -182,7 +169,15 @@ def unify_forum_to_db(new_df):
 
         resource_id_mapping_df = pd.DataFrame(resource_id_mapping)
 
+        # new articles load here
+        yesterday = datetime.now() - timedelta(days=1)
+        yesterday = yesterday.strftime('%Y-%m-%d')
+        new_df = pd.read_csv(f'./data_ETL/wordcloud_network_overview/all_{yesterday}.csv')
+
+
         new_df['統一文章類別'] = new_df['文章類別'].map(forum_mapping_dict) 
+        new_df.to_csv('category-test.csv', index=False)
+
         final_df = new_df.merge(category_id_mapping_df, left_on='統一文章類別', right_on='category', how='left')
         final_df = final_df.merge(resource_id_mapping_df, left_on='文章來源', right_on='resource', how='left')
 
@@ -191,7 +186,9 @@ def unify_forum_to_db(new_df):
         final_df = final_df[['id','文章類別','文章標題','文章內容','resource_id','日期','文章網址','文字雲','關係圖','文章摘要']]
         final_df = final_df.rename(columns={'id': '文章類別編號', 'resource_id': '文章來源編號'})
 
-        return final_df
+        final_df.to_csv(f'./data_ETL/ready_for_db/all_{yesterday}.csv', index=False)
+
+        print('new articles to db done')
     
 
     except mysql.connector.Error as e:
@@ -204,12 +201,12 @@ def unify_forum_to_db(new_df):
         Cursor.close()
 
 
-
-
 # local mysql insert test
-def insert_into_articles(df):
+def insert_into_articles():
 
-    #data = list(df.to_records(index=False))
+    yesterday = datetime.now() - timedelta(days=1)
+    yesterday = yesterday.strftime('%Y-%m-%d')
+    df = pd.read_csv(f'./data_ETL/ready_for_db/all_{yesterday}.csv')
     
     try:
         # 建立插入語句  update current columns
@@ -229,10 +226,6 @@ def insert_into_articles(df):
     except mysql.connector.Error as e:
 
         print(f"An error occurred: {str(e)}")
-        # 可以打印 DataFrame 的前幾行，查看資料
-        #print([:3])
-        # 可以打印 SQL 語句，檢查語法
-        #print(sql)
 
         return False
     
@@ -240,9 +233,6 @@ def insert_into_articles(df):
 
         con.close()
         cursor.close()
-
-
-
 
 
 def generate_hot_keywords():
@@ -288,8 +278,8 @@ def generate_hot_keywords():
 
         combine_stop = STOP_ch2 + stop_txt
 
-        resource_lst = [i for i in articles_df['resource'].unique()]
-        resource_lst = resource_lst.append('all')
+        resource_lst = [i for i in articles_df['resource_id'].unique()]
+        resource_lst = resource_lst.append(5)
 
         final_lst = []
 
@@ -324,9 +314,20 @@ def generate_hot_keywords():
 
             for ind in range(len(word_freq_list[:10])):
 
-                final_lst.append({'resource_id': r, 'keyword': word_freq_list[ind], 'hot_rank': ind+1})
+                final_lst.append({'resource_id': int(r), 'keyword': word_freq_list[ind][0], 'hot_rank': int(ind+1)})
+        
+        # for r in final_lst:
+        #     print(r)
 
-        return 
+        # save to hotKeywords
+        # 準備 SQL 插入語句
+        sql = "INSERT INTO hotKeywords (resource_id, keyword, hot_rank) VALUES (%s, %s, %s)"
+
+        # 批量插入
+        values = [(item['resource_id'], item['keyword'], item['hot_rank']) for item in final_lst]
+        Cursor.executemany(sql, values)
+
+        con.commit()
     
     except mysql.connector.Error as e:
 
@@ -478,11 +479,6 @@ def get_summary_of_article(title, content):
 
     # 摘要生成鏈
     overview = summary_chain.invoke(input_data)
-    # print('摘要')
-    # print(overview.content)
-    # print('原文')
-    # print(content)
-
 
     return overview.content
 
@@ -580,33 +576,39 @@ def generate_image_upload_s3(title, content):
     return f"https://{cloudfront}/wordcloud/" + str(uni_name_wc), f"https://{cloudfront}/network/" + str(uni_name_nw)
 
 
-def handle_wordcloud_network_overview(df):
+def handle_wordcloud_network_overview():
+
+    # new articles load here
+    yesterday = datetime.now() - timedelta(days=1)
+    yesterday = yesterday.strftime('%Y-%m-%d')
+    ptt = pd.read_csv(f'./data_ETL/after_webscrape/ptt-test_{yesterday}.csv')
+    storm = pd.read_csv(f'./data_ETL/after_webscrape/storm-test_{yesterday}.csv')
+    udn = pd.read_csv(f'./data_ETL/after_webscrape/udn-test_{yesterday}.csv')
+    businesstoday = pd.read_csv(f'./data_ETL/after_webscrape/businesstoday-test_{yesterday}.csv')
+
+    df = pd.concat([ptt, storm, udn, businesstoday], ignore_index=True)
+    df = df[df['文章內容'].notnull()]
 
     # wordcloud operations
     wordcloud = []
     network = []
     overview = []
-    for i in range(df.shape[0]):
+    for index, row in df.iterrows():
+        title = row['文章標題']
+        content = row['文章內容']
 
-        title = df['文章標題'][i]
-        content = df['文章內容'][i]
+        s3_uuid_wc, s3_uuid_nw = generate_image_upload_s3(title, content)
+        wordcloud.append(s3_uuid_wc)
+        network.append(s3_uuid_nw)
+        summary = get_summary_of_article(title, content)
+        overview.append(summary)
 
-        if content.strip() != '':
-
-            s3_uuid_wc, s3_uuid_nw = generate_image_upload_s3(title, content)
-            wordcloud.append(s3_uuid_wc)
-            network.append(s3_uuid_nw)
-            summary = get_summary_of_article(title, content)
-            overview.append(summary)
-        
-        else:
-
-            wordcloud.append('')
-            network.append('')
-            overview.append('')
 
     df['文字雲'] = wordcloud
     df['關係圖'] = network
     df['文章摘要'] = overview
 
-    return df
+    df.to_csv(f'./data_ETL/wordcloud_network_overview/all_{yesterday}.csv', index=False)
+
+    print('wordcloud_network_overview done')
+

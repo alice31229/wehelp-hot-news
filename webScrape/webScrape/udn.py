@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from tools import generate_image_upload_s3, get_summary_of_article, insert_into_articles, clean_content
+from tools import clean_content
 
 import os
 from dotenv import load_dotenv
@@ -48,10 +48,10 @@ def get_udn(scroll_time=3):
             
             for i in range(len(titles)):
 
-                time_judge = times[i].text
+                time_judge = times[i].text[:10]
                 yesterday = datetime.now() - timedelta(days=1)
                 yesterday = yesterday.strftime('%Y-%m-%d')
-
+                
                 if time_judge == yesterday:
 
                     title.append(titles[i].text)
@@ -76,10 +76,10 @@ def get_udn(scroll_time=3):
             
             for i in range(len(titles)):
 
-                time_judge = times[i].text
+                time_judge = times[i].text[:10]
                 yesterday = datetime.now() - timedelta(days=1)
                 yesterday = yesterday.strftime('%Y-%m-%d')
-
+                
                 if time_judge == yesterday:
 
                     title.append(titles[i].text)
@@ -125,34 +125,7 @@ def get_udn(scroll_time=3):
     final['日期'] = final['日期'].dt.strftime('%Y-%m-%d')
     #print(final['日期'].unique())
 
-    final.to_csv(f'udn-test_{yesterday}.csv', index=False)
-
-    return final
-    
-    # wordcloud operations
-    wordcloud = []
-    network = []
-    overview = []
-    for i in range(final.shape[0]):
-
-        s3_uuid_wc, s3_uuid_nw = generate_image_upload_s3(final['文章標題'][i], final['文章內容'][i])
-        wordcloud.append(s3_uuid_wc)
-        network.append(s3_uuid_nw)
-        summary = get_summary_of_article(final['文章標題'][i], final['文章內容'][i])
-        overview.append(summary)
-
-    final['文字雲'] = wordcloud
-    final['關係圖'] = network
-    final['文章摘要'] = overview
-
-    if insert_into_articles(final):
-
-        print('udn \Y/')
-
-    else:
-
-        print('udn error...')
-
-    #return final
+    final.to_csv(f'./data_ETL/udn-test_{yesterday}.csv', index=False)
+    print('udn done')
 
 get_udn()

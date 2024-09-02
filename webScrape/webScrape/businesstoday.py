@@ -8,7 +8,7 @@ from selenium import webdriver
 from time import sleep
 from datetime import datetime, timedelta
 import pandas as pd
-from tools import generate_image_upload_s3, get_summary_of_article, insert_into_articles, clean_content
+from tools import clean_content
 
 import os
 from dotenv import load_dotenv
@@ -50,9 +50,10 @@ def get_businesstoday(pages=5):
         for element in elements:
 
             #if 'businesstoday' in element['href']: # 過濾廣告
-            time = element.find("p", {'class': 'article__item-date'}).getText().strip()
+            time = element.find("p", {'class': 'article__item-date'}).getText().strip()[:10]
             yesterday = datetime.now() - timedelta(days=1)
             yesterday = yesterday.strftime('%Y-%m-%d')
+            
             if time == yesterday:
 
                 article_title = element.find("h4").getText().strip()
@@ -92,7 +93,7 @@ def get_businesstoday(pages=5):
     final['日期'] = date
     final['文章網址'] = url
 
-    final['日期'] = pd.to_datetime(final['日期'], format='%Y-%m-%d %H:%M:%S', errors='coerce')
+    final['日期'] = pd.to_datetime(final['日期'], format='%Y-%m-%d', errors='coerce')
 
     final['日期'] = final['日期'].dt.strftime('%Y-%m-%d')
 
@@ -100,35 +101,7 @@ def get_businesstoday(pages=5):
     # yesterday = yesterday.strftime('%Y-%m-%d')
     # final = final[final['日期']==yesterday]
 
-    final.to_csv(f'businesstoday-test_{yesterday}.csv', index=False)
-
-    return final
-    
-    # wordcloud operations
-    wordcloud = []
-    network = []
-    overview = []
-    for i in range(final.shape[0]):
-
-        s3_uuid_wc, s3_uuid_nw = generate_image_upload_s3(final['文章標題'][i], final['文章內容'][i])
-        wordcloud.append(s3_uuid_wc)
-        network.append(s3_uuid_nw)
-        summary = get_summary_of_article(final['文章標題'][i], final['文章內容'][i])
-        overview.append(summary)
-
-    final['文字雲'] = wordcloud
-    final['關係圖'] = network
-    final['文章摘要'] = overview
-
-    if insert_into_articles(final):
-
-        print('Businesstoday \Y/')
-
-    else:
-
-        print('Businesstoday error...')
-    
-    
-    #return final
+    final.to_csv(f'./data_ETL/businesstoday-test_{yesterday}.csv', index=False)
+    print('businesstoday done')
 
 get_businesstoday()
