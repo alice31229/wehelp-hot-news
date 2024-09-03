@@ -121,7 +121,7 @@ def get_udn(scroll_time=3):
     final['文章網址'] = link
 
     # make sure the date format at webpage
-    final['日期'] = pd.to_datetime(final['日期'], format='%Y-%m-%d %H:%M', errors='coerce')
+    final['日期'] = pd.to_datetime(final['日期'], format='%Y-%m-%d', errors='coerce')
     final['日期'] = final['日期'].dt.strftime('%Y-%m-%d')
     #print(final['日期'].unique())
 

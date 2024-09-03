@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>首頁</title>
     <link rel="stylesheet" href="/static/css/homepage.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="/static/js/homepage.js"></script>
 </head>
 <body>
@@ -83,13 +84,13 @@
             <form class="articlesFilterSameLine">
 
               <input type="text" name='keyword' class="searchKeyword_input" placeholder="輸入文章關鍵字查詢">
-              <button class="searchKeyword_button" onclick="submitSelection()"><img src="/static/photo_icon/search.png" alt="iconSearch" style="width: 30px; height: 30px;"></button>
-
+              
               <div class="optionAlign">
-                <label for="categories" class="optionTitle">進階篩選</label>
+                <div class="optionTitle">進階篩選</div>
+                <img src="/static/photo_icon/down-chevron.png" class="expandFilter" alt="filter">
+                
                 <div class="filter-category"> 
-                  <img src="/static/photo_icon/down-chevron.png" class="expandFilter" alt="filter">
-
+                  
                   <div class="pop-background-color-filter">
                     <div class="pop-up-filter">
                       <div class="decorator_bar_filter"></div>
@@ -97,19 +98,19 @@
                       <div class="filter_title">篩選文章條件</div>
                       <form id="filter">
                         <fieldset class="fieldset-section">
-                          <legend class="optionTitle">文章來源</legend>
+                          <legend class="filterOption">文章來源</legend>
                           <input type="checkbox" id="resourcePTT" name="resource" value="1"> 
                           <label for="resourcePTT" class="innerLabel">PTT</label>
                           <input type="checkbox" id="resourceStorm" name="resource" value="2"> 
                           <label for="resourceStorm" class="innerLabel">風傳媒</label>
                           <input type="checkbox" id="resourceUdn" name="resource" value="3">
-                          <label for="resourceUdn" class="innerLabel">聯合新聞網</label>
+                          <label for="resourceUdn" class="innerLabel" >聯合新聞網</label>
                           <input type="checkbox" id="resourceBusinesstoday" name="resource" value="4">
                           <label for="resourceBusinesstoday" class="innerLabel">今周刊</label>
                         </fieldset>
                         <br>
                         <fieldset class="fieldset-section">
-                          <legend class="optionTitle">文章類別</legend>
+                          <legend class="filterOption">文章類別</legend>
                           <!-- <label for="categories" class="optionTitle">文章類別：</label> -->
                           <div class="AppendCategory"></div>
                           <!-- 
@@ -120,8 +121,7 @@
                         </fieldset>
                         <br>
                         <fieldset class="fieldset-section">
-                          <legend class="optionTitle">文章時間</legend>
-                          <!-- <label for="dates" class="optionTitle"></label> -->
+                          <legend class="filterOption">文章時間</legend>
                           <input type="radio" id="date1" name="date" value="1"> 
                           <label for="date1" class="innerLabel">昨日</label>
                           <input type="radio" id="date3" name="date" value="3">
@@ -139,9 +139,13 @@
                 
               </div>
               
+              <button class="searchKeyword_button" onclick="submitSelection()"><img src="/static/photo_icon/search.png" alt="iconSearch" style="width: 30px; height: 30px;"></button>
+
             </form>
           </div>
         </div>
+
+        <div class="overallCategDistrib"></div>
 
       </div>
     </div>
@@ -176,22 +180,25 @@
 
       <!-- original article tags structure
       <div class="picture_word" id="">
+        
         <div class="picture">
           <img src="wc" alt="" class="content">
         </div>
+
         <div class="title"></div>
         <div class="word">
           <div class="article_forum"></div>
           <div class="article_resource"></div>
         </div>
+        
       </div>
       -->
 
       <!-- new article tags structure
       <div class="wcAndInfo" article id>
+        <div class="title"></div>
         <img src="" alt="wc" class="wc-img">
-        <div class="articleInfo">
-          <div class="title"></div>
+        <div class="oneLine">
           <div class="category"></div>
           <div class="resource"></div>
           <div class="date"></div>

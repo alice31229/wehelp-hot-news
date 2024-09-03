@@ -319,12 +319,15 @@ def generate_hot_keywords():
         # for r in final_lst:
         #     print(r)
 
+        yesterday = datetime.now() - timedelta(days=1)
+        yesterday = yesterday.strftime('%Y-%m-%d')
+
         # save to hotKeywords
         # 準備 SQL 插入語句
-        sql = "INSERT INTO hotKeywords (resource_id, keyword, hot_rank) VALUES (%s, %s, %s)"
+        sql = "INSERT INTO hotKeywords (resource_id, keyword, hot_rank, hot_kwd_date) VALUES (%s, %s, %s, %s)"
 
         # 批量插入
-        values = [(item['resource_id'], item['keyword'], item['hot_rank']) for item in final_lst]
+        values = [(item['resource_id'], item['keyword'], item['hot_rank'], yesterday) for item in final_lst]
         Cursor.executemany(sql, values)
 
         con.commit()

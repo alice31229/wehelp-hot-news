@@ -12,7 +12,7 @@ from tools import handle_wordcloud_network_overview, unify_forum_to_db, insert_i
 # 5. produce hot keywords from new articles -> generate_hot_keywords()
 
 # 2. wordcloud, network, overview
-handle_wordcloud_network_overview()
+#handle_wordcloud_network_overview()
 
 # 3. unify articles category from different resource
 unify_forum_to_db()
@@ -25,7 +25,29 @@ generate_hot_keywords()
 
 ####################################
 # unit test for each process of data pipeline
+# import pytest
 
+# # 
+# def check_web_scrape_results():
+#     '''
+#     each columns type and empty(nan, float) or not
+#     '''
+#     return True
+
+# def check_wordcloud_network_overview():
+    
+
+#     return True
+
+# def check_unified_category():
+
+
+#     return True
+
+# def check_data_before_db():
+
+
+#     return True
 
 
 ####################################

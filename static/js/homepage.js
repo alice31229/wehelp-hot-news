@@ -12,13 +12,12 @@ function eventsDomTree(events) {
         wc.src = event.wordcloud;
         wc.setAttribute('class', 'wc-img');
 
-        // article info at right part relative to wc-img
-        const articleInfo = document.createElement('div');
-        articleInfo.setAttribute('class', 'articleInfo');
-
         let title = document.createElement('div');
         title.setAttribute('class', 'title');
         title.textContent = event.title;
+
+        const oneLine = document.createElement('div');
+        oneLine.setAttribute('class', 'oneLine');
 
         let category = document.createElement('div');
         category.setAttribute('class', 'category');
@@ -28,18 +27,17 @@ function eventsDomTree(events) {
         resource.setAttribute('class', 'resource');
         resource.textContent = event.resource;
 
-        let date = document.createElement('div');
-        date.setAttribute('class', 'date');
-        date.textContent = event.date;
+        let dateTxt = document.createElement('div');
+        dateTxt.setAttribute('class', 'date');
+        dateTxt.textContent = event.date;
 
-        articleInfo.appendChild(title);
-        articleInfo.appendChild(category);
-        articleInfo.appendChild(resource);
-        articleInfo.appendChild(date);
+        oneLine.appendChild(category);
+        oneLine.appendChild(resource);
+        oneLine.appendChild(dateTxt);
 
-        // append img and article info under wcAndInfo
+        wcAndInfo.appendChild(title);
         wcAndInfo.appendChild(wc);
-        wcAndInfo.appendChild(articleInfo);
+        wcAndInfo.appendChild(oneLine);
 
         more_articles.appendChild(wcAndInfo);
     });
@@ -591,6 +589,44 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
     })
+
+    // advanced filter
+    let showFilter = document.querySelector('.expandFilter');
+    let FilterPopUp = document.querySelector('.pop-background-color-filter');
+    let closeFilter = document.querySelector('.close-pop-filter');
+    showFilter.addEventListener('click', () => {
+        FilterPopUp.style.display = 'flex';
+        AddArticleCategory();
+
+    })
+
+    closeFilter.addEventListener('click', () => {
+        let deleteCategory = document.querySelector('.AppendCategory');
+
+        // 獲取所有子節點
+        let childNodes = deleteCategory.childNodes;
+
+        // 遍歷並移除每個子節點
+        for (let i = childNodes.length - 1; i >= 0; i--) {
+        deleteCategory.removeChild(childNodes[i]);
+        }
+
+        let checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        // 遍歷並修改
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+
+        let radios = document.querySelectorAll('input[type="radio"]');
+        // 遍歷並修改
+        radios.forEach(radio => {
+            radio.checked = false;
+        });
+
+        FilterPopUp.style.display = 'none';
+        clearInputValue();
+    })
+    
 
     // clear any popup input value
     function clearInputValue() {

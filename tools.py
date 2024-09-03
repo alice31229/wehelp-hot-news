@@ -36,7 +36,7 @@ def get_12_articles_by_filter(filter_requirements, page=0):
 
 	# 用來完全比對文章類別名稱、或模糊比對文章名稱或文章內文的關鍵字，沒有給定則不做篩選
     sql = '''SELECT * FROM 
-            (SELECT c.category, a.title, a.wordcloud, r.resource, a.id 
+            (SELECT c.category, a.title, a.wordcloud, r.resource, DATE(a.date) AS date, a.id 
             FROM articles AS a
             LEFT JOIN resource AS r ON a.resource_id = r.id
             LEFT JOIN category AS c ON a.category_id = c.id
@@ -109,7 +109,7 @@ def get_12_articles_by_page(page):
 		page_size = 24 # judge the nextPage
 		start = page * 12
 
-		sql_12 = '''SELECT c.category, a.title, a.wordcloud, r.resource, a.id 
+		sql_12 = '''SELECT c.category, a.title, a.wordcloud, r.resource, DATE(a.date) AS date, a.id 
                     FROM articles AS a 
                     LEFT JOIN resource AS r ON a.resource_id = r.id 
                     LEFT JOIN category AS c ON a.resource_id = c.id 
