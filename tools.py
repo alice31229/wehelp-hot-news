@@ -43,7 +43,7 @@ def get_12_articles_by_filter(filter_requirements, page=0):
             WHERE (a.title LIKE %s OR a.content LIKE %s)
             AND (c.category IN (%s) OR %s IS NULL) 
             AND (r.resource IN (%s) OR %s IS NULL)
-            AND (a.date >= %s OR %s IS NULL)) AS subquery
+            AND (DATE(a.date) >= CURDATE() - INTERVAL %s DAY OR %s IS NULL)) AS subquery
             ORDER BY date DESC
             LIMIT %s, %s;'''
 
@@ -60,7 +60,7 @@ def get_12_articles_by_filter(filter_requirements, page=0):
     resource_lst = filter_requirements.resource
     resource_str = ','.join(['%s'] * len(resource_lst))
 
-    date = filter_requirements.date if filter_requirements.date is not None else ''
+    date = filter_requirements.date[0] if filter_requirements.date is not None else ''
     
     keyword = (search_param, search_param, category_str, category_str, resource_str, resource_str, date, date, start, page_size)
 

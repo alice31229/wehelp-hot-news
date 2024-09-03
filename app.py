@@ -130,7 +130,11 @@ async def get_hot_keywords():
         hot_keywords_result = Cursor.fetchall()
 
         for hk in hot_keywords_result:
-            hot_keywords.append(hk['keyword'])
+            # 把數字篩掉
+            if hk['keyword'].isdigit():
+                pass
+            else:
+                hot_keywords.append(hk['keyword'])
 
         forums_json = {'data':hot_keywords}
 
@@ -243,27 +247,29 @@ async def get_forum_info():
 async def get_resource_category_info():
 
     from tools import db
-    
-    forums = []
 
     try:
-        sql = '''SELECT r.resource, c.category, COUNT(*) AS category_cnt
+        # sql = '''SELECT r.resource, c.category, COUNT(*) AS category_cnt
+        #          FROM articles AS a
+        #          LEFT JOIN category AS c
+        #          ON a.category_id = c.id
+        #          LEFT JOIN resource AS r
+        #          ON a.resource_id = r.id
+        #          where DATE(date) = CURDATE() - INTERVAL 1 DAY
+        #          GROUP BY r.resource, c.category;'''
+        sql = '''SELECT c.category, COUNT(*) AS category_cnt
                  FROM articles AS a
                  LEFT JOIN category AS c
                  ON a.category_id = c.id
-                 LEFT JOIN resource AS r
-                 ON a.resource_id = r.id
                  where DATE(date) = CURDATE() - INTERVAL 1 DAY
-                 GROUP BY r.resource, c.category;'''
+                 GROUP BY c.category
+                 ORDER BY 2 DESC;'''
         con = db.get_connection()
         Cursor = con.cursor(dictionary=True)
         Cursor.execute(sql)
-        sorted_forums = Cursor.fetchall()
+        resource_category_cnt = Cursor.fetchall()
 
-        for sm in sorted_forums:
-            forums.append(sm['category'])
-
-        forums_json = {'data':forums}
+        forums_json = {'data':resource_category_cnt}
 
         return forums_json
 

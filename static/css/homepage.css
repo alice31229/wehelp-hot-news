@@ -303,11 +303,12 @@ body {
     margin: 0 auto;
     position: relative; 
     z-index: 20;
-    
+
+    /* separate search bar and category chart */
     display: flex;
     justify-content: space-between;
+    flex-flow: row wrap;
 }
-
 
 .vertical {
     display: flex;
@@ -412,6 +413,51 @@ input[type='radio'], input[type='checkbox'] {
 
 /****************************************/
 
+.chart-container {
+    width: 150px;
+    height: 100%;
+    margin-top: 100px;
+  }
+  
+  .overallCategDistrib {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin: 0 auto;
+    width: fit-content;
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.3);
+    border-radius: 20px;
+    padding: 8px 32px;
+    color: #023047;
+    transition: all 400ms ease;
+    height: 300px;
+    margin-top: 10px;
+    background-color: antiquewhite;
+  }
+  
+  .overallCategDistrib:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 16px -7px rgba(0, 0, 0, 0.3);
+  }
+  
+  .overallCategDistrib .chart-detail ul {
+    list-style: none;
+    padding: 0;
+    height: 100%;
+  }
+  
+  .overallCategDistrib .chart-detail ul li {
+    font-size: 16px;
+    margin: 12px 0;
+  }
+  
+  .overallCategDistrib .chart-detail .percentage {
+    font-weight: 700;
+    color: #bd5c0c;
+  }
+
+/****************************************/
+
 .click-title {
     max-width: 1200px;
     display: flex;
@@ -489,12 +535,15 @@ input[type='radio'], input[type='checkbox'] {
 }
 
 .wcAndInfo {
+    width: 80%;
     margin: 20px 20px 20px 20px;
     cursor: pointer;
+    height: auto;
 }
 
 .wcAndInfo:hover {
-    opacity: 0.7;
+    opacity: 0.5;
+    cursor: pointer;
 }
 
 .copyRight {
@@ -542,11 +591,6 @@ input[type='radio'], input[type='checkbox'] {
         margin-bottom: 105px;
     }
 
-    .wcAndInfo {
-        width: 80%;
-        height: auto;
-    }
-
     .wc-img {
         flex: none;
         width: 100%;
@@ -559,11 +603,6 @@ input[type='radio'], input[type='checkbox'] {
         object-fit: cover; 
         padding-left: 10px;
         padding-right: 10px;
-    }
-    
-    .wcAndInfo:hover {
-        opacity: 0.5;
-        cursor: pointer;
     }
     
     .title {
@@ -590,13 +629,28 @@ input[type='radio'], input[type='checkbox'] {
 
 }
 
+@media(max-width: 815px){
+    .back_img {
+        height: 600px;
+    }
+
+    .click-title {
+        margin-top: 300px;
+    }
+
+    #reduce-distance {
+        margin-top: 20px;
+    }
+
+}
+
 @media(max-width: 1200px) and (min-width: 601px){
 
     .home {
         padding-left: 5px;
     }
 
-    .forum_sorted, .load_articles, .click-title, .hotKeywords_sorted{
+    .forum_sorted, .click-title, .hotKeywords_sorted{
         max-width: 95%;
     }
 
@@ -607,6 +661,7 @@ input[type='radio'], input[type='checkbox'] {
         margin: 0 auto;
         margin-top: 15px;
         margin-bottom: 105px;
+        width: 75%;
     }
     
     .title {
@@ -622,6 +677,10 @@ input[type='radio'], input[type='checkbox'] {
         bottom: 0; 
         width: 100%; 
         z-index: 1; 
+    }
+
+    .wc-img {
+        width: 100%;
     }
 
     .oneLine {
@@ -671,11 +730,6 @@ input[type='radio'], input[type='checkbox'] {
     
     .load_articles .picture:last-child {
         margin-right: auto;
-    }
-
-    .wcAndInfo {
-        width: 80%;
-        height: auto;
     }
 
     .wc-img {

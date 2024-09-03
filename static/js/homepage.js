@@ -97,42 +97,100 @@ async function AddArticleCategory() {
 
 // provide overall and each resource category distribution
 async function ProvideCategoryDist() {
+    
+    try {
+        const postResponse = await fetch('/api/resource-category-distribution');
+        const postData = await postResponse.text();
+        const category_result = JSON.parse(postData);
+        let infos = category_result.data;
 
+        console.log(infos);
+
+        let myChart = document.querySelector('.CategoryDistribution');
+        const ul = document.querySelector(".overallCategDistrib .chart-detail ul");
+
+        infos.slice(0,7).forEach(info => {
+            let li = document.createElement("li");
+            li.setAttribute('class', 'percentage');
+            li.textContent = `${info['category']} ${info['category_cnt']} 篇`;
+            //li.innerHTML = `${l}: <span class='percentage'>${infos.category_cnt[i]}</span>`;
+            ul.appendChild(li);
+        });
+
+        categoryArray = [];
+        categoryCntArray = [];
+
+        infos.forEach(info => {
+            categoryArray.push(info['category']);
+            categoryCntArray.push(info['category_cnt']);
+        });
+
+        new Chart(myChart, {
+            type: "doughnut",
+            data: {
+              labels: categoryArray,
+              datasets: [
+                {
+                  label: "文章數",
+                  data: categoryCntArray,
+                },
+              ],
+            },
+            options: {
+                borderWidth: 3,
+                borderRadius: 2,
+                hoverBorderWidth: 0,
+                plugins: {
+                    legend: {
+                        display: false,
+                    },
+                    title: {
+                        display: true,
+                        text: '文章類別分佈',
+                        font: {
+                            size: 20
+                        },
+                        position: 'top',
+                        align: 'center'
+                    }
+                },
+            },
+        });
+
+        
+
+    } catch (e) {
+        console.error('Error fetching Category Distribution:', e);
+    }
 } 
 
-function submitSelection() {
+async function submitSelection() {
 
-    const keyword = document.querySelector('.searchKeyword_input').value;
+    //const keyword = document.querySelector('.searchKeyword_input').value;
     const resources = Array.from(document.querySelectorAll('input[name="resource"]:checked')).map(input => input.value);
     const categories = Array.from(document.querySelectorAll('input[name="category"]:checked')).map(input => input.value);
-    const dates = Array.from(document.querySelectorAll('input[name="date"]:checked')).map(input => input.value);
+    const dates = Array.from(document.querySelectorAll('input[name="date"]:checked')).map(input => Number(input.value));
+
+    //console.log(keyword);
+    console.log(resources);
+    console.log(categories);
+    console.log(dates);
 
     // resources -> ptt storm businesstoday udn
     // dates -> 當日 三天內 一週內
 
-    const data = {
-        keyword,
-        resources,
-        categories,
-        dates
+
+    const filterSelectedData = {
+        'resources': resources,
+        'categories': categories,
+        'dates': dates
     };
 
-    fetch('/api/filter-articles-search', {
-        method: 'POST',
-        headers: {
-        'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(data => {
-        
-        eventsDomTree(data);
-        //console.log(data);
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
+    // store in localStorage
+    const filterDataString = JSON.stringify(filterSelectedData);
+
+    // 儲存到 localStorage，使用 'filterData' 作為鍵
+    localStorage.setItem('filterData', filterDataString);
 
 }
 
@@ -265,6 +323,7 @@ document.addEventListener("DOMContentLoaded", function () {
     addForum();
     AppendHotKwd();
     addArticle();
+    ProvideCategoryDist();
     checkLogin();
 
     // sign-in pop up
@@ -593,6 +652,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // advanced filter
     let showFilter = document.querySelector('.expandFilter');
     let FilterPopUp = document.querySelector('.pop-background-color-filter');
+    let filterSubmit = document.querySelector('.filterBtn');
     let closeFilter = document.querySelector('.close-pop-filter');
     showFilter.addEventListener('click', () => {
         FilterPopUp.style.display = 'flex';
@@ -600,7 +660,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     })
 
+    filterSubmit.addEventListener('click', (event) => {
+        event.preventDefault();
+        submitSelection();
+        FilterPopUp.style.display = 'none';
+    })
+
     closeFilter.addEventListener('click', () => {
+
         let deleteCategory = document.querySelector('.AppendCategory');
 
         // 獲取所有子節點
@@ -682,8 +749,29 @@ document.addEventListener("DOMContentLoaded", function () {
         let originalArticles = document.querySelector('.load_articles');
         originalArticles.innerHTML = '';
 
-        let kwd = document.querySelector('.searchKeyword_input');
-        addKwdArticle(0, kwd.value);
+        let kwd = document.querySelector('.searchKeyword_input').value;
+        //addKwdArticle(0, kwd.value);
+
+        let filterSelectedData = JSON.parse(localStorage.getItem("filterData"));
+        filterSelectedData['keyword'] = kwd;
+
+        fetch('/api/filter-articles-search', {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(filterSelectedData)
+        })
+        .then(response => response.json())
+        .then(filterArticlesData => {
+            
+            localStorage.removeItem("filterData");
+            eventsDomTree(filterArticlesData);
+            //console.log(data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
 
         const keywordObserverCallback = entries => {
             entries.forEach(entry => {
@@ -850,16 +938,17 @@ document.addEventListener("DOMContentLoaded", function () {
     articles.addEventListener('click', async (event) => {
         // Check if the clicked element or its parent has the 'picture_word' class
         let targetElement = event.target;
-        while (targetElement && !targetElement.classList.contains('picture_word')) {
+        while (targetElement && !targetElement.classList.contains('wcAndInfo')) {
             targetElement = targetElement.parentElement;
         }
 
-        if (targetElement && targetElement.classList.contains('picture_word')) {
+        if (targetElement && targetElement.classList.contains('wcAndInfo')) {
             let articleID = targetElement.id;
             console.log(`Navigating to article/${articleID}`); // For debugging
 
             // Ensure attrID is valid before navigating
             if (articleID) {
+                localStorage.removeItem("filterData");
                 window.location.assign(`article/${articleID}`);
             }
             return;
@@ -874,6 +963,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let footer = document.querySelector('.copyRight');
         footer.style.display = 'none';
         footer.style.position = '';
+        localStorage.removeItem("filterData");
         window.location.href = '/';
     });
 
@@ -904,7 +994,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 signIn.style.display = 'flex';
 
             } else { // log in
-
+                localStorage.removeItem("filterData");
                 window.location.assign('/member');
 
             }

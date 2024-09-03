@@ -113,16 +113,12 @@
                           <legend class="filterOption">文章類別</legend>
                           <!-- <label for="categories" class="optionTitle">文章類別：</label> -->
                           <div class="AppendCategory"></div>
-                          <!-- 
-                          <input type="checkbox" id="categories" name="category" value="id"> 生活
-                          <input type="checkbox" id="categories" name="category" value=""> 財經
-                          <input type="checkbox" id="categories" name="category" value=""> 體育 
-                          -->
+                          
                         </fieldset>
                         <br>
                         <fieldset class="fieldset-section">
                           <legend class="filterOption">文章時間</legend>
-                          <input type="radio" id="date1" name="date" value="1"> 
+                          <input type="radio" checked="checked" id="date1" name="date" value="1"> 
                           <label for="date1" class="innerLabel">昨日</label>
                           <input type="radio" id="date3" name="date" value="3">
                           <label for="date3" class="innerLabel">三日內</label>
@@ -145,7 +141,26 @@
           </div>
         </div>
 
-        <div class="overallCategDistrib"></div>
+        <!-- <div class="programming-stats">
+          <div class="chart-container">
+            <canvas class="my-chart"></canvas>
+          </div>
+    
+          <div class="details">
+            <ul></ul>
+          </div>
+        </div> -->
+
+        <div class="overallCategDistrib">
+          <div class="chart-container">
+            <canvas class="CategoryDistribution"></canvas>
+          </div>
+
+          <div class="chart-detail">
+            <ul class="category-list"></ul>
+          </div>
+
+        </div>
 
       </div>
     </div>
@@ -161,7 +176,7 @@
     
     </div>
     
-    <div class="click-title">熱門類別</div>
+    <div class="click-title" id="reduce-distance">熱門類別</div>
     <div class="forum_sorted">
       
       <img src="/static/photo_icon/left_Default.png" alt="left-arrow" class="left-arrow" id="category-left">
