@@ -417,9 +417,9 @@ input[type='radio'], input[type='checkbox'] {
     width: 150px;
     height: 100%;
     margin-top: 100px;
-  }
-  
-  .overallCategDistrib {
+}
+
+.overallCategDistrib {
     display: flex;
     align-items: center;
     gap: 24px;
@@ -433,28 +433,28 @@ input[type='radio'], input[type='checkbox'] {
     height: 300px;
     margin-top: 10px;
     background-color: antiquewhite;
-  }
-  
-  .overallCategDistrib:hover {
+}
+
+.overallCategDistrib:hover {
     transform: scale(1.02);
     box-shadow: 0 4px 16px -7px rgba(0, 0, 0, 0.3);
-  }
-  
-  .overallCategDistrib .chart-detail ul {
+}
+
+.overallCategDistrib .chart-detail ul {
     list-style: none;
     padding: 0;
     height: 100%;
-  }
-  
-  .overallCategDistrib .chart-detail ul li {
+}
+
+.overallCategDistrib .chart-detail ul li {
     font-size: 16px;
     margin: 12px 0;
-  }
-  
-  .overallCategDistrib .chart-detail .percentage {
+}
+
+.overallCategDistrib .chart-detail .percentage {
     font-weight: 700;
     color: #bd5c0c;
-  }
+}
 
 /****************************************/
 

@@ -60,29 +60,30 @@
 
     <div class="imgs_article">
         <div class="thousand_twoHundred">
+
+            <div class="title"></div>
+
             <div class="banner_container">
                 
-            <div class="img_box"> <!--圖片元素-->
-                <!-- <img src="" alt="" class="article_imgs"> -->
-            </div>
-            <div class="dot_box"> <!--選擇按鈕 根據景點圖片數量 新增多少點點-->
-                <!-- <img src="" alt="" class="dot"> -->
-            </div>
+                <div class="img_box"> <!--圖片元素-->
+                    <!-- <img src="" alt="" class="article_imgs"> -->
+                </div>
+                <div class="dot_box"> <!--選擇按鈕 根據景點圖片數量 新增多少點點-->
+                    <!-- <img src="" alt="" class="dot"> -->
+                </div>
 
-            <img src="/static/photo_icon/left arrow.png" class="arrow_btn_left" onclick="minusSlides(counter)" alt="arrow_btn_left"> <!--左切換按鈕-->
-            <img src="/static/photo_icon/right arrow.png" class="arrow_btn_right" onclick="plusSlides(counter)" alt="arrow_btn_right"> <!--右切換按鈕-->
+                <img src="/static/photo_icon/left arrow.png" class="arrow_btn_left" onclick="minusSlides(counter)" alt="arrow_btn_left"> <!--左切換按鈕-->
+                <img src="/static/photo_icon/right arrow.png" class="arrow_btn_right" onclick="plusSlides(counter)" alt="arrow_btn_right"> <!--右切換按鈕-->
                 
-            </div>
-            <div class="article_info">
-                <div class="title"></div>
-                <div class="forum_reference">
-                    <div class="category_at_forum"></div>
-                    <a class="article_link" href="">文章出處<img src="/static/photo_icon/article_link.png" class="link-icon" alt="articleLink"></a>
             </div>
             
             <div class="summary">
-                <div class="common_style">輕瞥文章重點</div>
-                <div class="no_bold_style">以此重點決定是否深讀，為您提升掌握時事的效率</div>
+                <div class="summary_title_style">文章細項</div>
+
+                <div class="detail">
+                    <div class="common_style">文章類別：</div> 
+                    <div class="category"></div>
+                </div>
 
                 <div class="detail">
                     <div class="common_style">文章來源：</div> 
@@ -94,8 +95,12 @@
                     <div class="date"></div>
                 </div>
                 
-                <button class="start_collect">喜歡嘛？收藏起來吧～</button>
-            </div>
+                <button class="start_collect">收藏</button>
+
+                <div class="forum_reference">
+                    <a class="article_link" href="">文章出處<img src="/static/photo_icon/article_link.png" class="link-icon" alt="articleLink"></a>
+                </div>
+                
             </div>
         </div>
     </div>

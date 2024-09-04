@@ -71,7 +71,7 @@ async def get_target_article_info(id: int):
         con = db.get_connection()
         Cursor = con.cursor(dictionary=True)
 
-        search_article = '''SELECT a.title, c.category, a.overview, a.content, r.resource, a.date, a.url, a.wordcloud, a.network
+        search_article = '''SELECT a.title, c.category, a.overview, a.content, r.resource, DATE(a.date) AS date, a.url, a.wordcloud, a.network
                             FROM articles AS a
                             INNER JOIN category AS c
                             ON a.category_id = c.id
