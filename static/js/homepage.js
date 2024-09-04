@@ -104,8 +104,6 @@ async function ProvideCategoryDist() {
         const category_result = JSON.parse(postData);
         let infos = category_result.data;
 
-        console.log(infos);
-
         let myChart = document.querySelector('.CategoryDistribution');
         const ul = document.querySelector(".overallCategDistrib .chart-detail ul");
 
@@ -152,9 +150,23 @@ async function ProvideCategoryDist() {
                         },
                         position: 'top',
                         align: 'center'
+                    },
+                    datalabels: {
+                        display: true,
+                        formatter: (value, ctx) => {
+                            let dataset = ctx.dataset;
+                            let label = ctx.chart.data.labels[ctx.dataIndex];
+                            let sum = dataset.data.reduce((a, b) => a + b, 0);
+                            let percentage = new Intl.NumberFormat('zh-TW', { style: 'percent', minimumFractionDigits: 2 }).format(value / sum);
+                            return `${label}: ${percentage}`;
+                        },
+                        color: '#fff',
+                        font: {
+                            size: 14
+                        }
                     }
-                },
-            },
+                }
+            }
         });
 
         
@@ -167,24 +179,29 @@ async function ProvideCategoryDist() {
 async function submitSelection() {
 
     //const keyword = document.querySelector('.searchKeyword_input').value;
-    const resources = Array.from(document.querySelectorAll('input[name="resource"]:checked')).map(input => input.value);
-    const categories = Array.from(document.querySelectorAll('input[name="category"]:checked')).map(input => input.value);
-    const dates = Array.from(document.querySelectorAll('input[name="date"]:checked')).map(input => Number(input.value));
+    // const resources = Array.from(document.querySelectorAll('input[name="resource"]:checked')).map(input => parseInt(input.value));
+    // const categories = Array.from(document.querySelectorAll('input[name="category"]:checked')).map(input => parseInt(input.value));
+    // const dates = Array.from(document.querySelectorAll('input[name="date"]:checked')).map(input => parseInt(input.value));
 
-    //console.log(keyword);
-    console.log(resources);
-    console.log(categories);
-    console.log(dates);
 
-    // resources -> ptt storm businesstoday udn
-    // dates -> 當日 三天內 一週內
+    // const filterSelectedData = {
+    //     'resources': resources,
+    //     'categories': categories,
+    //     'dates': dates
+    // };
 
+    const resources = Array.from(document.querySelectorAll('input[name="resource"]:checked')).map(input => parseInt(input.value)).filter(Boolean);
+    const categories = Array.from(document.querySelectorAll('input[name="category"]:checked')).map(input => parseInt(input.value)).filter(Boolean);
+    const dates = Array.from(document.querySelectorAll('input[name="date"]:checked')).map(input => parseInt(input.value)).filter(Boolean);
 
     const filterSelectedData = {
-        'resources': resources,
-        'categories': categories,
-        'dates': dates
+        resources: resources.length > 0 ? resources : [],
+        categories: categories.length > 0 ? categories : [],
+        dates: dates
     };
+
+    console.log(filterSelectedData);
+
 
     // store in localStorage
     const filterDataString = JSON.stringify(filterSelectedData);
@@ -192,6 +209,33 @@ async function submitSelection() {
     // 儲存到 localStorage，使用 'filterData' 作為鍵
     localStorage.setItem('filterData', filterDataString);
 
+    let filterResource = document.querySelector('.resource-cnt');
+    let filterCategory = document.querySelector('.category-cnt');
+    let filterDate = document.querySelector('.date-cnt');
+    if (filterSelectedData['resources'].length != 0) {
+        filterResource.textContent = filterSelectedData['resources'].length;
+        filterResource.style.color = 'orange';
+    }
+    if (filterSelectedData['categories'].length != 0) {
+        filterCategory.textContent = filterSelectedData['categories'].length;
+        filterCategory.style.color = 'orange';
+    }
+    filterDate.textContent = filterSelectedData['dates'][0];
+    filterDate.style.color = 'orange';
+    
+
+}
+
+function filterReset() {
+    let filterResource = document.querySelector('.resource-cnt');
+    filterResource.textContent = '0';
+    filterResource.style.color = '#bd5c0c';
+    let filterCategory = document.querySelector('.category-cnt');
+    filterCategory.textContent = '0';
+    filterCategory.style.color = '#bd5c0c';
+    let filterDate = document.querySelector('.date-cnt');
+    filterDate.textContent = '';
+    filterDate.style.color = '#bd5c0c';
 }
 
 let nextPage = 0;
@@ -234,7 +278,7 @@ async function addArticle(page = 0) {
 }
 
 // change to filter type
-async function addKwdArticle(page = 0, keyword) {
+async function addKwdArticle(page = 0, filterCriteria) {
     if (isLoading) return; // Prevent multiple fetch requests
     isLoading = true;
 
@@ -248,7 +292,8 @@ async function addKwdArticle(page = 0, keyword) {
     loading.style.display = 'block';
 
     try {
-        const postResponse = await fetch(`/api/articles?page=${page}&keyword=${keyword}`);
+        //const postResponse = await fetch(`/api/articles?page=${page}&keyword=${keyword}`);
+        const postResponse = await fetch('/api/filter-articles-search');
         const postData = await postResponse.text();
         const article_result = JSON.parse(postData);
         let infos = article_result.data;
@@ -302,13 +347,34 @@ async function addForum() {
     }
 }
 
+function ClearFilterRecords() {
+    let deleteCategory = document.querySelector('.AppendCategory');
+
+        // 獲取所有子節點
+        let childNodes = deleteCategory.childNodes;
+
+        // 遍歷並移除每個子節點
+        for (let i = childNodes.length - 1; i >= 0; i--) {
+        deleteCategory.removeChild(childNodes[i]);
+        }
+
+        let checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        // 遍歷並修改
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+
+        let radios = document.querySelectorAll('input[type="radio"]');
+        // 遍歷並修改
+        radios.forEach(radio => {
+            radio.checked = false;
+        });
+}
+
 // loading before the data fetch back from db and backend
 window.addEventListener("load", () => {
     const loader = document.querySelector(".loader");
     loader.classList.add('loader--hidden');
-    // setTimeout(() => {
-    //     loader.classList.add('loader--hidden');
-    // }, 1500);
 });
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -657,38 +723,18 @@ document.addEventListener("DOMContentLoaded", function () {
     showFilter.addEventListener('click', () => {
         FilterPopUp.style.display = 'flex';
         AddArticleCategory();
-
     })
 
     filterSubmit.addEventListener('click', (event) => {
         event.preventDefault();
         submitSelection();
+        ClearFilterRecords();
         FilterPopUp.style.display = 'none';
     })
 
     closeFilter.addEventListener('click', () => {
 
-        let deleteCategory = document.querySelector('.AppendCategory');
-
-        // 獲取所有子節點
-        let childNodes = deleteCategory.childNodes;
-
-        // 遍歷並移除每個子節點
-        for (let i = childNodes.length - 1; i >= 0; i--) {
-        deleteCategory.removeChild(childNodes[i]);
-        }
-
-        let checkboxes = document.querySelectorAll('input[type="checkbox"]');
-        // 遍歷並修改
-        checkboxes.forEach(checkbox => {
-            checkbox.checked = false;
-        });
-
-        let radios = document.querySelectorAll('input[type="radio"]');
-        // 遍歷並修改
-        radios.forEach(radio => {
-            radio.checked = false;
-        });
+        ClearFilterRecords();
 
         FilterPopUp.style.display = 'none';
         clearInputValue();
@@ -753,12 +799,15 @@ document.addEventListener("DOMContentLoaded", function () {
         //addKwdArticle(0, kwd.value);
 
         let filterSelectedData = JSON.parse(localStorage.getItem("filterData"));
+        console.log(filterSelectedData);
         filterSelectedData['keyword'] = kwd;
+
+        console.log(filterSelectedData);
 
         fetch('/api/filter-articles-search', {
             method: 'POST',
             headers: {
-            'Content-Type': 'application/json'
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(filterSelectedData)
         })

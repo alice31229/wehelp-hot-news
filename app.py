@@ -8,6 +8,7 @@ from fastapi.staticfiles import StaticFiles
 
 
 import jwt
+import redis
 import bcrypt
 import mysql.connector
 #from typing import Optional
@@ -24,8 +25,10 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 dotenv_path = os.path.join(os.path.dirname(__file__), './config/.env')
 load_dotenv(dotenv_path)
 
-# trending-news
+# 連接 Redis
+redis_client = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
 
+# trending-news
 @app.get("/", include_in_schema=False)
 async def index(request: Request):
 	return FileResponse("./static/homepage.html", media_type="text/html")
@@ -45,8 +48,6 @@ async def member(request: Request):
 async def handle_articles_page(page: int = Query(0)):
 
     from tools import get_12_articles_by_page
-
-	#print(page)
 
     # call only get_12_attractions_by_page
     status_json = get_12_articles_by_page(page)
@@ -180,28 +181,28 @@ async def get_all_category():
 
 
 # filter articles requirements query
-@app.get("/api/filter-articles-search")
-async def get_demanded_articles(articles_requirements: articles_requirements):
+@app.post("/api/filter-articles-search")
+async def get_demanded_articles(articles_requirements: articles_requirements, page: int = Query(0)):
 
     from tools import get_12_articles_by_filter
+
+    print(articles_requirements)
 
     input_requirement = {'keyword': articles_requirements.keyword,
                          'resource': articles_requirements.resources,
                          'category': articles_requirements.categories,
                          'date': articles_requirements.dates}
     
-    result = get_12_articles_by_filter(input_requirement)
+    result = get_12_articles_by_filter(input_requirement, page)
 
-    if result[0]:
-         
-        result_json = {'data': result[1]}
-        
-        return result_json
+    if result['errow']:
+
+        return {'error': True,
+                'message': '文章擷取問題'}
 
     else:
          
-        return {'error': True,
-                'message': '文章擷取問題'}
+        return result
     
 
 # homepage mrt click keyword search api router

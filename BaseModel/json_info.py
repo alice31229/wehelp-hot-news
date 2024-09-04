@@ -27,6 +27,6 @@ class collect_info(BaseModel):
 	
 class articles_requirements(BaseModel):
 	keyword: str
-	resources: list[str] = []
-	categories: list[str] = []
-	dates: list[str] = []
+	resources: list[int] = []
+	categories: list[int] = []
+	dates: list[int] = []
