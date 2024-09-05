@@ -182,17 +182,51 @@ async def get_all_category():
 
 # filter articles requirements query
 @app.post("/api/filter-articles-search")
-async def get_demanded_articles(articles_requirements: articles_requirements, page: int = Query(0)):
+#async def get_demanded_articles(articles_requirements: articles_requirements, page: int = Query(0)):
+async def get_demanded_articles(articles_requirements: articles_requirements):
 
     from tools import get_12_articles_by_filter
 
-    print(articles_requirements)
+    print(articles_requirements, type(articles_requirements))
+    articles_requirements = articles_requirements.dict()
+    print(articles_requirements, type(articles_requirements)) #, articles_requirements.categories)
+    print(articles_requirements.keys(), articles_requirements.values())
 
-    input_requirement = {'keyword': articles_requirements.keyword,
-                         'resource': articles_requirements.resources,
-                         'category': articles_requirements.categories,
-                         'date': articles_requirements.dates}
+    input_requirement = {}
+    page = ''
+
+    for k,v in articles_requirements.items():
+        if k == 'keyword':
+            input_requirement[k] = v
+        if k == 'page':
+            input_requirement[k] = v
+        if k == 'resources':
+            input_requirement['resource'] = v
+        if k == 'categories':
+            input_requirement['category'] = v
+        if k == 'dates':
+            input_requirement['date'] = v 
+        if k == 'page':
+            page = v
+
+    print('arrange requirement:', input_requirement)
+
+    # input_requirement = {'keyword': articles_requirements.values()[0],
+    #                      'resource': articles_requirements.values()[2],
+    #                      'category': articles_requirements.values()[3],
+    #                      'date': articles_requirements.values()[4]}
     
+    # page = int(articles_requirements.values()[1])
+
+    # input_requirement = {
+    #     'keyword': articles_requirements["'keyword'"],
+    #     'resource': articles_requirements["'resources'"],
+    #     'category': articles_requirements["'categories'"],
+    #     'date': articles_requirements["'dates'"]
+    # }
+    
+    # page = int(articles_requirements["'page'"])
+
     result = get_12_articles_by_filter(input_requirement, page)
 
     if result['errow']:

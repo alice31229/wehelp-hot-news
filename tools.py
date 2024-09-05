@@ -48,19 +48,19 @@ def get_12_articles_by_filter(filter_requirements, page=0):
             LIMIT %s, %s;'''
 
     # Escaping wildcards in the parameter
-    kw = filter_requirements.keyword
+    kw = filter_requirements['keyword']
     if kw != '':
         search_param = f"%{kw}%"
     else:
         search_param = ''
     
-    category_lst = filter_requirements.category
+    category_lst = filter_requirements['category']
     category_str = ','.join(['%s'] * len(category_lst))
 
-    resource_lst = filter_requirements.resource
+    resource_lst = filter_requirements['resource']
     resource_str = ','.join(['%s'] * len(resource_lst))
 
-    date = filter_requirements.date[0] if filter_requirements.date is not None else ''
+    date = filter_requirements['date'][0] if filter_requirements['date'] is not None else ''
     
     keyword = (search_param, search_param, category_str, category_str, resource_str, resource_str, date, date, start, page_size)
 
@@ -150,6 +150,14 @@ def get_12_articles_by_page(page):
 ######################################
 # article page Cache 
 # 順序上 資料由舊到新
+
+# # 設定鍵值對
+# client.set('mykey', 'Hello, Redis!')
+
+# # 讀取鍵值對
+# value = client.get('mykey')
+# print(value.decode())  # Output: Hello, Redis!
+
 class Cache():
     def __init__(self):
           self.data = []

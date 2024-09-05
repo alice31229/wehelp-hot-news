@@ -176,6 +176,7 @@ async function ProvideCategoryDist() {
     }
 } 
 
+// fuck f
 async function submitSelection() {
 
     //const keyword = document.querySelector('.searchKeyword_input').value;
@@ -183,24 +184,21 @@ async function submitSelection() {
     // const categories = Array.from(document.querySelectorAll('input[name="category"]:checked')).map(input => parseInt(input.value));
     // const dates = Array.from(document.querySelectorAll('input[name="date"]:checked')).map(input => parseInt(input.value));
 
+    let resourcesArray = Array.from(document.querySelectorAll('input[name="resource"]:checked')).map(input => parseInt(input.value)).filter(Boolean);
+    let categoriesArray = Array.from(document.querySelectorAll('input[name="category"]:checked')).map(input => parseInt(input.value)).filter(Boolean);
+    let datesArray = Array.from(document.querySelectorAll('input[name="date"]:checked')).map(input => parseInt(input.value)).filter(Boolean);
 
-    // const filterSelectedData = {
-    //     'resources': resources,
-    //     'categories': categories,
-    //     'dates': dates
-    // };
+    // let resourcesStr = `${resources.length > 0 ? resources : []}`;
+    // let categoriesStr = `${categories.length > 0 ? categories : []}`;
+    // let datesStr = `${dates.length > 0 ? dates : []}`;
 
-    const resources = Array.from(document.querySelectorAll('input[name="resource"]:checked')).map(input => parseInt(input.value)).filter(Boolean);
-    const categories = Array.from(document.querySelectorAll('input[name="category"]:checked')).map(input => parseInt(input.value)).filter(Boolean);
-    const dates = Array.from(document.querySelectorAll('input[name="date"]:checked')).map(input => parseInt(input.value)).filter(Boolean);
 
-    const filterSelectedData = {
-        resources: resources.length > 0 ? resources : [],
-        categories: categories.length > 0 ? categories : [],
-        dates: dates
+    let filterSelectedData = {
+        resources: resourcesArray,
+        categories: categoriesArray,
+        dates: datesArray,
+        page: "0"
     };
-
-    console.log(filterSelectedData);
 
 
     // store in localStorage
@@ -208,19 +206,19 @@ async function submitSelection() {
 
     // 儲存到 localStorage，使用 'filterData' 作為鍵
     localStorage.setItem('filterData', filterDataString);
-
+    
     let filterResource = document.querySelector('.resource-cnt');
     let filterCategory = document.querySelector('.category-cnt');
     let filterDate = document.querySelector('.date-cnt');
-    if (filterSelectedData['resources'].length != 0) {
-        filterResource.textContent = filterSelectedData['resources'].length;
+    if (resourcesArray.length != 0) {
+        filterResource.textContent = resourcesArray.length;
         filterResource.style.color = 'orange';
     }
-    if (filterSelectedData['categories'].length != 0) {
-        filterCategory.textContent = filterSelectedData['categories'].length;
+    if (categoriesArray.length != 0) {
+        filterCategory.textContent = categoriesArray.length;
         filterCategory.style.color = 'orange';
     }
-    filterDate.textContent = filterSelectedData['dates'][0];
+    filterDate.textContent = datesArray[0];
     filterDate.style.color = 'orange';
     
 
@@ -292,8 +290,17 @@ async function addKwdArticle(page = 0, filterCriteria) {
     loading.style.display = 'block';
 
     try {
+        // handle filterCriteria
+        filterCriteria['page'] = page;
+
         //const postResponse = await fetch(`/api/articles?page=${page}&keyword=${keyword}`);
-        const postResponse = await fetch('/api/filter-articles-search');
+        const postResponse = await fetch('/api/filter-articles-search', {
+            method: "POST",
+            body: JSON.stringify(filterCriteria),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
         const postData = await postResponse.text();
         const article_result = JSON.parse(postData);
         let infos = article_result.data;
@@ -454,12 +461,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     document.querySelector('#signInEnroll').addEventListener("click", GoMemberPage);
                 }
-                // if (data.data!=null) {
-                //     // User is authenticated
-                //     let signInEnroll = document.querySelector('#signInEnroll');
-                //     signInEnroll.innerHTML = `<img class="signIn-enroll-icon" src="${data.data.selfie}" alt="signInIcon">會員專區`;
-                    
-                //     document.querySelector('#signInEnroll').addEventListener("click", GoMemberPage);
                 else {
                     // Token is invalid or expired
                     localStorage.removeItem("authToken");
@@ -798,18 +799,21 @@ document.addEventListener("DOMContentLoaded", function () {
         let kwd = document.querySelector('.searchKeyword_input').value;
         //addKwdArticle(0, kwd.value);
 
-        let filterSelectedData = JSON.parse(localStorage.getItem("filterData"));
-        console.log(filterSelectedData);
-        filterSelectedData['keyword'] = kwd;
+        // fuck f
+        let filterData = JSON.parse(localStorage.getItem("filterData"));
+        //let filterData = localStorage.getItem("filterData");
+        console.log(filterData);
+        filterData['keyword'] = kwd;
 
-        console.log(filterSelectedData);
+        console.log(filterData);
 
         fetch('/api/filter-articles-search', {
             method: 'POST',
+            body: JSON.stringify(filterData),
             headers: {
                 'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(filterSelectedData)
+            }
+            
         })
         .then(response => response.json())
         .then(filterArticlesData => {
