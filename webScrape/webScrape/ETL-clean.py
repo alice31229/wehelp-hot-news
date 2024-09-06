@@ -12,7 +12,7 @@ from tools import handle_wordcloud_network_overview, unify_forum_to_db, insert_i
 # 5. produce hot keywords from new articles -> generate_hot_keywords()
 
 # 2. wordcloud, network, overview
-#handle_wordcloud_network_overview()
+handle_wordcloud_network_overview()
 
 # 3. unify articles category from different resource
 unify_forum_to_db()

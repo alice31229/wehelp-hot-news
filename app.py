@@ -45,12 +45,18 @@ async def member(request: Request):
 
 # api for other web page data retrieve
 @app.get("/api/articles")
-async def handle_articles_page(page: int = Query(0)):
+async def handle_articles_page(page: int = Query(0), keyword: str = Query('')):
 
-    from tools import get_12_articles_by_page
+    from tools import get_12_articles_by_page, get_12_articles_by_keyword
 
-    # call only get_12_attractions_by_page
-    status_json = get_12_articles_by_page(page)
+    if keyword == '':
+
+        # call only get_12_attractions_by_page
+        status_json = get_12_articles_by_page(page)
+
+    else:
+
+        status_json = get_12_articles_by_keyword(page, keyword)
     
     return status_json
 
@@ -187,10 +193,10 @@ async def get_demanded_articles(articles_requirements: articles_requirements):
 
     from tools import get_12_articles_by_filter
 
-    print(articles_requirements, type(articles_requirements))
+    #print(articles_requirements, type(articles_requirements))
     articles_requirements = articles_requirements.dict()
-    print(articles_requirements, type(articles_requirements)) #, articles_requirements.categories)
-    print(articles_requirements.keys(), articles_requirements.values())
+    #print(articles_requirements, type(articles_requirements)) #, articles_requirements.categories)
+    #print(articles_requirements.keys(), articles_requirements.values())
 
     input_requirement = {}
     page = ''
@@ -198,38 +204,23 @@ async def get_demanded_articles(articles_requirements: articles_requirements):
     for k,v in articles_requirements.items():
         if k == 'keyword':
             input_requirement[k] = v
-        if k == 'page':
-            input_requirement[k] = v
-        if k == 'resources':
+        elif k == 'resources':
             input_requirement['resource'] = v
-        if k == 'categories':
+        elif k == 'categories':
             input_requirement['category'] = v
-        if k == 'dates':
+        elif k == 'dates':
             input_requirement['date'] = v 
-        if k == 'page':
+        elif k == 'page':
             page = v
 
-    print('arrange requirement:', input_requirement)
-
-    # input_requirement = {'keyword': articles_requirements.values()[0],
-    #                      'resource': articles_requirements.values()[2],
-    #                      'category': articles_requirements.values()[3],
-    #                      'date': articles_requirements.values()[4]}
-    
-    # page = int(articles_requirements.values()[1])
-
-    # input_requirement = {
-    #     'keyword': articles_requirements["'keyword'"],
-    #     'resource': articles_requirements["'resources'"],
-    #     'category': articles_requirements["'categories'"],
-    #     'date': articles_requirements["'dates'"]
-    # }
-    
-    # page = int(articles_requirements["'page'"])
+    #print('arrange requirement:', input_requirement)
 
     result = get_12_articles_by_filter(input_requirement, page)
+    print(result)
 
-    if result['errow']:
+
+
+    if 'error' in result.keys():
 
         return {'error': True,
                 'message': '文章擷取問題'}

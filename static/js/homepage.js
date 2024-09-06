@@ -176,21 +176,12 @@ async function ProvideCategoryDist() {
     }
 } 
 
-// fuck f
+// filter pass
 async function submitSelection() {
-
-    //const keyword = document.querySelector('.searchKeyword_input').value;
-    // const resources = Array.from(document.querySelectorAll('input[name="resource"]:checked')).map(input => parseInt(input.value));
-    // const categories = Array.from(document.querySelectorAll('input[name="category"]:checked')).map(input => parseInt(input.value));
-    // const dates = Array.from(document.querySelectorAll('input[name="date"]:checked')).map(input => parseInt(input.value));
 
     let resourcesArray = Array.from(document.querySelectorAll('input[name="resource"]:checked')).map(input => parseInt(input.value)).filter(Boolean);
     let categoriesArray = Array.from(document.querySelectorAll('input[name="category"]:checked')).map(input => parseInt(input.value)).filter(Boolean);
     let datesArray = Array.from(document.querySelectorAll('input[name="date"]:checked')).map(input => parseInt(input.value)).filter(Boolean);
-
-    // let resourcesStr = `${resources.length > 0 ? resources : []}`;
-    // let categoriesStr = `${categories.length > 0 ? categories : []}`;
-    // let datesStr = `${dates.length > 0 ? dates : []}`;
 
 
     let filterSelectedData = {
@@ -210,17 +201,12 @@ async function submitSelection() {
     let filterResource = document.querySelector('.resource-cnt');
     let filterCategory = document.querySelector('.category-cnt');
     let filterDate = document.querySelector('.date-cnt');
-    if (resourcesArray.length != 0) {
-        filterResource.textContent = resourcesArray.length;
-        filterResource.style.color = 'orange';
-    }
-    if (categoriesArray.length != 0) {
-        filterCategory.textContent = categoriesArray.length;
-        filterCategory.style.color = 'orange';
-    }
+    filterResource.textContent = resourcesArray.length;
+    filterResource.style.color = 'orange';
+    filterCategory.textContent = categoriesArray.length;
+    filterCategory.style.color = 'orange';
     filterDate.textContent = datesArray[0];
     filterDate.style.color = 'orange';
-    
 
 }
 
@@ -270,6 +256,49 @@ async function addArticle(page = 0) {
         }
     } catch (e) {
         console.error('Error fetching articles:', e);
+    } finally {
+        isLoading = false;
+    }
+}
+
+async function addOnlyKwdArticle(page = 0, keyword) {
+    if (isLoading) return; // Prevent multiple fetch requests
+    isLoading = true;
+
+    let clr = document.querySelector('.noArticle');
+    clr.style.display = 'none';
+    let footer = document.querySelector('.copyRight');
+    footer.style.display = 'none';
+    footer.style.position = '';
+
+    let loading = document.querySelector('#loading');
+    loading.style.display = 'block';
+
+    try {
+
+        const postResponse = await fetch(`/api/articles?page=${page}&keyword=${keyword}`);
+        //const postResponse = await fetch('/api/filter-articles-search', {
+            
+        const postData = await postResponse.text();
+        const article_result = JSON.parse(postData);
+        let infos = article_result.data;
+
+        if (article_result.error) {
+            check();
+        } else {
+            eventsDomTree(infos);
+        }
+
+        // Judge last page or not then add footer
+        if (article_result.nextPage == null) {
+            nextPage = 0;
+            loading.style.display = 'none';
+            footer.style.display = 'flex';
+        } else {
+            nextPage = article_result.nextPage;
+        }
+    } catch (e) {
+        console.error('Error fetching keyword articles:', e);
     } finally {
         isLoading = false;
     }
@@ -357,25 +386,32 @@ async function addForum() {
 function ClearFilterRecords() {
     let deleteCategory = document.querySelector('.AppendCategory');
 
-        // 獲取所有子節點
-        let childNodes = deleteCategory.childNodes;
+    // 獲取所有子節點
+    let childNodes = deleteCategory.childNodes;
 
-        // 遍歷並移除每個子節點
-        for (let i = childNodes.length - 1; i >= 0; i--) {
-        deleteCategory.removeChild(childNodes[i]);
-        }
+    // 遍歷並移除每個子節點
+    for (let i = childNodes.length - 1; i >= 0; i--) {
+    deleteCategory.removeChild(childNodes[i]);
+    }
 
-        let checkboxes = document.querySelectorAll('input[type="checkbox"]');
-        // 遍歷並修改
-        checkboxes.forEach(checkbox => {
-            checkbox.checked = false;
-        });
+    let checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    // 遍歷並修改
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+    });
 
-        let radios = document.querySelectorAll('input[type="radio"]');
-        // 遍歷並修改
-        radios.forEach(radio => {
+    let radios = document.querySelectorAll('input[type="radio"]');
+    // 遍歷並修改
+    radios.forEach(radio => {
+        if (radio.value == '1'){
+            radio.checked = true;
+        } else {
             radio.checked = false;
-        });
+        }
+    });
+
+    // edit the filter criteria picked
+    //let filterPicked = document.querySelector('')
 }
 
 // loading before the data fetch back from db and backend
@@ -384,12 +420,19 @@ window.addEventListener("load", () => {
     loader.classList.add('loader--hidden');
 });
 
+window.onbeforeunload = function() {
+  
+    // 檢查 localStorage 中是否存在該鍵名
+    if (localStorage.getItem('filterData')) {
+      localStorage.removeItem('filterData');
+      //console.log(`已刪除 localStorage 中的 ${keyToDelete} 資料`);
+    } 
+  };
+
 document.addEventListener("DOMContentLoaded", function () {
     
     // const memberInfo = JSON.parse(localStorage.getItem("memberInfo"));
     // if (memberInfo) {
-
-
 
     // } else{
 
@@ -398,6 +441,25 @@ document.addEventListener("DOMContentLoaded", function () {
     addArticle();
     ProvideCategoryDist();
     checkLogin();
+
+    // initiate article filter criteria
+    let resourcesArray = [];
+    let categoriesArray = [];
+    let datesArray = [];
+
+    let filterSelectedData = {
+        resources: resourcesArray,
+        categories: categoriesArray,
+        dates: datesArray,
+        page: "0"
+    };
+
+    // store in localStorage
+    const filterDataString = JSON.stringify(filterSelectedData);
+
+    // 儲存到 localStorage，使用 'filterData' 作為鍵
+    localStorage.setItem('filterData', filterDataString);
+
 
     // sign-in pop up
     let signIn = document.querySelector('.pop-background-color-sign-in');
@@ -797,40 +859,29 @@ document.addEventListener("DOMContentLoaded", function () {
         originalArticles.innerHTML = '';
 
         let kwd = document.querySelector('.searchKeyword_input').value;
-        //addKwdArticle(0, kwd.value);
 
-        // fuck f
+        // filter Pass
         let filterData = JSON.parse(localStorage.getItem("filterData"));
         //let filterData = localStorage.getItem("filterData");
         console.log(filterData);
         filterData['keyword'] = kwd;
 
+        // store in localStorage
+        const filterDataString = JSON.stringify(filterData);
+
+        // 儲存到 localStorage，使用 'filterData' 作為鍵
+        localStorage.setItem('filterData', filterDataString);
+
         console.log(filterData);
 
-        fetch('/api/filter-articles-search', {
-            method: 'POST',
-            body: JSON.stringify(filterData),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-            
-        })
-        .then(response => response.json())
-        .then(filterArticlesData => {
-            
-            localStorage.removeItem("filterData");
-            eventsDomTree(filterArticlesData);
-            //console.log(data);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
+        addKwdArticle(0, filterData);
 
-        const keywordObserverCallback = entries => {
+        const keywordFilterObserverCallback = entries => {
             entries.forEach(entry => {
                 if (entry.isIntersecting && !isLoading) {
                     if (nextPage) {
-                        addKwdArticle(nextPage, kwd.value);
+                        let filterData = JSON.parse(localStorage.getItem("filterData"));
+                        addKwdArticle(nextPage, filterData);
                     } else {
                         const footer = document.querySelector('.copyRight');
                         footer.style.display = 'flex';
@@ -839,7 +890,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         };
 
-        createObserver(keywordObserverCallback);
+        createObserver(keywordFilterObserverCallback);
     });
 
 
@@ -854,13 +905,13 @@ document.addEventListener("DOMContentLoaded", function () {
             let originalArticles = document.querySelector('.load_articles');
             originalArticles.innerHTML = '';
 
-            addKwdArticle(0, keyword);
+            addOnlyKwdArticle(0, keyword);
 
             const keywordObserverCallback = entries => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting && !isLoading) {
                         if (nextPage) {
-                            addKwdArticle(nextPage, keyword);
+                            addOnlyKwdArticle(nextPage, keyword);
                         } else {
                             const footer = document.querySelector('.copyRight');
                             footer.style.display = 'flex';
@@ -925,13 +976,13 @@ document.addEventListener("DOMContentLoaded", function () {
             let originalArticles = document.querySelector('.load_articles');
             originalArticles.innerHTML = '';
 
-            addKwdArticle(0, keyword);
+            addOnlyKwdArticle(0, keyword);
 
             const hotKeywordObserverCallback = entries => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting && !isLoading) {
                         if (nextPage) {
-                            addKwdArticle(nextPage, keyword);
+                            addOnlyKwdArticle(nextPage, keyword);
                         } else {
                             const footer = document.querySelector('.copyRight');
                             footer.style.display = 'flex';

@@ -25,50 +25,237 @@ db = mysql.connector.pooling.MySQLConnectionPool(
 #         password=os.getenv("AWS_RDS_PASSWORD"),
 #         database=os.getenv("AWS_RDS_DB"))
 
-# homepage filter search articles 
-def get_12_articles_by_filter(filter_requirements, page=0):
-
-	# sql = 'SELECT * FROM articles WHERE MATCH(title) AGAINST (%s) OR MATCH(content) AGAINST (%s)'
-	# sql = "SELECT * FROM articles WHERE title like %s OR content like %s;"
+def get_12_articles_by_keyword(page, kw):
      
-    start = page * 12
-    page_size = 24
-
-	# 用來完全比對文章類別名稱、或模糊比對文章名稱或文章內文的關鍵字，沒有給定則不做篩選
     sql = '''SELECT * FROM 
             (SELECT c.category, a.title, a.wordcloud, r.resource, DATE(a.date) AS date, a.id 
             FROM articles AS a
             LEFT JOIN resource AS r ON a.resource_id = r.id
             LEFT JOIN category AS c ON a.category_id = c.id
-            WHERE (a.title LIKE %s OR a.content LIKE %s)
-            AND (c.category IN (%s) OR %s IS NULL) 
-            AND (r.resource IN (%s) OR %s IS NULL)
-            AND (DATE(a.date) >= CURDATE() - INTERVAL %s DAY OR %s IS NULL)) AS subquery
+            WHERE a.title LIKE %s OR a.content LIKE %s OR c.category LIKE %s) AS subquery
             ORDER BY date DESC
             LIMIT %s, %s;'''
-
-    # Escaping wildcards in the parameter
-    kw = filter_requirements['keyword']
-    if kw != '':
-        search_param = f"%{kw}%"
-    else:
-        search_param = ''
     
-    category_lst = filter_requirements['category']
-    category_str = ','.join(['%s'] * len(category_lst))
+    page_size = 24 # judge the nextPage
+    start = page * 12
 
-    resource_lst = filter_requirements['resource']
-    resource_str = ','.join(['%s'] * len(resource_lst))
-
-    date = filter_requirements['date'][0] if filter_requirements['date'] is not None else ''
-    
-    keyword = (search_param, search_param, category_str, category_str, resource_str, resource_str, date, date, start, page_size)
+	# Escaping wildcards in the parameter
+    search_param = f"%{kw}%"
+    keyword = (search_param, search_param, search_param, start, page_size)
 
     try:
         
         con = db.get_connection()
         Cursor = con.cursor(dictionary=True)
         Cursor.execute(sql, keyword)
+        query_result = Cursor.fetchall()
+        next_page_judge = len(query_result)
+
+        if next_page_judge < 13 and next_page_judge > 0:
+
+            return {'nextPage': None,
+                    'data': query_result[:next_page_judge]}
+        
+        elif next_page_judge > 12:
+
+            return {'nextPage': page+1,
+                    'data': query_result[:12]}
+
+        else:
+
+            return {'error': True,
+                    'message': '資料超出頁數'}
+
+    except mysql.connector.Error as err:
+
+        print(f"Error: {err}")
+        return {'error': True,
+                'message': '資料輸出錯誤'}
+
+    finally:
+
+        con.close()
+        Cursor.close()
+
+
+def judge_filter_options(filter_requirements, page):
+    
+    page = int(page)
+
+    start = page * 12
+    page_size = 24
+
+    category_lst = filter_requirements['category']
+    category_str = ','.join(['%s'] * len(category_lst))
+
+    resource_lst = filter_requirements['resource']
+    resource_str = ','.join(['%s'] * len(resource_lst))
+
+    kw = filter_requirements['keyword']
+    if kw != '':
+        search_param = f"%{kw}%"
+    else:
+        search_param = ''
+
+    if filter_requirements['date'] != []:
+        date = filter_requirements['date'][0]
+    else:
+         date = ''
+
+    variable = '%s'
+
+    if len(category_lst) == 0 and len(resource_lst) != 0 and kw != '':
+         
+        sql = f'''SELECT * FROM 
+                (SELECT c.category, a.title, a.wordcloud, r.resource, DATE(a.date) AS date, a.id 
+                FROM articles AS a
+                LEFT JOIN resource AS r ON a.resource_id = r.id
+                LEFT JOIN category AS c ON a.category_id = c.id
+                WHERE (a.title LIKE {variable} OR a.content LIKE {variable}) 
+                AND (a.resource_id IN ({resource_str}))
+                AND (DATE(a.date) >= CURDATE() - INTERVAL {variable} DAY)) AS subquery
+                ORDER BY date DESC
+                LIMIT {variable}, {variable};'''
+
+        variables = (search_param, search_param, *resource_lst, date, start, page_size)
+
+
+    elif len(category_lst) != 0 and len(resource_lst) == 0 and kw != '':
+         
+        sql = f'''SELECT * FROM 
+                (SELECT c.category, a.title, a.wordcloud, r.resource, DATE(a.date) AS date, a.id 
+                FROM articles AS a
+                LEFT JOIN resource AS r ON a.resource_id = r.id
+                LEFT JOIN category AS c ON a.category_id = c.id
+                WHERE (a.title LIKE {variable} OR a.content LIKE {variable})
+                AND (a.category_id IN ({category_str})) 
+                AND (DATE(a.date) >= CURDATE() - INTERVAL {variable} DAY)) AS subquery
+                ORDER BY date DESC
+                LIMIT {variable}, {variable};'''
+
+        variables = (search_param, search_param, *category_lst, date, start, page_size)
+
+
+    elif len(category_lst) != 0 and len(resource_lst) != 0 and kw == '':
+         
+        sql = f'''SELECT * FROM 
+                (SELECT c.category, a.title, a.wordcloud, r.resource, DATE(a.date) AS date, a.id 
+                FROM articles AS a
+                LEFT JOIN resource AS r ON a.resource_id = r.id
+                LEFT JOIN category AS c ON a.category_id = c.id
+                WHERE (a.category_id IN ({category_str})) 
+                AND (a.resource_id IN ({resource_str}))
+                AND (DATE(a.date) >= CURDATE() - INTERVAL {variable} DAY)) AS subquery
+                ORDER BY date DESC
+                LIMIT {variable}, {variable};'''
+
+        variables = (*category_lst, *resource_lst, date, start, page_size)
+
+
+    elif len(category_lst) != 0 and len(resource_lst) == 0 and kw == '':
+         
+        sql = f'''SELECT * FROM 
+                (SELECT c.category, a.title, a.wordcloud, r.resource, DATE(a.date) AS date, a.id 
+                FROM articles AS a
+                LEFT JOIN resource AS r ON a.resource_id = r.id
+                LEFT JOIN category AS c ON a.category_id = c.id
+                WHERE (a.category_id IN ({category_str})
+                AND (DATE(a.date) >= CURDATE() - INTERVAL {variable} DAY)) AS subquery
+                ORDER BY date DESC
+                LIMIT {variable}, {variable};'''
+
+        variables = (*category_lst, date, start, page_size)
+
+
+    elif len(category_lst) == 0 and len(resource_lst) != 0 and kw == '':
+         
+        sql = f'''SELECT * FROM 
+                (SELECT c.category, a.title, a.wordcloud, r.resource, DATE(a.date) AS date, a.id 
+                FROM articles AS a
+                LEFT JOIN resource AS r ON a.resource_id = r.id
+                LEFT JOIN category AS c ON a.category_id = c.id
+                WHERE (a.resource_id IN ({resource_str}))
+                AND (DATE(a.date) >= CURDATE() - INTERVAL {variable} DAY)) AS subquery
+                ORDER BY date DESC
+                LIMIT {variable}, {variable};'''
+
+        variables = (*resource_lst, date, start, page_size)
+
+
+    elif len(category_lst) == 0 and len(resource_lst) == 0 and kw != '' and date == '':
+         
+        sql = f'''SELECT * FROM 
+                (SELECT c.category, a.title, a.wordcloud, r.resource, DATE(a.date) AS date, a.id 
+                FROM articles AS a
+                LEFT JOIN resource AS r ON a.resource_id = r.id
+                LEFT JOIN category AS c ON a.category_id = c.id
+                WHERE (a.title LIKE {variable} OR a.content LIKE {variable})) AS subquery
+                ORDER BY date DESC
+                LIMIT {variable}, {variable};'''
+
+        variables = (search_param, search_param, start, page_size)
+
+
+    elif len(category_lst) == 0 and len(resource_lst) == 0 and kw != '':
+         
+        sql = f'''SELECT * FROM 
+                (SELECT c.category, a.title, a.wordcloud, r.resource, DATE(a.date) AS date, a.id 
+                FROM articles AS a
+                LEFT JOIN resource AS r ON a.resource_id = r.id
+                LEFT JOIN category AS c ON a.category_id = c.id
+                WHERE (a.title LIKE {variable} OR a.content LIKE {variable})
+                AND (DATE(a.date) >= CURDATE() - INTERVAL {variable} DAY)) AS subquery
+                ORDER BY date DESC
+                LIMIT {variable}, {variable};'''
+
+        variables = (search_param, search_param, date, start, page_size)
+
+
+    elif len(category_lst) != 0 and len(resource_lst) != 0 and kw != '':
+         
+        sql = f'''SELECT * FROM 
+                (SELECT c.category, a.title, a.wordcloud, r.resource, DATE(a.date) AS date, a.id 
+                FROM articles AS a
+                LEFT JOIN resource AS r ON a.resource_id = r.id
+                LEFT JOIN category AS c ON a.category_id = c.id
+                WHERE (a.title LIKE {variable} OR a.content LIKE {variable})
+                AND (a.category_id IN ({category_str}) OR {category_str} IS NULL) 
+                AND (a.resource_id IN ({resource_str}) OR {resource_str} IS NULL)
+                AND (DATE(a.date) >= CURDATE() - INTERVAL {variable} DAY)) AS subquery
+                ORDER BY date DESC
+                LIMIT {variable}, {variable};'''
+
+        variables = (search_param, search_param, *category_lst, *category_lst, *resource_lst, *resource_lst, date, start, page_size)
+
+
+    elif len(category_lst) == 0 and len(resource_lst) == 0 and kw == '' and date == '':
+         
+        sql = f'''SELECT * FROM 
+                (SELECT c.category, a.title, a.wordcloud, r.resource, DATE(a.date) AS date, a.id 
+                FROM articles AS a
+                LEFT JOIN resource AS r ON a.resource_id = r.id
+                LEFT JOIN category AS c ON a.category_id = c.id) AS subquery
+                ORDER BY date DESC
+                LIMIT {variable}, {variable};'''
+
+        variables = (start, page_size)
+
+    return sql, variables 
+
+
+# homepage filter search articles 
+def get_12_articles_by_filter(filter_requirements, page):
+    
+    page = int(page)
+    print(filter_requirements, page)
+
+    sql, variables = judge_filter_options(filter_requirements, page)
+
+    try:
+        
+        con = db.get_connection()
+        Cursor = con.cursor(dictionary=True)
+        Cursor.execute(sql, variables)
         query_result = Cursor.fetchall()
         next_page_judge = len(query_result)
 
