@@ -78,12 +78,13 @@
       <div class="thousand_twoHundred">
   
         <div class="vertical">
-          <div class="relax">歡迎光臨，一同享受探索文章的喜悅</div> <!-- 變成篩選器 -->
+          <div class="relax">歡迎光臨，一同享受探索文章的喜悅</div>
           <div class="form-keyword-search">
-            <!-- <form action="/api/articles" class="articlesFilterSameLine"> -->
             <form class="articlesFilterSameLine">
 
               <input type="text" name='keyword' class="searchKeyword_input" placeholder="輸入文章關鍵字查詢">
+
+              <button class="searchKeyword_button"><img src="/static/photo_icon/search.png" alt="iconSearch" style="width: 30px; height: 30px;"></button>
               
               <div class="optionAlign">
                 <div class="optionTitle">進階篩選</div>
@@ -111,7 +112,6 @@
                         <br>
                         <fieldset class="fieldset-section">
                           <legend class="filterOption">文章類別</legend>
-                          <!-- <label for="categories" class="optionTitle">文章類別：</label> -->
                           <div class="AppendCategory"></div>
                           
                         </fieldset>
@@ -135,8 +135,6 @@
                 
               </div>
               
-              <button class="searchKeyword_button"><img src="/static/photo_icon/search.png" alt="iconSearch" style="width: 30px; height: 30px;"></button>
-
               <div class="filterCriteria">篩選條件已選
                 <div class="filter-resource">來源：<div class="resource-cnt">0</div>個</div>
                 <div class="filter-category">類別：<div class="category-cnt">0</div>個</div>
@@ -158,13 +156,27 @@
         </div> -->
 
         <div class="overallCategDistrib">
-          <div class="chart-container">
-            <canvas class="CategoryDistribution"></canvas>
+
+          <div class="select-distribution-resource">
+            <button onclick="chooseResourceType('1')" class="resourceBtn">PTT</button>
+            <button onclick="chooseResourceType('2')" class="resourceBtn">風傳媒</button>
+            <button onclick="chooseResourceType('3')" class="resourceBtn">聯合新聞網</button>
+            <button onclick="chooseResourceType('4')" class="resourceBtn">今周刊</button>
+            <button onclick="chooseResourceType('5')" class="resourceBtn">整體</button>
           </div>
 
-          <div class="chart-detail">
-            <ul class="category-list"></ul>
+          <div class="chart-container-outer">
+
+            <div class="chart-container">
+              <canvas class="CategoryDistribution"></canvas>
+            </div>
+  
+            <div class="chart-detail">
+              <ul class="category-list"></ul>
+            </div>
+
           </div>
+          
 
         </div>
 

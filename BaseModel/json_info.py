@@ -35,3 +35,6 @@ class articles_requirements(BaseModel):
 	resources: list
 	categories: list
 	dates: list
+
+class resourceID(BaseModel):
+	resourceId: int

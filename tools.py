@@ -87,9 +87,11 @@ def judge_filter_options(filter_requirements, page):
 
     category_lst = filter_requirements['category']
     category_str = ','.join(['%s'] * len(category_lst))
+    #print(category_lst, category_str, *category_lst)
 
     resource_lst = filter_requirements['resource']
     resource_str = ','.join(['%s'] * len(resource_lst))
+    #print(resource_lst, resource_str, *resource_lst)
 
     kw = filter_requirements['keyword']
     if kw != '':
@@ -219,13 +221,13 @@ def judge_filter_options(filter_requirements, page):
                 LEFT JOIN resource AS r ON a.resource_id = r.id
                 LEFT JOIN category AS c ON a.category_id = c.id
                 WHERE (a.title LIKE {variable} OR a.content LIKE {variable})
-                AND (a.category_id IN ({category_str}) OR {category_str} IS NULL) 
-                AND (a.resource_id IN ({resource_str}) OR {resource_str} IS NULL)
+                AND (a.category_id IN ({category_str})) 
+                AND (a.resource_id IN ({resource_str}))
                 AND (DATE(a.date) >= CURDATE() - INTERVAL {variable} DAY)) AS subquery
                 ORDER BY date DESC
                 LIMIT {variable}, {variable};'''
 
-        variables = (search_param, search_param, *category_lst, *category_lst, *resource_lst, *resource_lst, date, start, page_size)
+        variables = (search_param, search_param, *category_lst, *resource_lst, date, start, page_size)
 
 
     elif len(category_lst) == 0 and len(resource_lst) == 0 and kw == '' and date == '':
@@ -250,6 +252,7 @@ def get_12_articles_by_filter(filter_requirements, page):
     print(filter_requirements, page)
 
     sql, variables = judge_filter_options(filter_requirements, page)
+    print(sql, variables)
 
     try:
         

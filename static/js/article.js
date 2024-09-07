@@ -525,7 +525,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 counter = parseInt(event.target.id) + 1;
 
-                let slides = document.querySelectorAll('.imgs_article');
+                let slides = document.querySelectorAll('.article_imgs');
                 slides.forEach(slide => slide.style.display = "none");
                 slides[counter - 1].style.display = 'block';
 

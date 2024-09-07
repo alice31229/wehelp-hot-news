@@ -15,7 +15,7 @@ import mysql.connector
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime, timedelta, timezone
-from BaseModel.json_info import user_info, member_log_in_info, collect_info, member_update_info, articles_requirements
+from BaseModel.json_info import user_info, member_log_in_info, collect_info, member_update_info, articles_requirements, resourceID
 
 app = FastAPI()
 
@@ -195,8 +195,6 @@ async def get_demanded_articles(articles_requirements: articles_requirements):
 
     #print(articles_requirements, type(articles_requirements))
     articles_requirements = articles_requirements.dict()
-    #print(articles_requirements, type(articles_requirements)) #, articles_requirements.categories)
-    #print(articles_requirements.keys(), articles_requirements.values())
 
     input_requirement = {}
     page = ''
@@ -216,8 +214,7 @@ async def get_demanded_articles(articles_requirements: articles_requirements):
     #print('arrange requirement:', input_requirement)
 
     result = get_12_articles_by_filter(input_requirement, page)
-    print(result)
-
+    #print(result)
 
 
     if 'error' in result.keys():
@@ -269,8 +266,8 @@ async def get_forum_info():
 
 
 # homepage mrt click keyword search api router
-@app.get("/api/resource-category-distribution")
-async def get_resource_category_info():
+@app.post("/api/resource-category-distribution")
+async def get_resource_category_info(resource_id: resourceID):
 
     from tools import db
 
@@ -283,17 +280,32 @@ async def get_resource_category_info():
         #          ON a.resource_id = r.id
         #          where DATE(date) = CURDATE() - INTERVAL 1 DAY
         #          GROUP BY r.resource, c.category;'''
-        sql = '''SELECT c.category, COUNT(*) AS category_cnt
-                 FROM articles AS a
-                 LEFT JOIN category AS c
-                 ON a.category_id = c.id
-                 where DATE(date) = CURDATE() - INTERVAL 1 DAY
-                 GROUP BY c.category
-                 ORDER BY 2 DESC;'''
-        con = db.get_connection()
-        Cursor = con.cursor(dictionary=True)
-        Cursor.execute(sql)
-        resource_category_cnt = Cursor.fetchall()
+        if resource_id.resourceId != 5:
+            sql = '''SELECT c.category, COUNT(*) AS category_cnt
+                    FROM articles AS a
+                    LEFT JOIN category AS c
+                    ON a.category_id = c.id
+                    WHERE DATE(date) = CURDATE() - INTERVAL 1 DAY
+                    AND a.resource_id = %s
+                    GROUP BY c.category
+                    ORDER BY 2 DESC;'''
+            con = db.get_connection()
+            Cursor = con.cursor(dictionary=True)
+            Cursor.execute(sql, (resource_id.resourceId,))
+            resource_category_cnt = Cursor.fetchall()
+
+        else:
+            sql = '''SELECT c.category, COUNT(*) AS category_cnt
+                    FROM articles AS a
+                    LEFT JOIN category AS c
+                    ON a.category_id = c.id
+                    WHERE DATE(date) = CURDATE() - INTERVAL 1 DAY
+                    GROUP BY c.category
+                    ORDER BY 2 DESC;'''
+            con = db.get_connection()
+            Cursor = con.cursor(dictionary=True)
+            Cursor.execute(sql)
+            resource_category_cnt = Cursor.fetchall()
 
         forums_json = {'data':resource_category_cnt}
 

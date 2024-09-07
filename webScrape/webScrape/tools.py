@@ -43,7 +43,7 @@ def clean_content(content):
     '''
     url_pattern = r'https?://[^\s]+'
     result_content = re.sub(url_pattern, '', content)
-    content = content.replace('原文連結', '')
+    result_content = result_content.replace('原文連結', '')
 
     return result_content
 

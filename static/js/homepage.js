@@ -95,11 +95,21 @@ async function AddArticleCategory() {
     }
 }
 
+let ChartResource;
+
 // provide overall and each resource category distribution
 async function ProvideCategoryDist() {
     
+    let resourceID = 5; 
+
     try {
-        const postResponse = await fetch('/api/resource-category-distribution');
+        const postResponse = await fetch('/api/resource-category-distribution', {
+            method: 'POST',
+            body: JSON.stringify({ resourceId: resourceID}),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
         const postData = await postResponse.text();
         const category_result = JSON.parse(postData);
         let infos = category_result.data;
@@ -107,11 +117,10 @@ async function ProvideCategoryDist() {
         let myChart = document.querySelector('.CategoryDistribution');
         const ul = document.querySelector(".overallCategDistrib .chart-detail ul");
 
-        infos.slice(0,7).forEach(info => {
+        infos.slice(0,5).forEach(info => {
             let li = document.createElement("li");
             li.setAttribute('class', 'percentage');
             li.textContent = `${info['category']} ${info['category_cnt']} 篇`;
-            //li.innerHTML = `${l}: <span class='percentage'>${infos.category_cnt[i]}</span>`;
             ul.appendChild(li);
         });
 
@@ -123,51 +132,56 @@ async function ProvideCategoryDist() {
             categoryCntArray.push(info['category_cnt']);
         });
 
-        new Chart(myChart, {
-            type: "doughnut",
-            data: {
-              labels: categoryArray,
-              datasets: [
-                {
-                  label: "文章數",
-                  data: categoryCntArray,
-                },
-              ],
-            },
-            options: {
-                borderWidth: 3,
-                borderRadius: 2,
-                hoverBorderWidth: 0,
-                plugins: {
-                    legend: {
-                        display: false,
-                    },
-                    title: {
-                        display: true,
-                        text: '文章類別分佈',
-                        font: {
-                            size: 20
-                        },
-                        position: 'top',
-                        align: 'center'
-                    },
-                    datalabels: {
-                        display: true,
-                        formatter: (value, ctx) => {
-                            let dataset = ctx.dataset;
-                            let label = ctx.chart.data.labels[ctx.dataIndex];
-                            let sum = dataset.data.reduce((a, b) => a + b, 0);
-                            let percentage = new Intl.NumberFormat('zh-TW', { style: 'percent', minimumFractionDigits: 2 }).format(value / sum);
-                            return `${label}: ${percentage}`;
-                        },
-                        color: '#fff',
-                        font: {
-                            size: 14
-                        }
-                    }
-                }
-            }
-        });
+        // Destroy existing chart instance if it exists
+        if (ChartResource) {
+            ChartResource.destroy();
+        }
+
+        ChartResource = new Chart(myChart, {
+                            type: "doughnut",
+                            data: {
+                            labels: categoryArray,
+                            datasets: [
+                                {
+                                label: "文章數",
+                                data: categoryCntArray,
+                                },
+                            ],
+                            },
+                            options: {
+                                borderWidth: 3,
+                                borderRadius: 2,
+                                hoverBorderWidth: 0,
+                                plugins: {
+                                    legend: {
+                                        display: false,
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: '文章類別分佈',
+                                        font: {
+                                            size: 20
+                                        },
+                                        position: 'top',
+                                        align: 'center'
+                                    },
+                                    datalabels: {
+                                        display: true,
+                                        formatter: (value, ctx) => {
+                                            let dataset = ctx.dataset;
+                                            let label = ctx.chart.data.labels[ctx.dataIndex];
+                                            let sum = dataset.data.reduce((a, b) => a + b, 0);
+                                            let percentage = new Intl.NumberFormat('zh-TW', { style: 'percent', minimumFractionDigits: 2 }).format(value / sum);
+                                            return `${label}: ${percentage}`;
+                                        },
+                                        color: '#fff',
+                                        font: {
+                                            size: 14
+                                        }
+                                    }
+                                }
+                            }
+                        });
 
         
 
@@ -175,6 +189,114 @@ async function ProvideCategoryDist() {
         console.error('Error fetching Category Distribution:', e);
     }
 } 
+
+
+// resource articles distribution
+async function chooseResourceType(resourceID=5) {
+
+    try {
+
+        var resourceDist = '';
+        if (resourceDist == 1) {
+            resourceDist = 'PTT';
+        } else if (resourceDist == 2) {
+            resourceDist = '風傳媒';
+        } else if (resourceDist == 3) {
+            resourceDist = '聯合新聞網';
+        } else if (resourceDist == 4) {
+            resourceDist = '今周刊';
+        } 
+
+        resourceID = parseInt(resourceID);
+
+        const postResponse = await fetch('/api/resource-category-distribution', {
+            method: 'POST',
+            body: JSON.stringify({ resourceId: resourceID}),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+        const postData = await postResponse.text();
+        const category_result = JSON.parse(postData);
+        let infos = category_result.data;
+
+        let myChart = document.querySelector('.CategoryDistribution');
+        const ul = document.querySelector(".overallCategDistrib .chart-detail ul");
+
+        ul.innerHTML = '';
+
+        infos.slice(0,5).forEach(info => {
+            let li = document.createElement("li");
+            li.setAttribute('class', 'percentage');
+            li.textContent = `${info['category']} ${info['category_cnt']} 篇`;
+            ul.appendChild(li);
+        });
+
+        categoryArray = [];
+        categoryCntArray = [];
+
+        infos.forEach(info => {
+            categoryArray.push(info['category']);
+            categoryCntArray.push(info['category_cnt']);
+        });
+
+        // Destroy existing chart instance if it exists
+        if (ChartResource) {
+            ChartResource.destroy();
+        }
+
+        ChartResource = new Chart(myChart, {
+                            type: "doughnut",
+                            data: {
+                            labels: categoryArray,
+                            datasets: [
+                                {
+                                label: "文章數",
+                                data: categoryCntArray,
+                                },
+                            ],
+                            },
+                            options: {
+                                borderWidth: 3,
+                                borderRadius: 2,
+                                hoverBorderWidth: 0,
+                                plugins: {
+                                    legend: {
+                                        display: false,
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: `${resourceDist} 類別分佈`,
+                                        font: {
+                                            size: 16
+                                        },
+                                        position: 'top',
+                                        align: 'center'
+                                    },
+                                    datalabels: {
+                                        display: true,
+                                        formatter: (value, ctx) => {
+                                            let dataset = ctx.dataset;
+                                            let label = ctx.chart.data.labels[ctx.dataIndex];
+                                            let sum = dataset.data.reduce((a, b) => a + b, 0);
+                                            let percentage = new Intl.NumberFormat('zh-TW', { style: 'percent', minimumFractionDigits: 2 }).format(value / sum);
+                                            return `${label}: ${percentage}`;
+                                        },
+                                        color: '#fff',
+                                        font: {
+                                            size: 14
+                                        }
+                                    }
+                                }
+                            }
+                        });
+
+    } catch (e) {
+        console.log(`error: ${e}`)
+    }
+
+}
+
 
 // filter pass
 async function submitSelection() {

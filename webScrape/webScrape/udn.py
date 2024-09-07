@@ -125,6 +125,8 @@ def get_udn(scroll_time=3):
     final['日期'] = final['日期'].dt.strftime('%Y-%m-%d')
     #print(final['日期'].unique())
 
+    final = final.drop_duplicates()
+
     final.to_csv(f'./data_ETL/udn-test_{yesterday}.csv', index=False)
     print('udn done')
 

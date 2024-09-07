@@ -313,6 +313,7 @@ body {
 .vertical {
     display: flex;
     flex-direction: column;
+    justify-content: center;
     padding: 10px 10px 10px 10px;
 }
 
@@ -359,12 +360,31 @@ body {
     background-color: #f0a747; 
     padding-top: 3px;
     cursor: pointer; 
-    border-radius: 5px;
-    /* border-top-right-radius: 5px; 
-    border-bottom-right-radius: 5px;  */
+    border-top-right-radius: 5px; 
+    border-bottom-right-radius: 5px; 
     height: 39px;
     position: absolute;
-    margin-top: 20px;
+    margin-top: 3px;
+    margin-left: 456px;
+}
+
+.select-distribution-resource {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.resourceBtn {
+    cursor: pointer;
+    width: 90px;
+    height: 25px;
+    font-size: 15px;
+    border-radius: 5px;
+    border: 1px solid rgba(0, 0, 0, .1);
+    background-color: #f0a747;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    color: #F8F8F8;
+    text-align: center;
 }
 
 .optionTitle, .filterOption {
@@ -390,8 +410,8 @@ body {
     width: 130px;
     height: 39px;
     margin-top: 5px;
-    border-top-right-radius: 5px; 
-    border-bottom-right-radius: 5px;
+    /* border-top-left-radius: 5px; 
+    border-bottom-right-radius: 5px; */
 }
 
 .back_img {
@@ -468,31 +488,26 @@ input[type="radio"]:checked::before {
 
 /****************************************/
 
-.chart-container {
-    width: 150px;
-    height: 100%;
-    margin-top: 100px;
-}
-
 .overallCategDistrib {
-    display: flex;
-    align-items: center;
-    gap: 24px;
     margin: 0 auto;
     width: fit-content;
     box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.3);
     border-radius: 20px;
     padding: 8px 32px;
-    color: #023047;
     transition: all 400ms ease;
-    height: 300px;
-    margin-top: 10px;
+    height: 270px;
     background-color: antiquewhite;
 }
 
 .overallCategDistrib:hover {
     transform: scale(1.02);
     box-shadow: 0 4px 16px -7px rgba(0, 0, 0, 0.3);
+}
+
+.chart-container-outer {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
 }
 
 .overallCategDistrib .chart-detail ul {
@@ -510,6 +525,14 @@ input[type="radio"]:checked::before {
     font-weight: 700;
     color: #bd5c0c;
 }
+
+.chart-container {
+    width: 150px;
+    height: 100%;
+    margin-top: 25px;
+}
+
+
 
 /****************************************/
 
@@ -640,10 +663,16 @@ input[type="radio"]:checked::before {
         justify-content: center;
         flex-flow: row wrap;
         max-width: 1200px;
-        width: 55%;
+        width: 70%;
         margin: 0 auto;
         margin-top: 15px;
         margin-bottom: 105px;
+    }
+
+    .wcAndInfo {
+        width: 45%;
+        display: flex;
+        flex-direction: column;
     }
 
     .wc-img {
@@ -679,27 +708,45 @@ input[type="radio"]:checked::before {
         font-size: 23px;
         width: 100%; 
         z-index: 1; 
-        padding-left: 10px;
+        padding-left: 5px;
+        padding-right: 10px;
+    }
+
+    .overallCategDistrib {
+        margin-top: 20px;
     }
 
 }
 
-@media(max-width: 815px){
+@media(max-width: 1200px){
     .back_img {
         height: 660px;
     }
 
     .click-title {
-        margin-top: 300px;
+        margin-top: 375px;
     }
 
     #reduce-distance {
         margin-top: 20px;
     }
 
+    .searchKeyword_button {
+        margin-left: 480px;
+    }
+
+    .vertical {
+        max-width: 580px;
+        margin: 0 auto;
+    }
+
 }
 
 @media(max-width: 1200px) and (min-width: 601px){
+
+    .thousand_twoHundred {
+        display: block;
+    }
 
     .home {
         padding-left: 5px;
@@ -716,7 +763,7 @@ input[type="radio"]:checked::before {
         margin: 0 auto;
         margin-top: 15px;
         margin-bottom: 105px;
-        width: 75%;
+        width: 70%;
     }
     
     .title {
@@ -750,6 +797,15 @@ input[type="radio"]:checked::before {
         padding-left: 10px;
     }
 
+    .overallCategDistrib {
+        margin-top: 12px;
+    }
+
+    .click-title, .hotKeywords_sorted, .forum_sorted {
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+
 }
 
 @media(max-width: 600px){
@@ -758,8 +814,12 @@ input[type="radio"]:checked::before {
         padding-left: 5px;
     }
 
-    .searchKeyword_input{
+    .searchKeyword_input {
         width: 225px; 
+    }
+
+    .searchKeyword_button {
+        margin-left: 346px; 
     }
 
     .pop-up-survey, .pop-up-filter {
@@ -820,6 +880,16 @@ input[type="radio"]:checked::before {
 
     .filterCriteria {
         margin-left: 200px;
+    }
+
+    .overallCategDistrib {
+        max-width: 95%;
+        height: 300px;
+    }
+
+    .vertical {
+        width: 100%;
+        margin: 0 auto;
     }
 
 }
