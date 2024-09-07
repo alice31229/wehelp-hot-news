@@ -9,5 +9,5 @@ Use the following techniques:
 4. Python wordcloud, networkx, langchain
 5. Python boto3
 6. Docker
-7. AWS - EC2, RDS, S3, Route53, Cloudfront
+7. AWS - EC2, RDS, S3, DynamoDB, Route53, Cloudfront
 8. Nginx
