@@ -1,3 +1,5 @@
+# Overview
+
 It's a platform gathering popular articles from pttbrain, storm, businesstoday and udn.
 
 Website: https://aliceta.cloud/
@@ -11,3 +13,12 @@ Use the following techniques:
 6. Docker
 7. AWS - EC2, RDS, S3, DynamoDB, Route53, Cloudfront
 8. Nginx
+
+
+# Technical Flow
+
+![alt text](technical_flow.png)
+
+# Table Schema ERD
+
+![alt text](table_ERD.png)

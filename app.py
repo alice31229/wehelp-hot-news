@@ -650,7 +650,7 @@ async def get_previous_collection(payload: dict = Depends(login_required)):
     else:
 
         article_ids = [item['article_id']['S'] for item in collect_articles]
-        
+
         try:
             if article_ids != []:
                 # get article info from rds
@@ -663,8 +663,10 @@ async def get_previous_collection(payload: dict = Depends(login_required)):
                                 ON a.resource_id = r.id
                                 LEFT JOIN category AS c
                                 ON a.category_id = c.id
-                                WHERE id IN ({format_strings})'''
-                Cursor.execute(sql_query, *article_ids)
+                                WHERE a.id IN ({format_strings})
+                                ORDER BY date DESC;'''
+                
+                Cursor.execute(sql_query, tuple(article_ids))
                 
                 articles_info = Cursor.fetchall()
             
