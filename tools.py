@@ -10,20 +10,20 @@ load_dotenv(dotenv_path)
 
 # db config
 # local mysql settings
-db = mysql.connector.pooling.MySQLConnectionPool(
-    pool_name="sql_pool",
-    host=os.getenv('MYSQL_HOST'), # in same ec2 use localhost; otherwise, use the endpoint
-    user=os.getenv('MYSQL_USER'), 
-    password=os.getenv('MYSQL_PASSWORD'),
-	database=os.getenv("MYSQL_DB"))
+# db = mysql.connector.pooling.MySQLConnectionPool(
+#     pool_name="sql_pool",
+#     host=os.getenv('MYSQL_HOST'), # in same ec2 use localhost; otherwise, use the endpoint
+#     user=os.getenv('MYSQL_USER'), 
+#     password=os.getenv('MYSQL_PASSWORD'),
+# 	database=os.getenv("MYSQL_DB"))
 
 # aws rds mysql settings
-# db = mysql.connector.pooling.MySQLConnectionPool(
-#         pool_name = "sql_pool",
-#         host=os.getenv("AWS_RDS_HOSTNAME"),
-#         user=os.getenv("AWS_RDS_USER"),
-#         password=os.getenv("AWS_RDS_PASSWORD"),
-#         database=os.getenv("AWS_RDS_DB"))
+db = mysql.connector.pooling.MySQLConnectionPool(
+        pool_name = "sql_pool",
+        host=os.getenv("AWS_RDS_HOSTNAME"),
+        user=os.getenv("AWS_RDS_USER"),
+        password=os.getenv("AWS_RDS_PASSWORD"),
+        database=os.getenv("AWS_RDS_DB"))
 
 def get_12_articles_by_keyword(page, kw):
      

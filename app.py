@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 
 
 import jwt
-import redis
+#import redis
 import bcrypt
 import mysql.connector
 #from typing import Optional
@@ -26,7 +26,7 @@ dotenv_path = os.path.join(os.path.dirname(__file__), './config/.env')
 load_dotenv(dotenv_path)
 
 # 連接 Redis
-redis_client = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+#redis_client = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
 
 # trending-news
 @app.get("/", include_in_schema=False)
@@ -652,20 +652,21 @@ async def get_previous_collection(payload: dict = Depends(login_required)):
         article_ids = [item['article_id']['S'] for item in collect_articles]
         
         try:
-            # get article info from rds
-            con = db.get_connection()
-            Cursor = con.cursor(dictionary=True)
-            format_strings = ','.join(['%s'] * len(article_ids))
-            sql_query = f'''SELECT a.id, a.category, a.title, r.resource, a.date, a.url, a.wordcloud 
-                          FROM articles AS a
-                          INNER JOIN resource AS r
-                          ON a.resource_id = r.id
-                          WHERE id IN ({format_strings})'''
-            Cursor.execute(sql_query, tuple(article_ids))
-            
-            articles_info = Cursor.fetchall()
-
-            if len(articles_info) != 0:
+            if article_ids != []:
+                # get article info from rds
+                con = db.get_connection()
+                Cursor = con.cursor(dictionary=True)
+                format_strings = ','.join(['%s'] * len(article_ids))
+                sql_query = f'''SELECT a.id, c.category, a.title, r.resource, DATE(a.date) AS date, a.url, a.wordcloud 
+                                FROM articles AS a
+                                LEFT JOIN resource AS r
+                                ON a.resource_id = r.id
+                                LEFT JOIN category AS c
+                                ON a.category_id = c.id
+                                WHERE id IN ({format_strings})'''
+                Cursor.execute(sql_query, *article_ids)
+                
+                articles_info = Cursor.fetchall()
             
                 result_json['data'] = articles_info
 
@@ -734,8 +735,8 @@ async def delete_collection(collect_info: collect_info):
     
 
 if __name__ == '__main__':
-    #uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
-	uvicorn.run("app:app", port=8000, reload=True)
+    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
+	#uvicorn.run("app:app", port=8000, reload=True)
      
     
 ##########################
