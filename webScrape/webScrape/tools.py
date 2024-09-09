@@ -180,20 +180,20 @@ def unify_forum_to_db():
         new_df = pd.read_csv(f'./data_ETL/wordcloud_network_overview/all_{yesterday}.csv')
 
         new_df['統一文章類別'] = new_df['文章類別'].map(forum_mapping_dict) 
-        new_df.to_csv('category-test.csv', index=False)
+        #new_df.to_csv('category-test.csv', index=False)
 
         final_df = new_df.merge(category_id_mapping_df, left_on='統一文章類別', right_on='category', how='left')
         final_df = final_df.merge(resource_id_mapping_df, left_on='文章來源', right_on='resource', how='left')
 
-        final_df.to_csv('category-check-20240904.csv', index=False)
+        #final_df.to_csv('category-check-20240904.csv', index=False)
 
         # rename column names
 
         final_df = final_df[['id','文章類別','文章標題','文章內容','resource_id','日期','文章網址','文字雲','關係圖','文章摘要']]
         final_df = final_df.rename(columns={'id': '文章類別編號', 'resource_id': '文章來源編號'})
 
-        print(final_df['文章類別編號'].unique())
-        print(final_df[final_df['文章類別編號'].isna()], final_df.shape, final_df[final_df['文章類別編號'].isna()].shape)
+        #print(final_df['文章類別編號'].unique())
+        #print(final_df[final_df['文章類別編號'].isna()], final_df.shape, final_df[final_df['文章類別編號'].isna()].shape)
 
         final_df['文章類別編號'] = final_df['文章類別編號'].astype(int)
 
