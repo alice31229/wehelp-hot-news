@@ -64,7 +64,8 @@ def get_pttbrain(pages=20):
 
             target_date = article.find('div', {'class': 'description'}).getText().strip()
             #today = datetime.now().strftime('%Y-%m-%d')
-            yesterday = datetime.now() - timedelta(days=1)
+            #yesterday = datetime.now() - timedelta(days=1)
+            yesterday = datetime.now()
             yesterday = yesterday.strftime('%Y-%m-%d')
 
             if target_date == yesterday: # 只抓目標日期的資訊

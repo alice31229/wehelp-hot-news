@@ -10,6 +10,7 @@ from tools import handle_wordcloud_network_overview, unify_forum_to_db, insert_i
 # 3. unify articles category from different resource -> unify_forum_to_db()
 # 4. save the clean articles data into db -> insert_into_articles()
 # 5. produce hot keywords from new articles -> generate_hot_keywords()
+# 6. delete those not in need data from articles and hotKeywords 7 days ago
 
 # 2. wordcloud, network, overview
 handle_wordcloud_network_overview()

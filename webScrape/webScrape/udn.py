@@ -49,7 +49,8 @@ def get_udn(scroll_time=3):
             for i in range(len(titles)):
 
                 time_judge = times[i].text[:10]
-                yesterday = datetime.now() - timedelta(days=1)
+                #yesterday = datetime.now() - timedelta(days=1)
+                yesterday = datetime.now()
                 yesterday = yesterday.strftime('%Y-%m-%d')
                 
                 if time_judge == yesterday:
@@ -77,7 +78,8 @@ def get_udn(scroll_time=3):
             for i in range(len(titles)):
 
                 time_judge = times[i].text[:10]
-                yesterday = datetime.now() - timedelta(days=1)
+                #yesterday = datetime.now() - timedelta(days=1)
+                yesterday = datetime.now()
                 yesterday = yesterday.strftime('%Y-%m-%d')
                 
                 if time_judge == yesterday:

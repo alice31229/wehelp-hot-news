@@ -36,6 +36,110 @@ db = mysql.connector.pooling.MySQLConnectionPool(
 #         password=os.getenv("AWS_RDS_PASSWORD"),
 #         database="messagePhoto")
 
+
+def delete_s3_wc_nw_imgs():
+
+    try:
+        con = db.get_connection()
+        Cursor = con.cursor(dictionary=True)
+        
+        query_wordcloud_network_delete = '''SELECT wordcloud, network FROM articlesDelete;'''
+
+        Cursor.execute(query_wordcloud_network_delete)
+        wordcloud_network_result = Cursor.fetchall()
+
+        df = pd.DataFrame(wordcloud_network_result)
+
+        #print(df)
+
+
+        # AWS S3 settings
+        session = boto3.Session(
+            aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+            aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+            region_name=os.getenv("AWS_REGION")
+        )
+        s3 = session.client('s3')
+
+        # S3 bucket & photo id
+        bucket_name = os.getenv('AWS_BUCKET_NAME')
+
+        for ind in range(df.shape[0]):
+
+            wc = df['wordcloud'][ind][48:]
+            nw = df['network'][ind][46:]
+
+            s3_object_key_wc = f'wordcloud/{wc}'
+            s3_object_key_nw = f'network/{nw}'
+
+            
+            # delete photo from S3
+            s3.delete_object(Bucket=bucket_name, Key=s3_object_key_wc)
+            s3.delete_object(Bucket=bucket_name, Key=s3_object_key_nw)
+            
+            print(str(ind) + ' done')
+
+        #delete_articlesDelete_data = '''TRUNCATE TABLE articlesDelete;'''
+
+
+    except mysql.connector.Error as e:
+
+        print(f"An error occurred: {str(e)}")
+        
+
+    finally:
+        con.close()
+        Cursor.close()
+
+
+def delete_collect_records_week_ago():
+
+
+
+    return True
+
+
+# delete unnecessary data from articles and hotKeywords 7 days ago part
+def delete_week_ago_data():
+
+    '''
+    1. insert into articlesDelete from articles for s3 images handles
+    2. delete articles and hotKeywords data 7 days ago
+    3. s3 images of wordcloud and network deletion
+    4. delete collect data for those articles 7 days ago 
+    5. delete data from articlesDelete
+    '''
+
+    try:
+        con = db.get_connection()
+        Cursor = con.cursor(dictionary=True)
+
+        insert_sql = '''INSERT INTO articlesDelete
+                        SELECT *
+                        FROM articles
+                        WHERE date(date) < CURDATE() - INTERVAL 7 DAY;'''
+        
+        delete_articles_sql = '''DELETE FROM articles
+                                 WHERE DATE(date) < CURDATE() - INTERVAL 7 DAY;'''
+        
+        delete_hot_keywords_sql = '''DELETE FROM hotKeywords
+                                     WHERE DATE(hot_kwd_date) < CURDATE() - INTERVAL 7 DAY;'''
+        
+        query_wordcloud_network_delete = '''SELECT wordcloud, network FROM articlesDelete;'''
+
+        delete_articlesDelete_data = '''TRUNCATE TABLE articlesDelete;'''
+
+
+    except mysql.connector.Error as e:
+
+        print(f"An error occurred: {str(e)}")
+        
+
+    finally:
+        con.close()
+        Cursor.close()
+
+
 # article content clean
 def clean_content(content):
     '''
@@ -615,6 +719,8 @@ def handle_wordcloud_network_overview():
     for index, row in df.iterrows():
         title = row['文章標題']
         content = row['文章內容']
+
+        content = content.replace('closeAdvertisementstaiwanese_weather [webstory]-20240909-23:00CANCELNEXT VIDEOplay_arrowvolume_mutePausePlay% buffered00:0000:0000:42UnmuteMutePlayPowered by GliaStudio', '')
 
         s3_uuid_wc, s3_uuid_nw = generate_image_upload_s3(title, content)
         wordcloud.append(s3_uuid_wc)
