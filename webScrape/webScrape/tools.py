@@ -92,11 +92,74 @@ def delete_s3_wc_nw_imgs():
         Cursor.close()
 
 
+def delete_by_article_id_with_scan(article_ids):
+
+    dynamodb = boto3.resource(
+        'dynamodb',
+        aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+        aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+        region_name=os.getenv("AWS_REGION")
+    )
+
+    table_name = os.getenv("AWS_DYNAMODB") 
+    table = dynamodb.Table(table_name)
+
+    try:
+        
+        response = table.scan()
+        items = response['Items']
+
+        # 遍历扫描结果并删除
+        for item in items:
+            
+            article_id = item['article_id']
+            if article_id not in article_ids:
+                member_id = item['member_id']
+                # 删除指定记录
+                table.delete_item(
+                    Key = {
+                        'member_id': member_id,
+                        'article_id': article_id
+                    }
+                )
+                print(f"Deleted record with member_id: {member_id}, article_id: {article_id}")
+
+    except Exception as e:
+        print(f"Error deleting records: {e}")
+
+
 def delete_collect_records_week_ago():
 
+    try:
+        con = db.get_connection()
+        Cursor = con.cursor(dictionary=True)
+        
+        collect_articles_delete = '''SELECT id FROM articles;'''
+
+        Cursor.execute(collect_articles_delete)
+        delete_list_result = Cursor.fetchall()
+
+        df = pd.DataFrame(delete_list_result)
+        df['id'] = df['id'].astype(str)
+
+        check_ids = set(df['id'])
 
 
-    return True
+        delete_by_article_id_with_scan(check_ids)
+
+
+        return True
+
+
+    except mysql.connector.Error as e:
+
+        print(f"An error occurred: {str(e)}")
+        
+
+    finally:
+
+        con.close()
+        Cursor.close()
 
 
 # delete unnecessary data from articles and hotKeywords 7 days ago part
@@ -119,15 +182,33 @@ def delete_week_ago_data():
                         FROM articles
                         WHERE date(date) < CURDATE() - INTERVAL 7 DAY;'''
         
+        Cursor.execute(insert_sql)
+        con.commit()
+        print('get 7 days ago data')
+        
         delete_articles_sql = '''DELETE FROM articles
                                  WHERE DATE(date) < CURDATE() - INTERVAL 7 DAY;'''
+        Cursor.execute(delete_articles_sql)
+        con.commit()
+        print('delete 7 days ago articles')
         
         delete_hot_keywords_sql = '''DELETE FROM hotKeywords
                                      WHERE DATE(hot_kwd_date) < CURDATE() - INTERVAL 7 DAY;'''
+        Cursor.execute(delete_hot_keywords_sql)
+        con.commit()
+        print('delete 7 days ago hot keywords')
         
-        query_wordcloud_network_delete = '''SELECT wordcloud, network FROM articlesDelete;'''
+        #query_wordcloud_network_delete = '''SELECT wordcloud, network FROM articlesDelete;'''
+        delete_s3_wc_nw_imgs()
+        print('delete 7 days agor wordcloud and network imgs')
+
+        delete_collect_records_week_ago()
+        print('delete 7 days ago articles collected records')
 
         delete_articlesDelete_data = '''TRUNCATE TABLE articlesDelete;'''
+        Cursor.execute(delete_articlesDelete_data)
+        con.commit()
+        print('clear articlesDelete records')
 
 
     except mysql.connector.Error as e:

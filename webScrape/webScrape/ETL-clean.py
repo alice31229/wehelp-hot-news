@@ -1,5 +1,5 @@
 # handle articles data functions
-from tools import handle_wordcloud_network_overview, unify_forum_to_db, insert_into_articles, generate_hot_keywords
+from tools import handle_wordcloud_network_overview, unify_forum_to_db, insert_into_articles, generate_hot_keywords, delete_week_ago_data
 
 # test outcome quality functions
 
@@ -10,7 +10,7 @@ from tools import handle_wordcloud_network_overview, unify_forum_to_db, insert_i
 # 3. unify articles category from different resource -> unify_forum_to_db()
 # 4. save the clean articles data into db -> insert_into_articles()
 # 5. produce hot keywords from new articles -> generate_hot_keywords()
-# 6. delete those not in need data from articles and hotKeywords 7 days ago
+# 6. delete those not in need data from articles and hotKeywords 7 days ago -> delete_week_ago_data()
 
 # 2. wordcloud, network, overview
 handle_wordcloud_network_overview()
@@ -23,6 +23,9 @@ insert_into_articles()
 
 # 5. produce hot keywords from new articles
 generate_hot_keywords()
+
+# 6. delete 7 days ago related articles records
+delete_week_ago_data()
 
 ####################################
 # unit test for each process of data pipeline
