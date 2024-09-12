@@ -8,7 +8,7 @@ from selenium import webdriver
 from time import sleep
 from datetime import datetime, timedelta
 import pandas as pd
-from tools import generate_image_upload_s3, get_summary_of_article, insert_into_articles, clean_content
+from tools import clean_content, clean_spaces
 
 import os
 from dotenv import load_dotenv
@@ -18,7 +18,7 @@ dotenv_path = os.path.join(os.path.dirname(__file__), '../../config/.env')
 load_dotenv(dotenv_path)
 
 
-def get_storm():
+def get_storm(pages=3):
 
     storm_url = "https://www.storm.mg/articles/"
     
@@ -41,17 +41,17 @@ def get_storm():
     url = []
     content = []
 
-    page = 1
-    while True:
-    #for i in range(pages):
-        # base_url = storm_url+str(i+1)
-        base_url = storm_url+str(page)
+    # page = 1
+    # while True:
+    for i in range(pages):
+        base_url = storm_url+str(i+1)
+        #base_url = storm_url+str(page)
         driver.get(base_url)
         sleep(5)
         soup = BeautifulSoup(driver.page_source, "html.parser")
         elements = soup.find_all("div", {"class": "category_card card_thumbs_left"})
 
-        stop_scraping = False
+        # stop_scraping = False
     
         for element in elements:
 
@@ -91,13 +91,15 @@ def get_storm():
                 content.append(clean_txt)
 
             else:
-                stop_scraping = True
-                break
+                # stop_scraping = True
+                # break
+                pass
 
-        if stop_scraping:
-            break
-        else:
-            page+=1
+        # if stop_scraping:
+        #     break
+        # else:
+        #     page+=1
+        
 
             
     driver.quit()
@@ -115,6 +117,8 @@ def get_storm():
     #print(final['日期'].unique())
 
     final = final[final['日期']!=''] # 排除非會員點擊顯示的行銷文章頁面
+
+    final['文章類別'] = final['文章類別'].apply(clean_spaces)
 
     final.to_csv(f'./data_ETL/storm-test_{yesterday}.csv', index=False)
     print('storm done')

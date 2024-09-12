@@ -21,23 +21,39 @@ load_dotenv(dotenv_path)
 
 # db config
 # local mysql settings
-db = mysql.connector.pooling.MySQLConnectionPool(
-    pool_name="sql_pool",
-    host=os.getenv('MYSQL_HOST'), # in same ec2 use localhost; otherwise, use the endpoint
-    user=os.getenv('MYSQL_USER'), 
-    password=os.getenv('MYSQL_PASSWORD'),
-	database=os.getenv("MYSQL_DB"))
+def get_db():
+
+    db = mysql.connector.pooling.MySQLConnectionPool(
+            pool_name="sql_pool",
+            host=os.getenv('MYSQL_HOST'), 
+            user=os.getenv('MYSQL_USER'), 
+            password=os.getenv('MYSQL_PASSWORD'),
+            database=os.getenv("MYSQL_DB")
+        )
+    
+    return db
 
 # aws rds mysql settings
-# db_rds = mysql.connector.pooling.MySQLConnectionPool(
-#         pool_name = "sql_pool",
-#         host=os.getenv("AWS_RDS_HOSTNAME"),
-#         user=os.getenv("AWS_RDS_USER"),
-#         password=os.getenv("AWS_RDS_PASSWORD"),
-#         database="messagePhoto")
+# def get_db():
 
+#     db_rds = mysql.connector.pooling.MySQLConnectionPool(
+#                 pool_name = "sql_pool",
+#                 host=os.getenv("AWS_RDS_HOSTNAME"),
+#                 user=os.getenv("AWS_RDS_USER"),
+#                 password=os.getenv("AWS_RDS_PASSWORD"),
+#                 database=os.getenv("AWS_RDS_DB")
+#             )
+    
+#     return db_rds
+
+# 定義一個函數來處理空格
+def clean_spaces(text):
+    # 使用正則表達式將多個空格替換為單一空格
+    return re.sub(r'\s+', ' ', text.strip())
 
 def delete_s3_wc_nw_imgs():
+
+    db = get_db()
 
     try:
         con = db.get_connection()
@@ -130,6 +146,8 @@ def delete_by_article_id_with_scan(article_ids):
 
 def delete_collect_records_week_ago():
 
+    db = get_db()
+
     try:
         con = db.get_connection()
         Cursor = con.cursor(dictionary=True)
@@ -172,6 +190,8 @@ def delete_week_ago_data():
     4. delete collect data for those articles 7 days ago 
     5. delete data from articlesDelete
     '''
+
+    db = get_db()
 
     try:
         con = db.get_connection()
@@ -244,6 +264,8 @@ def unify_forum_category():
     from langchain_openai import ChatOpenAI
     from langchain.prompts import PromptTemplate
 
+    db = get_db()
+
     try:
         con = db.get_connection()
         Cursor = con.cursor(dictionary=True)
@@ -260,8 +282,6 @@ def unify_forum_category():
 
         new_forum_result = all['文章類別'].unique()
 
-        ###
-
         chat_model = ChatOpenAI(model_name="gpt-4o", temperature=0.7)
 
         # 創建 PromptTemplate
@@ -269,8 +289,8 @@ def unify_forum_category():
             input_variables=["prev_forum_result", "new_forum_result"],
             template="""
             請根據提供的先前文章類別來對新的文章類別進行歸類。若發現現有類別不適合，可以創建新的類別，
-            我希望得到一個dictionary，其中key是先前文章類別，不要更動值，例如'NBA ( NBA )'請保留完整'NBA ( NBA )'，'風生活 國內  台北 時事話題'就是'風生活 國內  台北 時事話題'，value是歸類後的文章類別，其中歸類後的文章類別不要出現英文。
-            像是 {{'風生活 國內 理財 時事話題': '生活', '風生活 財經': '財經', '八卦 ( Gossiping )': '八卦', 'NBA ( NBA )': '運動',...}}。
+            我希望得到一個dictionary，其中key是先前文章類別，不要更動值，例如'八卦 ( Gossiping )'請保留完整'八卦 ( Gossiping )'，'風生活 國內  台北 時事話題'就是'風生活 國內  台北 時事話題'，value是歸類後的文章類別，其中歸類後的文章類別不要出現英文。
+            像是 {{'風生活 國內 理財 時事話題': '生活', '風生活 財經': '財經', '八卦 ( Gossiping )': '八卦', 'NBA ( NBA )': '運動'}}。
             不用解釋整理過程，我只需要整理結果即可。
             先前文章類別: {prev_forum_result}
             新的文章類別: {new_forum_result}
@@ -299,7 +319,7 @@ def unify_forum_category():
         json_str = json_str.replace(r'\n', '')
         forum_dict = json.loads(json_str)
 
-        print(forum_dict)
+        #print(forum_dict)
 
         # new category unique
         unique_forum_value = set(forum_dict.values())
@@ -317,12 +337,10 @@ def unify_forum_category():
 
         return forum_dict
 
-        ###
 
     except mysql.connector.Error as e:
 
         print(f"An error occurred: {str(e)}")
-        return False
 
     finally:
         con.close()
@@ -340,6 +358,8 @@ def unify_forum_to_db():
     for k,v in forum_mapping_dict.items():
         print(k, ':',v)
         print('##############')
+
+    db = get_db()
 
     try:
         con = db.get_connection()
@@ -365,12 +385,15 @@ def unify_forum_to_db():
         new_df = pd.read_csv(f'./data_ETL/wordcloud_network_overview/all_{yesterday}.csv')
 
         new_df['統一文章類別'] = new_df['文章類別'].map(forum_mapping_dict) 
-        #new_df.to_csv('category-test.csv', index=False)
+        new_df.to_csv('category-test.csv', index=False)
+
+        new_df.loc[new_df['文章類別'] == '風生活  娛樂 影視', '統一文章類別'] = '生活'
+        new_df.loc[new_df['文章類別'] == '風生活 房地產  台北 房市', '統一文章類別'] = '房地產'
 
         final_df = new_df.merge(category_id_mapping_df, left_on='統一文章類別', right_on='category', how='left')
         final_df = final_df.merge(resource_id_mapping_df, left_on='文章來源', right_on='resource', how='left')
 
-        #final_df.to_csv('category-check-20240904.csv', index=False)
+        #final_df.to_csv('category-check-20240912.csv', index=False)
 
         # rename column names
 
@@ -390,7 +413,6 @@ def unify_forum_to_db():
     except mysql.connector.Error as e:
 
         print(f"An error occurred: {str(e)}")
-        return False
 
     finally:
         con.close()
@@ -403,6 +425,8 @@ def insert_into_articles():
     yesterday = datetime.now() - timedelta(days=1)
     yesterday = yesterday.strftime('%Y-%m-%d')
     df = pd.read_csv(f'./data_ETL/ready_for_db/all_{yesterday}.csv')
+
+    db = get_db()
     
     try:
         # 建立插入語句  update current columns
@@ -439,6 +463,8 @@ def generate_hot_keywords():
     '''
 
     try:
+
+        db = get_db()
 
         hot_kwds_sql = '''SELECT title, content, resource_id
                           FROM articles
@@ -540,26 +566,6 @@ def generate_hot_keywords():
         Cursor.close()
 
 
-
-# each resource and overall category calculation
-sql_each_resource = '''SELECT resource, category, COUNT(*) AS cnt
-                        FROM articles AS a
-                        LEFT JOIN category AS c
-                        ON a.category_id = c.id
-                        LEFT JOIN resource AS r
-                        ON a.resource_id = r.id
-                        GROUP BY resource, category
-                        ORDER BY resource, category'''
-
-sql_overall_category = '''SELECT category, COUNT(*) AS cnt
-                            FROM articles AS a
-                            LEFT JOIN category AS c
-                            ON a.category_id = c.id
-                            GROUP BY category
-                            '''
-
-
-
 ######################################
 
 def create_relationship_graph(word_freq, top_n=10):
@@ -630,8 +636,7 @@ def save_relationship_graph(G):
         pos, 
         labels=labels, 
         font_family=font_prop.get_name(), 
-        font_size=10#, 
-        #bbox=dict(facecolor='#FFFFE0', edgecolor='none', boxstyle='round,pad=0.3')  # Light yellow background
+        font_size=10
     )
 
     plt.axis('off')
@@ -755,9 +760,9 @@ def generate_image_upload_s3(title, content):
     
     # # AWS S3 settings
     session = boto3.Session(
-    aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
-    region_name=os.getenv("AWS_REGION")
+        aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+        aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+        region_name=os.getenv("AWS_REGION")
     )
     s3 = session.client('s3')
 

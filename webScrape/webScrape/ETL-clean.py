@@ -18,7 +18,7 @@ handle_wordcloud_network_overview()
 # 3. unify articles category from different resource
 unify_forum_to_db()
 
-# # 4. save the clean articles data into db
+# 4. save the clean articles data into db
 insert_into_articles()
 
 # 5. produce hot keywords from new articles
