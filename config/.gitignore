@@ -1,7 +1,7 @@
 .env
 **/chromedriver
 **/dict.txt.big.txt
-**/stop_words_ch_filter.txt
+**/stop_words_ch_filer.txt
 **/stopwords.txt
 *ipynb*
 **/__pycache__/
