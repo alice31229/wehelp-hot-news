@@ -249,6 +249,7 @@ def clean_content(content):
     url_pattern = r'https?://[^\s]+'
     result_content = re.sub(url_pattern, '', content)
     result_content = result_content.replace('原文連結', '')
+    result_content = result_content.replace('closeAdvertisementstaiwanese_weather [webstory]-20240912-23:00CANCELNEXT VIDEOplay_arrowvolume_mutePausePlay% buffered00:0000:0000:42UnmuteMutePlayPowered by GliaStudio', '')
 
     return result_content
 
@@ -289,8 +290,8 @@ def unify_forum_category():
             input_variables=["prev_forum_result", "new_forum_result"],
             template="""
             請根據提供的先前文章類別來對新的文章類別進行歸類。若發現現有類別不適合，可以創建新的類別，
-            我希望得到一個dictionary，其中key是先前文章類別，不要更動值，例如'八卦 ( Gossiping )'請保留完整'八卦 ( Gossiping )'，'風生活 國內  台北 時事話題'就是'風生活 國內  台北 時事話題'，value是歸類後的文章類別，其中歸類後的文章類別不要出現英文。
-            像是 {{'風生活 國內 理財 時事話題': '生活', '風生活 財經': '財經', '八卦 ( Gossiping )': '八卦', 'NBA ( NBA )': '運動'}}。
+            我希望得到一個dictionary，其中key是新的文章類別，value是歸類後的文章類別，歸類後的文章類別不要出現英文。
+            回傳範例： {{'風生活 國內 理財 時事話題': '生活', '風生活 財經': '財經', '八卦 ( Gossiping )': '八卦', 'NBA ( NBA )': '運動'}}。
             不用解釋整理過程，我只需要整理結果即可。
             先前文章類別: {prev_forum_result}
             新的文章類別: {new_forum_result}
@@ -387,11 +388,12 @@ def unify_forum_to_db():
         new_df['統一文章類別'] = new_df['文章類別'].map(forum_mapping_dict) 
         new_df.to_csv('category-test.csv', index=False)
 
-        new_df.loc[new_df['文章類別'] == '風生活  娛樂 影視', '統一文章類別'] = '生活'
-        new_df.loc[new_df['文章類別'] == '風生活 房地產  台北 房市', '統一文章類別'] = '房地產'
+        # new_df.loc[new_df['文章類別'] == 'Oops', '統一文章類別'] = '八卦'
 
         final_df = new_df.merge(category_id_mapping_df, left_on='統一文章類別', right_on='category', how='left')
         final_df = final_df.merge(resource_id_mapping_df, left_on='文章來源', right_on='resource', how='left')
+
+        print(final_df['統一文章類別'].unique())
 
         #final_df.to_csv('category-check-20240912.csv', index=False)
 
