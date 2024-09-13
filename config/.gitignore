@@ -4,5 +4,7 @@
 **/stop_words_ch_filer.txt
 **/stopwords.txt
 *ipynb*
+**/.ipynb_checkpoints
+**/.DS_Store
 **/__pycache__/
 category.json
