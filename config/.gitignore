@@ -1,10 +1,10 @@
 .env
 **/chromedriver
 **/dict.txt.big.txt
-**/stop_words_ch_filer.txt
+**/stop_words_ch_filter.txt
 **/stopwords.txt
 *ipynb*
 **/.ipynb_checkpoints
 **/.DS_Store
 **/__pycache__/
-category.json
+**/category.json
