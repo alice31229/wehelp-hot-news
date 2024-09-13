@@ -3,3 +3,6 @@
 **/dict.txt.big.txt
 **/stop_words_ch_filter.txt
 **/stopwords.txt
+*ipynb*
+**/__pycache__/
+category.json
