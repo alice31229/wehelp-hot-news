@@ -14,7 +14,7 @@ dotenv_path = os.path.join(os.path.dirname(__file__), '../../config/.env')
 load_dotenv(dotenv_path)
 
 
-def get_udn(scroll_time=3):
+def get_udn(scroll_time=5):
 
     opt = webdriver.ChromeOptions()
     opt.chrome_executable_path='./chromedriver'
@@ -49,8 +49,8 @@ def get_udn(scroll_time=3):
             for i in range(len(titles)):
 
                 time_judge = times[i].text[:10]
-                #yesterday = datetime.now() - timedelta(days=1)
-                yesterday = datetime.now()
+                yesterday = datetime.now() - timedelta(days=1)
+                #yesterday = datetime.now()
                 yesterday = yesterday.strftime('%Y-%m-%d')
                 
                 if time_judge == yesterday:

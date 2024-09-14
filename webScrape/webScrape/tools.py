@@ -487,7 +487,7 @@ def generate_hot_keywords():
 
         # load stop words
         STOP_ch2 = []
-        with open("./stop_words_ch_filer.txt", 'r', encoding='utf-8') as f:
+        with open("./stop_words_ch_filter.txt", 'r', encoding='utf-8') as f:
             for line in f:
                 STOP_ch2.append(line.strip())
 
@@ -702,7 +702,7 @@ def generate_image_upload_s3(title, content):
     '''
 
     STOP_ch2 = []
-    with open("./stop_words_ch_filer.txt", 'r', encoding='utf-8') as f:
+    with open("./stop_words_ch_filter.txt", 'r', encoding='utf-8') as f:
         for line in f:
             STOP_ch2.append(line.strip())
 
