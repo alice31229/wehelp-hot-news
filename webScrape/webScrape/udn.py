@@ -1,9 +1,13 @@
 
+import time
+
 import pandas as pd
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from tools import clean_content
 
 import os
@@ -14,7 +18,7 @@ dotenv_path = os.path.join(os.path.dirname(__file__), '../../config/.env')
 load_dotenv(dotenv_path)
 
 
-def get_udn(scroll_time=5):
+def get_udn(scroll_time=3):
 
     opt = webdriver.ChromeOptions()
     opt.chrome_executable_path='./chromedriver'
@@ -49,8 +53,8 @@ def get_udn(scroll_time=5):
             for i in range(len(titles)):
 
                 time_judge = times[i].text[:10]
-                yesterday = datetime.now() - timedelta(days=1)
-                #yesterday = datetime.now()
+                #yesterday = datetime.now() - timedelta(days=1)
+                yesterday = datetime.now()
                 yesterday = yesterday.strftime('%Y-%m-%d')
                 
                 if time_judge == yesterday:
@@ -78,8 +82,8 @@ def get_udn(scroll_time=5):
             for i in range(len(titles)):
 
                 time_judge = times[i].text[:10]
-                yesterday = datetime.now() - timedelta(days=1)
-                #yesterday = datetime.now()
+                #yesterday = datetime.now() - timedelta(days=1)
+                yesterday = datetime.now()
                 yesterday = yesterday.strftime('%Y-%m-%d')
                 
                 if time_judge == yesterday:
@@ -98,6 +102,13 @@ def get_udn(scroll_time=5):
     content = []
     for url in link:
         driver.get(url)
+
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, '/html/body/main/div/section[2]/section/article/div/section[1]'))
+        )
+
+        time.sleep(5)
+
         soup = BeautifulSoup(driver.page_source, "html.parser")
         section = soup.find("section", {'class': 'article-content__editor'})
         content_ps = section.find_all('p')

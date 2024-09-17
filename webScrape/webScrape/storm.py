@@ -59,12 +59,12 @@ def get_storm(pages=3):
 
             time = time[:10]
             date_judge = datetime.strptime(time, '%Y-%m-%d').date()
-            #today = datetime.now().date()
-            yesterday = (datetime.now() - timedelta(days=1)).date()
+            today = datetime.now().date()
+            #yesterday = (datetime.now() - timedelta(days=1)).date()
             #yesterday = yesterday.strftime('%Y-%m-%d')
             
-            if date_judge == yesterday:
-            #if date_judge == today:
+            #if date_judge == yesterday:
+            if date_judge == today:
 
                 date.append(time)
 
@@ -120,7 +120,8 @@ def get_storm(pages=3):
 
     final['文章類別'] = final['文章類別'].apply(clean_spaces)
 
-    final.to_csv(f'./data_ETL/storm-test_{yesterday}.csv', index=False)
+    #final.to_csv(f'./data_ETL/storm-test_{yesterday}.csv', index=False)
+    final.to_csv(f'./data_ETL/storm-test_{today}.csv', index=False)
     print('storm done')
 
 get_storm()
