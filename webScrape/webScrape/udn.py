@@ -103,9 +103,9 @@ def get_udn(scroll_time=3):
     for url in link:
         driver.get(url)
 
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, '/html/body/main/div/section[2]/section/article/div/section[1]'))
-        )
+        # WebDriverWait(driver, 10).until(
+        #     EC.presence_of_element_located((By.XPATH, '/html/body/main/div/section[2]/section/article/div/section[1]'))
+        # )
 
         time.sleep(5)
 

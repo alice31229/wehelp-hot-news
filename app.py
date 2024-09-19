@@ -22,7 +22,7 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # .env for config
-dotenv_path = os.path.join(os.path.dirname(__file__), './config/.env')
+dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
 # 連接 Redis

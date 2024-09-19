@@ -8,3 +8,5 @@
 **/__pycache__/
 **/category.json
 **/*.csv
+**/test.py
+**/all-test.py

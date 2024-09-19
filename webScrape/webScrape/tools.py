@@ -15,14 +15,14 @@ from wordcloud import WordCloud
 import io
 from collections import Counter
 
-# get .env under config directory
+# get .env 
 dotenv_path = os.path.join(os.path.dirname(__file__), '../../.env')
 load_dotenv(dotenv_path)
 
 # db config
-# local mysql settings
 def get_db():
 
+    # local mysql settings
     db = mysql.connector.pooling.MySQLConnectionPool(
             pool_name="sql_pool",
             host=os.getenv('MYSQL_HOST'), 
@@ -33,18 +33,17 @@ def get_db():
     
     return db
 
-# aws rds mysql settings
-# def get_db():
-
-#     db_rds = mysql.connector.pooling.MySQLConnectionPool(
-#                 pool_name = "sql_pool",
-#                 host=os.getenv("AWS_RDS_HOSTNAME"),
-#                 user=os.getenv("AWS_RDS_USER"),
-#                 password=os.getenv("AWS_RDS_PASSWORD"),
-#                 database=os.getenv("AWS_RDS_DB")
-#             )
+    # aws rds mysql settings
+    # db_rds = mysql.connector.pooling.MySQLConnectionPool(
+    #             pool_name = "sql_pool",
+    #             host=os.getenv("AWS_RDS_HOSTNAME"),
+    #             user=os.getenv("AWS_RDS_USER"),
+    #             password=os.getenv("AWS_RDS_PASSWORD"),
+    #             database=os.getenv("AWS_RDS_DB")
+    #         )
     
-#     return db_rds
+    # return db_rds
+
 
 # 定義一個函數來處理空格
 def clean_spaces(text):

@@ -23,7 +23,8 @@ db = mysql.connector.pooling.MySQLConnectionPool(
         host=os.getenv("AWS_RDS_HOSTNAME"),
         user=os.getenv("AWS_RDS_USER"),
         password=os.getenv("AWS_RDS_PASSWORD"),
-        database=os.getenv("AWS_RDS_DB"))
+        database=os.getenv("AWS_RDS_DB")
+    )
 
 def get_12_articles_by_keyword(page, kw):
      
