@@ -2,8 +2,6 @@
 
 It's a platform gathering popular articles from pttbrain, storm, businesstoday and udn.
 
-Website: https://aliceta.cloud/
-
 Use the following techniques:
 1. HTML/CSS/JavaScript
 2. Python FastAPI
@@ -14,11 +12,16 @@ Use the following techniques:
 7. AWS - EC2, RDS, S3, DynamoDB, Route53, Cloudfront
 8. Nginx
 
+Website: https://aliceta.cloud/
+
+Tesing account:
+- username: test 
+- password: test
 
 # Technical Flow
 
-![alt text](technical_flow.png)
+![alt text](/readme/technical_flow.png)
 
 # Table Schema ERD
 
-![alt text](table_ERD.png)
+![alt text](/readme/hot_news_ERD.png)

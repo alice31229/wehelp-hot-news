@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 import mysql.connector
-import uvicorn
+#import uvicorn
 from fastapi import *
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -65,7 +65,7 @@ async def handle_articles_page(page: int = Query(0), keyword: str = Query('')):
 @app.get("/api/article/{id}")
 async def get_target_article_info(id: int):
 	
-    from tools import db, Cache
+    from tools import get_db, Cache
 
     # 如果快取有資料 就直接拿 沒有就去資料庫抓
     result = Cache.get("article-"+str(id))
@@ -74,7 +74,7 @@ async def get_target_article_info(id: int):
          return {'data': result}
 
     try:
-
+        db = get_db()
         con = db.get_connection()
         Cursor = con.cursor(dictionary=True)
 
@@ -121,7 +121,7 @@ async def get_target_article_info(id: int):
 @app.get("/api/hotkeywords") # elastic?
 async def get_hot_keywords():
      
-     from tools import db
+     from tools import get_db
 
      hot_keywords = []
 
@@ -130,6 +130,7 @@ async def get_hot_keywords():
                  FROM hotKeywords AS h
                  INNER JOIN resource AS r
                  ON h.resource_id = r.id;'''
+        db = get_db()
         con = db.get_connection()
         Cursor = con.cursor(dictionary=True)
         Cursor.execute(sql)
@@ -162,10 +163,11 @@ async def get_hot_keywords():
 @app.get("/api/filter-category")
 async def get_all_category():
      
-    from tools import db
+    from tools import get_db
 
     try:
         sql = '''SELECT * FROM category;'''
+        db = get_db()
         con = db.get_connection()
         Cursor = con.cursor(dictionary=True)
         Cursor.execute(sql)
@@ -231,7 +233,7 @@ async def get_demanded_articles(articles_requirements: articles_requirements):
 @app.get("/api/forums")
 async def get_forum_info():
 
-    from tools import db
+    from tools import get_db
     
     forums = []
 
@@ -242,6 +244,7 @@ async def get_forum_info():
                  ON a.category_id = c.id
                  GROUP BY c.category
                  ORDER BY 2 DESC;'''
+        db = get_db()
         con = db.get_connection()
         Cursor = con.cursor(dictionary=True)
         Cursor.execute(sql)
@@ -269,9 +272,12 @@ async def get_forum_info():
 @app.post("/api/resource-category-distribution")
 async def get_resource_category_info(resource_id: resourceID):
 
-    from tools import db
+    from tools import get_db
 
     try:
+
+        db = get_db()
+
         # sql = '''SELECT r.resource, c.category, COUNT(*) AS category_cnt
         #          FROM articles AS a
         #          LEFT JOIN category AS c
@@ -289,6 +295,7 @@ async def get_resource_category_info(resource_id: resourceID):
                     AND a.resource_id = %s
                     GROUP BY c.category
                     ORDER BY 2 DESC;'''
+            
             con = db.get_connection()
             Cursor = con.cursor(dictionary=True)
             Cursor.execute(sql, (resource_id.resourceId,))
@@ -302,6 +309,7 @@ async def get_resource_category_info(resource_id: resourceID):
                     WHERE DATE(date) = CURDATE() - INTERVAL 1 DAY
                     GROUP BY c.category
                     ORDER BY 2 DESC;'''
+            
             con = db.get_connection()
             Cursor = con.cursor(dictionary=True)
             Cursor.execute(sql)
@@ -391,7 +399,7 @@ def login_required(token: str = Depends(oauth2_scheme)):
 async def sign_in(member_info: member_log_in_info):
 #async def sign_in(email: str = Form(...), password: str = Form(...)):
 
-    from tools import db
+    from tools import get_db
 
     response_json = {}
 
@@ -407,6 +415,7 @@ async def sign_in(member_info: member_log_in_info):
         query = '''SELECT id, name, email, password, username, selfie FROM members WHERE username = %s;'''
         account = (member_info.username,)
 
+        db = get_db()
         con = db.get_connection()
         Cursor = con.cursor(dictionary=True)
         Cursor.execute(query, account)
@@ -483,13 +492,14 @@ async def get_user_info(token: str = Depends(oauth2_scheme)):
 @app.post("/api/user")
 async def enroll_account(user_info: user_info):
 
-    from tools import db
+    from tools import get_db
 
     response_json = {}
 
     # 確認是否已註冊
     try:
 
+        db = get_db()
         con = db.get_connection()
         Cursor = con.cursor(dictionary=True)
 
@@ -632,7 +642,7 @@ async def edit_member_info(member_update_info: member_update_info, payload: dict
 #async def get_previous_collection(member_id: int, page: int = Query(1)):
 async def get_previous_collection(payload: dict = Depends(login_required)):
 	
-    from tools import db, get_all_collection_member
+    from tools import get_db, get_all_collection_member
 
     result_json = {}  
 
@@ -654,6 +664,7 @@ async def get_previous_collection(payload: dict = Depends(login_required)):
         try:
             if article_ids != []:
                 # get article info from rds
+                db = get_db()
                 con = db.get_connection()
                 Cursor = con.cursor(dictionary=True)
                 format_strings = ','.join(['%s'] * len(article_ids))
@@ -736,110 +747,6 @@ async def delete_collection(collect_info: collect_info):
         return result_json
     
 
-if __name__ == '__main__':
-    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
+# if __name__ == '__main__':
+#     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
 	#uvicorn.run("app:app", port=8000, reload=True)
-     
-    
-##########################
-# 會員文章收藏 RDMS version
-
-# get collections
-# @app.get("/api/collect")
-# async def get_previous_collection(member_id: int, page: int = Query(1)):
-	
-#     result_json = {}
-	
-#     try:
-    
-#         sql = '''SELECT * FROM (
-# 		         SELECT a.title, a.forum, a.resource, a.date, a.url
-# 		         FROM collections AS c
-# 		         INNER JOIN articles AS a ON c.article_id = a.id
-# 				 WHERE c.member_id = %s
-# 				 ORDER BY c.collect_date DESC
-# 				 ) AS t
-# 				 LIMIT %s, %s;'''
-		
-#         con = db.get_connection()
-#         Cursor = con.cursor(dictionary=True)
-		
-#         page_size = 12 
-#         start = (page - 1) * 12
-#         get_collect = (member_id, (start, page_size))
-#         Cursor.execute(sql, get_collect)
-#         collect_articles = Cursor.fetchall()
-
-#         result_json['data'] = collect_articles
-		
-#         return result_json
-
-#     except Exception as e:
-
-#         raise CustomHTTPException(status_code=500, detail=str(e))
-
-#     finally:
-		
-#         con.close()
-#         Cursor.close()
-		
-
-# # collect article
-# @app.post("/api/collect")
-# async def insert_collection(collect_info: collect_info):
-	
-#     result_json = {}
-	
-#     try:
-    
-#         sql = '''INSERT INTO collections (member_id, article_id) VALUES (%s, %s);'''
-#         con = db.get_connection()
-#         Cursor = con.cursor(dictionary=True)
-		
-#         insert_collect = (collect_info.member_id, collect_info.article_id)
-#         Cursor.execute(sql, insert_collect)
-#         con.commit()
-
-#         result_json['ok'] = True
-		
-#         return result_json
-
-#     except Exception as e:
-
-#         raise CustomHTTPException(status_code=500, detail=str(e))
-
-#     finally:
-		
-#         con.close()
-#         Cursor.close()
-		
-
-# # delete article collection
-# @app.delete("/api/collect")
-# async def delete_collection(collect_info: collect_info):
-	
-#     result_json = {}
-	
-#     try:
-    
-#         sql = '''DELETE FROM collections WHERE member_id = %s AND article_id = %s;'''
-#         con = db.get_connection()
-#         Cursor = con.cursor(dictionary=True)
-		
-#         insert_collect = (collect_info.member_id, collect_info.article_id)
-#         Cursor.execute(sql, insert_collect)
-#         con.commit()
-
-#         result_json['ok'] = True
-		
-#         return result_json
-
-#     except Exception as e:
-
-#         raise CustomHTTPException(status_code=500, detail=str(e))
-
-#     finally:
-		
-#         con.close()
-#         Cursor.close()
-

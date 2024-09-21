@@ -139,6 +139,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 const fadeElement = document.getElementById('fade-sign-in');
                 fadeElement.classList.add('show');
                 signIn.style.display = 'flex';
+
+                // add default username and password
+                let defaultUsername = document.querySelector('#usernameID');
+                defaultUsername.value = 'test';
+                let defaultPassword = document.querySelector('#passwordID');
+                defaultPassword.value = 'test';
+
             }
         })
         closeSignIn.addEventListener('click', function(){
@@ -255,6 +262,13 @@ document.addEventListener("DOMContentLoaded", function () {
             signIn.style.display = 'flex';
             clearInputValue();
             adjustHeightAll();
+
+            // add default username and password
+            let defaultUsername = document.querySelector('#usernameID');
+            defaultUsername.value = 'test';
+            let defaultPassword = document.querySelector('#passwordID');
+            defaultPassword.value = 'test';
+
         })
         closeEnroll.addEventListener('click', function() {
             const fadeElement = document.getElementById('fade-sign-in');
@@ -574,6 +588,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 let signIn = document.querySelector('.pop-background-color-sign-in');
                 signIn.style.display = 'flex';
 
+                // add default username and password
+                let defaultUsername = document.querySelector('#usernameID');
+                defaultUsername.value = 'test';
+                let defaultPassword = document.querySelector('#passwordID');
+                defaultPassword.value = 'test';
+
             } else { // log in
 
                 let articleId = extractNumberFromPath(window.location.pathname);
@@ -642,6 +662,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 fadeElement.classList.add('show');
                 let signIn = document.querySelector('.pop-background-color-sign-in');
                 signIn.style.display = 'flex';
+
+                // add default username and password
+                let defaultUsername = document.querySelector('#usernameID');
+                defaultUsername.value = 'test';
+                let defaultPassword = document.querySelector('#passwordID');
+                defaultPassword.value = 'test';
 
             } else { // log in
 

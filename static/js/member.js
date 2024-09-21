@@ -429,6 +429,13 @@ document.addEventListener("DOMContentLoaded", async function () {
                         fadeElement.classList.add('show');
                         let signIn = document.querySelector('.pop-background-color-sign-in');
                         signIn.style.display = 'flex';
+
+                        // add default username and password
+                        let defaultUsername = document.querySelector('#usernameID');
+                        defaultUsername.value = 'test';
+                        let defaultPassword = document.querySelector('#passwordID');
+                        defaultPassword.value = 'test';
+
                     };
 
                 })
@@ -460,6 +467,12 @@ document.addEventListener("DOMContentLoaded", async function () {
                         
                                     let signIn = document.querySelector('.pop-background-color-sign-in');
                                     signIn.style.display = 'flex';
+
+                                    // add default username and password
+                                    let defaultUsername = document.querySelector('#usernameID');
+                                    defaultUsername.value = 'test';
+                                    let defaultPassword = document.querySelector('#passwordID');
+                                    defaultPassword.value = 'test';
 
                         
                                 } else {
@@ -673,6 +686,13 @@ document.addEventListener("DOMContentLoaded", async function () {
                         fadeElement.classList.add('show');
                         let signIn = document.querySelector('.pop-background-color-sign-in');
                         signIn.style.display = 'flex';
+
+                        // add default username and password
+                        let defaultUsername = document.querySelector('#usernameID');
+                        defaultUsername.value = 'test';
+                        let defaultPassword = document.querySelector('#passwordID');
+                        defaultPassword.value = 'test';
+
                     };
 
                 })
@@ -704,6 +724,12 @@ document.addEventListener("DOMContentLoaded", async function () {
                         
                                     let signIn = document.querySelector('.pop-background-color-sign-in');
                                     signIn.style.display = 'flex';
+
+                                    // add default username and password
+                                    let defaultUsername = document.querySelector('#usernameID');
+                                    defaultUsername.value = 'test';
+                                    let defaultPassword = document.querySelector('#passwordID');
+                                    defaultPassword.value = 'test';
 
                         
                                 } else {

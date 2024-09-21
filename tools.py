@@ -9,22 +9,29 @@ dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
 # db config
-# local mysql settings
-# db = mysql.connector.pooling.MySQLConnectionPool(
-#     pool_name="sql_pool",
-#     host=os.getenv('MYSQL_HOST'), # in same ec2 use localhost; otherwise, use the endpoint
-#     user=os.getenv('MYSQL_USER'), 
-#     password=os.getenv('MYSQL_PASSWORD'),
-# 	database=os.getenv("MYSQL_DB"))
+def get_db():
 
-# aws rds mysql settings
-db = mysql.connector.pooling.MySQLConnectionPool(
-        pool_name = "sql_pool",
-        host=os.getenv("AWS_RDS_HOSTNAME"),
-        user=os.getenv("AWS_RDS_USER"),
-        password=os.getenv("AWS_RDS_PASSWORD"),
-        database=os.getenv("AWS_RDS_DB")
-    )
+    # local mysql settings
+    # db = mysql.connector.pooling.MySQLConnectionPool(
+    #         pool_name="sql_pool",
+    #         host=os.getenv('MYSQL_HOST'), 
+    #         user=os.getenv('MYSQL_USER'), 
+    #         password=os.getenv('MYSQL_PASSWORD'),
+    #         database=os.getenv("MYSQL_DB")
+    #     )
+    
+    # return db
+
+    # aws rds mysql settings
+    db_rds = mysql.connector.pooling.MySQLConnectionPool(
+                pool_name = "sql_pool",
+                host=os.getenv("AWS_RDS_HOSTNAME"),
+                user=os.getenv("AWS_RDS_USER"),
+                password=os.getenv("AWS_RDS_PASSWORD"),
+                database=os.getenv("AWS_RDS_DB")
+            )
+    
+    return db_rds
 
 def get_12_articles_by_keyword(page, kw):
      
@@ -45,7 +52,7 @@ def get_12_articles_by_keyword(page, kw):
     keyword = (search_param, search_param, search_param, start, page_size)
 
     try:
-        
+        db = get_db()
         con = db.get_connection()
         Cursor = con.cursor(dictionary=True)
         Cursor.execute(sql, keyword)
@@ -256,7 +263,7 @@ def get_12_articles_by_filter(filter_requirements, page):
     print(sql, variables)
 
     try:
-        
+        db = get_db()
         con = db.get_connection()
         Cursor = con.cursor(dictionary=True)
         Cursor.execute(sql, variables)
@@ -293,49 +300,50 @@ def get_12_articles_by_filter(filter_requirements, page):
 # homepage infinite scroll data
 def get_12_articles_by_page(page):
 
-	try:
+    try:
 
-		con = db.get_connection()
-		Cursor = con.cursor(dictionary=True)
-		page_size = 24 # judge the nextPage
-		start = page * 12
+        db = get_db()
+        con = db.get_connection()
+        Cursor = con.cursor(dictionary=True)
+        page_size = 24 # judge the nextPage
+        start = page * 12
 
-		sql_12 = '''SELECT c.category, a.title, a.wordcloud, r.resource, DATE(a.date) AS date, a.id 
+        sql_12 = '''SELECT c.category, a.title, a.wordcloud, r.resource, DATE(a.date) AS date, a.id 
                     FROM articles AS a 
                     LEFT JOIN resource AS r ON a.resource_id = r.id 
                     LEFT JOIN category AS c ON a.resource_id = c.id 
                     ORDER BY date DESC
                     LIMIT %s, %s;'''
-		Cursor.execute(sql_12, (start, page_size))
-		demand_articles = Cursor.fetchall()
+        Cursor.execute(sql_12, (start, page_size))
+        demand_articles = Cursor.fetchall()
 
 
-		if len(demand_articles) > 12:
-		
-			return {'nextPage': page+1,
-					'data': demand_articles[:12]}
-		
-		elif len(demand_articles) < 13 and len(demand_articles) > 0:
+        if len(demand_articles) > 12:
 
-			return {'nextPage': None,
-					'data': demand_articles}
+            return {'nextPage': page+1,
+                    'data': demand_articles[:12]}
 
-		else:
+        elif len(demand_articles) < 13 and len(demand_articles) > 0:
 
-			return {'error': True,
-				    'message': '請輸入涵蓋文章資料的正確頁數'}
-			
+            return {'nextPage': None,
+                    'data': demand_articles}
 
-	except mysql.connector.Error as err:
+        else:
 
-		print(f"Error: {err}")
-		return {'error': True,
-				'message': '文章資料輸出錯誤'}
+            return {'error': True,
+                    'message': '請輸入涵蓋文章資料的正確頁數'}
+            
 
-	finally:
+    except mysql.connector.Error as err:
 
-		con.close()
-		Cursor.close()
+        print(f"Error: {err}")
+        return {'error': True,
+                'message': '文章資料輸出錯誤'}
+
+    finally:
+
+        con.close()
+        Cursor.close()
 
 
 ######################################
@@ -550,6 +558,7 @@ def update_selfie_s3(member_selfie_id, img_input, img_type):
 def update_member_info_rds(new_info):
 
     try:
+        db = get_db()
         con = db.get_connection()
         Cursor = con.cursor(dictionary=True)
 
@@ -574,3 +583,104 @@ def update_member_info_rds(new_info):
         Cursor.close()
 
     
+##########################
+# 會員文章收藏 RDMS version
+
+# get collections
+# @app.get("/api/collect")
+# async def get_previous_collection(member_id: int, page: int = Query(1)):
+	
+#     result_json = {}
+	
+#     try:
+    
+#         sql = '''SELECT * FROM (
+# 		         SELECT a.title, a.forum, a.resource, a.date, a.url
+# 		         FROM collections AS c
+# 		         INNER JOIN articles AS a ON c.article_id = a.id
+# 				 WHERE c.member_id = %s
+# 				 ORDER BY c.collect_date DESC
+# 				 ) AS t
+# 				 LIMIT %s, %s;'''
+		
+#         con = db.get_connection()
+#         Cursor = con.cursor(dictionary=True)
+		
+#         page_size = 12 
+#         start = (page - 1) * 12
+#         get_collect = (member_id, (start, page_size))
+#         Cursor.execute(sql, get_collect)
+#         collect_articles = Cursor.fetchall()
+
+#         result_json['data'] = collect_articles
+		
+#         return result_json
+
+#     except Exception as e:
+
+#         raise CustomHTTPException(status_code=500, detail=str(e))
+
+#     finally:
+		
+#         con.close()
+#         Cursor.close()
+		
+
+# # collect article
+# @app.post("/api/collect")
+# async def insert_collection(collect_info: collect_info):
+	
+#     result_json = {}
+	
+#     try:
+    
+#         sql = '''INSERT INTO collections (member_id, article_id) VALUES (%s, %s);'''
+#         con = db.get_connection()
+#         Cursor = con.cursor(dictionary=True)
+		
+#         insert_collect = (collect_info.member_id, collect_info.article_id)
+#         Cursor.execute(sql, insert_collect)
+#         con.commit()
+
+#         result_json['ok'] = True
+		
+#         return result_json
+
+#     except Exception as e:
+
+#         raise CustomHTTPException(status_code=500, detail=str(e))
+
+#     finally:
+		
+#         con.close()
+#         Cursor.close()
+		
+
+# # delete article collection
+# @app.delete("/api/collect")
+# async def delete_collection(collect_info: collect_info):
+	
+#     result_json = {}
+	
+#     try:
+    
+#         sql = '''DELETE FROM collections WHERE member_id = %s AND article_id = %s;'''
+#         con = db.get_connection()
+#         Cursor = con.cursor(dictionary=True)
+		
+#         insert_collect = (collect_info.member_id, collect_info.article_id)
+#         Cursor.execute(sql, insert_collect)
+#         con.commit()
+
+#         result_json['ok'] = True
+		
+#         return result_json
+
+#     except Exception as e:
+
+#         raise CustomHTTPException(status_code=500, detail=str(e))
+
+#     finally:
+		
+#         con.close()
+#         Cursor.close()

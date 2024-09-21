@@ -1,5 +1,6 @@
 # 使用官方的 Python 鏡像
-FROM python:3.9
+#FROM python:3.9
+FROM python:3.11-slim
 
 # 設定工作目錄
 WORKDIR /app
@@ -14,4 +15,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 8000
 
 # 運行程式
-CMD ["python", "app.py"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
