@@ -51,8 +51,8 @@ def get_businesstoday(pages=5):
 
             #if 'businesstoday' in element['href']: # 過濾廣告
             time = element.find("p", {'class': 'article__item-date'}).getText().strip()[:10]
-            #yesterday = datetime.now() - timedelta(days=1)
-            yesterday = datetime.now()
+            yesterday = datetime.now() - timedelta(days=1)
+            #yesterday = datetime.now()
             yesterday = yesterday.strftime('%Y-%m-%d')
             
             if time == yesterday:

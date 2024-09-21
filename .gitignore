@@ -10,3 +10,4 @@
 **/*.csv
 **/test.py
 **/all-test.py
+**/clean-s3-imgs.py

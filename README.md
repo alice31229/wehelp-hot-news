@@ -25,3 +25,15 @@ Tesing account:
 # Table Schema ERD
 
 ![alt text](/readme/hot_news_ERD.png)
+
+# Home Page
+
+![alt text](/readme/hot-news-homepage.png)
+
+# Article Page
+
+![alt text](/readme/hot-news-article.png)
+
+# Member Page
+
+![alt text](/readme/hot-news-collect.png)
