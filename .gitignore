@@ -8,6 +8,6 @@
 **/__pycache__/
 **/category.json
 **/*.csv
-**/test.py
-**/all-test.py
+**/develop.py
+**/all-develop.py
 **/clean-s3-imgs.py
