@@ -14,7 +14,7 @@ import os
 from dotenv import load_dotenv
 
 # get .env under config directory
-dotenv_path = os.path.join(os.path.dirname(__file__), '../../config/.env')
+dotenv_path = os.path.join(os.path.dirname(__file__), '../../.env')
 load_dotenv(dotenv_path)
 
 
@@ -28,7 +28,7 @@ def get_udn(scroll_time=3):
     opt.add_argument('--user-agent=%s' % os.getenv('USER_AGENT'))
 
     driver = webdriver.Chrome(options=opt)
-    driver.get('https://udn.com/rank/pv/2')
+    driver.get(os.getenv('UDN_URL'))
 
     #scroll_time = int(input('請輸入想要捲動幾次'))
 

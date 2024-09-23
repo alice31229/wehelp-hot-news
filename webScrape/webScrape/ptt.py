@@ -16,7 +16,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from tools import clean_content
 
 # get .env under config directory
-dotenv_path = os.path.join(os.path.dirname(__file__), '../../config/.env')
+dotenv_path = os.path.join(os.path.dirname(__file__), '../../.env')
 load_dotenv(dotenv_path)
 
 

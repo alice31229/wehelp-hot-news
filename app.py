@@ -278,20 +278,11 @@ async def get_resource_category_info(resource_id: resourceID):
 
         db = get_db()
 
-        # sql = '''SELECT r.resource, c.category, COUNT(*) AS category_cnt
-        #          FROM articles AS a
-        #          LEFT JOIN category AS c
-        #          ON a.category_id = c.id
-        #          LEFT JOIN resource AS r
-        #          ON a.resource_id = r.id
-        #          where DATE(date) = CURDATE() - INTERVAL 1 DAY
-        #          GROUP BY r.resource, c.category;'''
         if resource_id.resourceId != 5:
             sql = '''SELECT c.category, COUNT(*) AS category_cnt
                     FROM articles AS a
-                    LEFT JOIN category AS c
+                    JOIN category AS c
                     ON a.category_id = c.id
-                    WHERE DATE(date) = CURDATE() - INTERVAL 1 DAY
                     AND a.resource_id = %s
                     GROUP BY c.category
                     ORDER BY 2 DESC;'''
@@ -304,9 +295,8 @@ async def get_resource_category_info(resource_id: resourceID):
         else:
             sql = '''SELECT c.category, COUNT(*) AS category_cnt
                     FROM articles AS a
-                    LEFT JOIN category AS c
+                    JOIN category AS c
                     ON a.category_id = c.id
-                    WHERE DATE(date) = CURDATE() - INTERVAL 1 DAY
                     GROUP BY c.category
                     ORDER BY 2 DESC;'''
             

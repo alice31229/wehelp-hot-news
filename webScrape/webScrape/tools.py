@@ -385,7 +385,7 @@ def unify_forum_to_db():
         new_df = pd.read_csv(f'./data_ETL/wordcloud_network_overview/all_{yesterday}.csv')
 
         new_df['統一文章類別'] = new_df['文章類別'].map(forum_mapping_dict) 
-        #new_df.to_csv('category-test.csv', index=False)
+        new_df.to_csv('category-test.csv', index=False)
 
         # new_df.loc[new_df['文章類別'] == 'Oops', '統一文章類別'] = '八卦'
 

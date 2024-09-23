@@ -28,3 +28,27 @@ def test_articles_date():
 
     assert len(result) == 7
 
+
+# unit test for each process of data pipeline
+
+# # 
+# def check_web_scrape_results():
+#     '''
+#     each columns type and empty(nan, float) or not
+#     '''
+#     return True
+
+# def check_wordcloud_network_overview():
+    
+
+#     return True
+
+# def check_unified_category():
+
+
+#     return True
+
+# def check_data_before_db():
+
+
+#     return True

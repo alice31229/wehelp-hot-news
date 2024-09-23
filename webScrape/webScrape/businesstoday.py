@@ -4,7 +4,6 @@ from bs4 import BeautifulSoup
 # 操作 browser 的 API
 from selenium import webdriver
 
-# 強制等待 (執行期間休息一下)
 from time import sleep
 from datetime import datetime, timedelta
 import pandas as pd
@@ -14,7 +13,7 @@ import os
 from dotenv import load_dotenv
 
 # get .env under config directory
-dotenv_path = os.path.join(os.path.dirname(__file__), '../../config/.env')
+dotenv_path = os.path.join(os.path.dirname(__file__), '../../.env')
 load_dotenv(dotenv_path)
 
 def get_businesstoday(pages=5):
@@ -40,7 +39,7 @@ def get_businesstoday(pages=5):
     forum = []
 
     for i in range(pages):
-        base_url = str("https://www.businesstoday.com.tw/hot/"+str(i+1))
+        base_url = str(os.getenv('BUSINESSTODAY_URL')+str(i+1))
         driver.get(base_url)
         sleep(5)
         soup = BeautifulSoup(driver.page_source, "html.parser")
