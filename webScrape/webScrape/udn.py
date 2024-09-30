@@ -53,8 +53,8 @@ def get_udn(scroll_time=3):
             for i in range(len(titles)):
 
                 time_judge = times[i].text[:10]
-                yesterday = datetime.now() - timedelta(days=1)
-                #yesterday = datetime.now()
+                #yesterday = datetime.now() - timedelta(days=1)
+                yesterday = datetime.now()
                 yesterday = yesterday.strftime('%Y-%m-%d')
                 
                 if time_judge == yesterday:
@@ -140,7 +140,7 @@ def get_udn(scroll_time=3):
 
     final = final.drop_duplicates()
 
-    final.to_csv(f'./data_ETL/udn-test_{yesterday}.csv', index=False)
+    final.to_csv(f'./data_ETL/after_webscrape/udn-test_{yesterday}.csv', index=False)
     print('udn done')
 
 get_udn()

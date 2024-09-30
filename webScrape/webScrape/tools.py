@@ -282,7 +282,7 @@ def unify_forum_category():
 
         new_forum_result = all['文章類別'].unique()
 
-        chat_model = ChatOpenAI(model_name="gpt-4o", temperature=0.7)
+        chat_model = ChatOpenAI(model_name=os.getenv('OPENAI_MODEL'), temperature=0.7)
 
         # 創建 PromptTemplate
         prompt_template = PromptTemplate(
@@ -385,7 +385,7 @@ def unify_forum_to_db():
         new_df = pd.read_csv(f'./data_ETL/wordcloud_network_overview/all_{yesterday}.csv')
 
         new_df['統一文章類別'] = new_df['文章類別'].map(forum_mapping_dict) 
-        new_df.to_csv('category-test.csv', index=False)
+        #new_df.to_csv('category-test.csv', index=False)
 
         # new_df.loc[new_df['文章類別'] == 'Oops', '統一文章類別'] = '八卦'
 
@@ -662,7 +662,7 @@ def get_summary_of_article(title, content):
     from langchain_openai import ChatOpenAI
     from langchain.prompts import PromptTemplate
 
-    chat_model = ChatOpenAI(model_name="gpt-4o", temperature=0.7)
+    chat_model = ChatOpenAI(model_name=os.getenv('OPENAI_MODEL'), temperature=0.7)
 
     # 創建 PromptTemplate
     prompt_template = PromptTemplate(
@@ -795,6 +795,10 @@ def handle_wordcloud_network_overview():
     storm = pd.read_csv(f'./data_ETL/after_webscrape/storm-test_{yesterday}.csv')
     udn = pd.read_csv(f'./data_ETL/after_webscrape/udn-test_{yesterday}.csv')
     businesstoday = pd.read_csv(f'./data_ETL/after_webscrape/businesstoday-test_{yesterday}.csv')
+
+    ptt = ptt.iloc[0:20]
+    udn = udn.iloc[0:20]
+    storm = storm.iloc[0:20]
 
     df = pd.concat([ptt, storm, udn, businesstoday], ignore_index=True)
     df = df[df['文章內容'].notnull()]

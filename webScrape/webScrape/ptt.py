@@ -123,15 +123,7 @@ def get_pttbrain(pages=20):
     final['日期'] = final['日期'].dt.strftime('%Y-%m-%d')
     #print(final['日期'].unique())
 
-    # yesterday = datetime.now() - timedelta(days=1)
-    # yesterday = yesterday.strftime('%Y-%m-%d')
-    
-    # final = final[final['日期']==yesterday]
-
-    #today = datetime.now().strftime('%Y-%m-%d')
-
-    final.to_csv(f'./data_ETL/ptt-test_{yesterday}.csv', index=False)
-    #final.to_csv(f'ptt-test_{today}.csv', index=False)
+    final.to_csv(f'./data_ETL/after_webscrape/ptt-test_{yesterday}.csv', index=False)
     
     print('ptt done')
     

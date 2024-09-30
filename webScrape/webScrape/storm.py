@@ -120,8 +120,8 @@ def get_storm(pages=3):
 
     final['文章類別'] = final['文章類別'].apply(clean_spaces)
 
-    final.to_csv(f'./data_ETL/storm-test_{yesterday}.csv', index=False)
-    #final.to_csv(f'./data_ETL/storm-test_{today}.csv', index=False)
+    final.to_csv(f'./data_ETL/after_webscrape/storm-test_{yesterday}.csv', index=False)
+    #final.to_csv(f'./data_ETL/after_webscrape/storm-test_{today}.csv', index=False)
     print('storm done')
 
 get_storm()

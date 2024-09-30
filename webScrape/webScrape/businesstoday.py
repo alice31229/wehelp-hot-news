@@ -97,11 +97,7 @@ def get_businesstoday(pages=5):
 
     final['日期'] = final['日期'].dt.strftime('%Y-%m-%d')
 
-    # yesterday = datetime.now() - timedelta(days=1)
-    # yesterday = yesterday.strftime('%Y-%m-%d')
-    # final = final[final['日期']==yesterday]
-
-    final.to_csv(f'./data_ETL/businesstoday-test_{yesterday}.csv', index=False)
+    final.to_csv(f'./data_ETL/after_webscrape/businesstoday-test_{yesterday}.csv', index=False)
     print('businesstoday done')
 
 get_businesstoday()
