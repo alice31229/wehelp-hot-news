@@ -1,7 +1,5 @@
-import os
-import re
-import json
-import uuid
+import os, re, json, uuid, time, random
+
 import pandas as pd
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
@@ -15,9 +13,11 @@ from wordcloud import WordCloud
 import io
 from collections import Counter
 
+
 # get .env 
 dotenv_path = os.path.join(os.path.dirname(__file__), '../../.env')
 load_dotenv(dotenv_path)
+
 
 # db config
 def get_db():
@@ -45,16 +45,51 @@ def get_db():
     # return db_rds
 
 
+# 爬蟲設定
+def get_webdriver_settings():
+
+    from selenium import webdriver
+    #from selenium.webdriver.chrome.options import Options
+
+    # selenium settings
+    # options = Options()
+    options = webdriver.ChromeOptions()
+    options.add_argument('--user-agent=%s' % os.getenv('USER_AGENT'))
+    options.add_argument('disable-infobars')
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_argument("--disable-extensions")
+    options.add_argument("--profile-directory=Default")
+    options.add_argument("--incognito")
+    options.add_argument('cookie=over18=1')
+    options.add_argument("--disable-plugins-discovery")
+    options.add_argument("--start-maximized")
+    options.chrome_executable_path='./chromedriver'
+    
+    driver = webdriver.Chrome(options=options)
+
+    return driver
+
+
+# 隨機睡覺時間
+def get_random_sleep_time():
+
+    sleep_time = random.uniform(1, 5)
+
+    return sleep_time
+
+
 # 定義一個函數來處理空格
 def clean_spaces(text):
     # 使用正則表達式將多個空格替換為單一空格
     return re.sub(r'\s+', ' ', text.strip())
+
 
 def delete_s3_wc_nw_imgs():
 
     db = get_db()
 
     try:
+        
         con = db.get_connection()
         Cursor = con.cursor(dictionary=True)
         
@@ -110,11 +145,11 @@ def delete_s3_wc_nw_imgs():
 def delete_by_article_id_with_scan(article_ids):
 
     dynamodb = boto3.resource(
-        'dynamodb',
-        aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-        aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
-        region_name=os.getenv("AWS_REGION")
-    )
+                    'dynamodb',
+                    aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+                    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+                    region_name=os.getenv("AWS_REGION")
+               )
 
     table_name = os.getenv("AWS_DYNAMODB") 
     table = dynamodb.Table(table_name)
@@ -140,6 +175,7 @@ def delete_by_article_id_with_scan(article_ids):
                 print(f"Deleted record with member_id: {member_id}, article_id: {article_id}")
 
     except Exception as e:
+        
         print(f"Error deleting records: {e}")
 
 
@@ -148,6 +184,7 @@ def delete_collect_records_week_ago():
     db = get_db()
 
     try:
+
         con = db.get_connection()
         Cursor = con.cursor(dictionary=True)
         
@@ -193,6 +230,7 @@ def delete_week_ago_data():
     db = get_db()
 
     try:
+
         con = db.get_connection()
         Cursor = con.cursor(dictionary=True)
 
@@ -236,6 +274,7 @@ def delete_week_ago_data():
         
 
     finally:
+
         con.close()
         Cursor.close()
 

@@ -1,16 +1,13 @@
 
-import time
-
 import pandas as pd
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
-from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from tools import clean_content
+from tools import clean_content, get_webdriver_settings, get_random_sleep_time
 
-import os
+import os, time
 from dotenv import load_dotenv
 
 # get .env under config directory
@@ -20,17 +17,8 @@ load_dotenv(dotenv_path)
 
 def get_udn(scroll_time=3):
 
-    opt = webdriver.ChromeOptions()
-    opt.chrome_executable_path='./chromedriver'
-    opt.add_argument('disable-infobars')
-    opt.add_argument("--disable-extensions")
-    opt.add_argument("--start-maximized")
-    opt.add_argument('--user-agent=%s' % os.getenv('USER_AGENT'))
-
-    driver = webdriver.Chrome(options=opt)
+    driver = get_webdriver_settings()
     driver.get(os.getenv('UDN_URL'))
-
-    #scroll_time = int(input('請輸入想要捲動幾次'))
 
     link = [] # 文章連結
     #view = [] # 觀看數
@@ -38,7 +26,7 @@ def get_udn(scroll_time=3):
     date = [] # 日期
     forum = [] # 文章類別
 
-    for now_time in range(1, scroll_time+1):
+    for current_scroll_time in range(1, scroll_time+1):
 
         if driver.find_elements(By.XPATH, "//section[@class='story-list__holder--append']//div[@class='story-list__text']//h2")!=[]:
             #time.sleep(1)
@@ -53,8 +41,8 @@ def get_udn(scroll_time=3):
             for i in range(len(titles)):
 
                 time_judge = times[i].text[:10]
-                #yesterday = datetime.now() - timedelta(days=1)
-                yesterday = datetime.now()
+                yesterday = datetime.now() - timedelta(days=1)
+                #yesterday = datetime.now()
                 yesterday = yesterday.strftime('%Y-%m-%d')
                 
                 if time_judge == yesterday:
@@ -67,7 +55,7 @@ def get_udn(scroll_time=3):
 
             js = "window.scrollTo(0, document.body.scrollHeight);"
             driver.execute_script(js)
-            #time.sleep(2)
+            time.sleep(get_random_sleep_time())
 
         else:
 
@@ -97,7 +85,7 @@ def get_udn(scroll_time=3):
 
             js = "window.scrollTo(0, document.body.scrollHeight);"
             driver.execute_script(js)
-            #time.sleep(2)
+            time.sleep(get_random_sleep_time())
     
     content = []
     for url in link:
@@ -107,7 +95,7 @@ def get_udn(scroll_time=3):
         #     EC.presence_of_element_located((By.XPATH, '/html/body/main/div/section[2]/section/article/div/section[1]'))
         # )
 
-        time.sleep(5)
+        time.sleep(get_random_sleep_time())
 
         soup = BeautifulSoup(driver.page_source, "html.parser")
         section = soup.find("section", {'class': 'article-content__editor'})

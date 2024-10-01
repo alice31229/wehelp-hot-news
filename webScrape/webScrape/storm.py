@@ -1,16 +1,11 @@
 #匯入套件
 from bs4 import BeautifulSoup
 
-# 操作 browser 的 API
-from selenium import webdriver
-
-# 強制等待 (執行期間休息一下)
-from time import sleep
 from datetime import datetime, timedelta
 import pandas as pd
-from tools import clean_content, clean_spaces
+from tools import clean_content, clean_spaces, get_webdriver_settings, get_random_sleep_time
 
-import os
+import os, time
 from dotenv import load_dotenv
 
 # get .env under config directory
@@ -22,18 +17,7 @@ def get_storm(pages=3):
 
     storm_url = os.getenv('STORM_URL')
     
-    # selenium settings
-    options = webdriver.ChromeOptions()
-    options.add_argument('--user-agent=%s' % os.getenv('USER_AGENT'))
-    options.add_argument('disable-infobars')
-    options.add_argument("--disable-blink-features=AutomationControlled")
-    options.add_argument("--disable-extensions")
-    options.add_argument("--profile-directory=Default")
-    options.add_argument("--incognito")
-    options.add_argument("--disable-plugins-discovery")
-    options.add_argument("--start-maximized")
-    options.chrome_executable_path='./chromedriver'
-    driver = webdriver.Chrome(options=options)
+    driver = get_webdriver_settings()
 
     forum = []
     title = []
@@ -47,7 +31,7 @@ def get_storm(pages=3):
         base_url = storm_url+str(i+1)
         #base_url = storm_url+str(page)
         driver.get(base_url)
-        sleep(5)
+        time.sleep(get_random_sleep_time())
         soup = BeautifulSoup(driver.page_source, "html.parser")
         elements = soup.find_all("div", {"class": "category_card card_thumbs_left"})
 
@@ -78,7 +62,7 @@ def get_storm(pages=3):
                 url.append(website)
 
                 driver.get(website)
-                sleep(5)
+                time.sleep(get_random_sleep_time())
                 soup = BeautifulSoup(driver.page_source, "html.parser")
                 ps = soup.find_all('p', attrs={'aid': True})
 

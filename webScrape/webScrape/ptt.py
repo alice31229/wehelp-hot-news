@@ -1,19 +1,16 @@
-import os
+import os, time
 from dotenv import load_dotenv
 
-import time
 import pandas as pd
 from datetime import datetime, timedelta
 # import threading # when there is need to return variable 
 
 # webCrawl
 from bs4 import BeautifulSoup
-from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from tools import clean_content
+from tools import clean_content, get_webdriver_settings, get_random_sleep_time
 
 # get .env under config directory
 dotenv_path = os.path.join(os.path.dirname(__file__), '../../.env')
@@ -22,23 +19,12 @@ load_dotenv(dotenv_path)
 
 def get_pttbrain(pages=20):
 
-    options = Options()
-    options.add_argument('disable-infobars')
-    options.add_argument("--disable-blink-features=AutomationControlled")
-    options.add_argument("--disable-extensions")
-    options.add_argument("--profile-directory=Default")
-    options.add_argument("--incognito")
-    options.add_argument("--disable-plugins-discovery")
-    options.add_argument("--start-maximized")
-    options.add_argument(f'user-agent={os.getenv("USER_AGENT")}')
-    options.add_argument('cookie=over18=1')
-    options.chrome_executable_path = './chromedriver'
-    driver = webdriver.Chrome(options=options)
+    driver = get_webdriver_settings()
     
     # 打開目標網頁
     ptt_url = os.getenv("PTT_URL")
     driver.get(ptt_url)
-    time.sleep(3)
+    time.sleep(get_random_sleep_time())
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
 
@@ -82,7 +68,7 @@ def get_pttbrain(pages=20):
         cnt+=1
         next_page = driver.find_element(By.XPATH, '//*[@id="__next"]/div[2]/div[2]/div/div[3]/div/div[2]/a[13]')
         next_page.click()
-        time.sleep(5)
+        time.sleep(get_random_sleep_time())
         
     
     for u in url:
@@ -93,7 +79,7 @@ def get_pttbrain(pages=20):
             EC.presence_of_element_located((By.XPATH, "//*[@id='__next']/div[2]/div[2]/div[1]/div/div/p"))
         )
 
-        time.sleep(5)
+        time.sleep(get_random_sleep_time())
 
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
