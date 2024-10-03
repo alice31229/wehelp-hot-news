@@ -24,7 +24,8 @@ def get_pttbrain(pages=20):
     # 打開目標網頁
     ptt_url = os.getenv("PTT_URL")
     driver.get(ptt_url)
-    time.sleep(get_random_sleep_time())
+    sleep_time = get_random_sleep_time()
+    time.sleep(sleep_time)
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
 
@@ -68,7 +69,8 @@ def get_pttbrain(pages=20):
         cnt+=1
         next_page = driver.find_element(By.XPATH, '//*[@id="__next"]/div[2]/div[2]/div/div[3]/div/div[2]/a[13]')
         next_page.click()
-        time.sleep(get_random_sleep_time())
+        sleep_time = get_random_sleep_time()
+        time.sleep(sleep_time)
         
     
     for u in url:
@@ -79,8 +81,8 @@ def get_pttbrain(pages=20):
             EC.presence_of_element_located((By.XPATH, "//*[@id='__next']/div[2]/div[2]/div[1]/div/div/p"))
         )
 
-        time.sleep(get_random_sleep_time())
-
+        sleep_time = get_random_sleep_time()
+        time.sleep(sleep_time)
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
         h2 = soup.find('h2')

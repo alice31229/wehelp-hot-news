@@ -688,7 +688,6 @@ async def get_previous_collection(payload: dict = Depends(login_required)):
             con.close()
             Cursor.close()
 
-		
 
 # collect article
 @app.post("/api/collect")
@@ -735,8 +734,9 @@ async def delete_collection(collect_info: collect_info):
 		
         result_json['error'] = True
         return result_json
-    
 
+
+# # python3 app.py <-- version
 # if __name__ == '__main__':
 #     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
 	#uvicorn.run("app:app", port=8000, reload=True)

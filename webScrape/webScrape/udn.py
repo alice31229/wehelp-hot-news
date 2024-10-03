@@ -55,7 +55,8 @@ def get_udn(scroll_time=3):
 
             js = "window.scrollTo(0, document.body.scrollHeight);"
             driver.execute_script(js)
-            time.sleep(get_random_sleep_time())
+            sleep_time = get_random_sleep_time()
+            time.sleep(sleep_time)
 
         else:
 
@@ -85,7 +86,8 @@ def get_udn(scroll_time=3):
 
             js = "window.scrollTo(0, document.body.scrollHeight);"
             driver.execute_script(js)
-            time.sleep(get_random_sleep_time())
+            sleep_time = get_random_sleep_time()
+            time.sleep(sleep_time)
     
     content = []
     for url in link:
@@ -95,7 +97,8 @@ def get_udn(scroll_time=3):
         #     EC.presence_of_element_located((By.XPATH, '/html/body/main/div/section[2]/section/article/div/section[1]'))
         # )
 
-        time.sleep(get_random_sleep_time())
+        sleep_time = get_random_sleep_time()
+        time.sleep(sleep_time)
 
         soup = BeautifulSoup(driver.page_source, "html.parser")
         section = soup.find("section", {'class': 'article-content__editor'})

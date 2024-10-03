@@ -31,7 +31,8 @@ def get_storm(pages=3):
         base_url = storm_url+str(i+1)
         #base_url = storm_url+str(page)
         driver.get(base_url)
-        time.sleep(get_random_sleep_time())
+        sleep_time = get_random_sleep_time()
+        time.sleep(sleep_time)
         soup = BeautifulSoup(driver.page_source, "html.parser")
         elements = soup.find_all("div", {"class": "category_card card_thumbs_left"})
 
@@ -39,18 +40,17 @@ def get_storm(pages=3):
     
         for element in elements:
 
-            time = element.find("span", {'class': 'info_time'}).getText().strip()
+            time_date = element.find("span", {'class': 'info_time'}).getText().strip()
 
-            time = time[:10]
-            date_judge = datetime.strptime(time, '%Y-%m-%d').date()
-            #today = datetime.now().date()
+            time_date = time_date[:10]
+            date_judge = datetime.strptime(time_date, '%Y-%m-%d').date()
+            #yesterday = datetime.now().date()
             yesterday = (datetime.now() - timedelta(days=1)).date()
             #yesterday = yesterday.strftime('%Y-%m-%d')
             
             if date_judge == yesterday:
-            #if date_judge == today:
 
-                date.append(time)
+                date.append(date_judge)
 
                 t = element.find('h3').getText().strip()
                 title.append(t)
@@ -62,7 +62,8 @@ def get_storm(pages=3):
                 url.append(website)
 
                 driver.get(website)
-                time.sleep(get_random_sleep_time())
+                sleep_time = get_random_sleep_time()
+                time.sleep(sleep_time)
                 soup = BeautifulSoup(driver.page_source, "html.parser")
                 ps = soup.find_all('p', attrs={'aid': True})
 

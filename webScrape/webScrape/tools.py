@@ -257,7 +257,7 @@ def delete_week_ago_data():
         
         #query_wordcloud_network_delete = '''SELECT wordcloud, network FROM articlesDelete;'''
         delete_s3_wc_nw_imgs()
-        print('delete 7 days agor wordcloud and network imgs')
+        print('delete 7 days ago wordcloud and network imgs')
 
         delete_collect_records_week_ago()
         print('delete 7 days ago articles collected records')
@@ -446,8 +446,6 @@ def unify_forum_to_db():
         final_df['文章類別編號'] = final_df['文章類別編號'].astype(int)
 
         final_df.to_csv(f'./data_ETL/ready_for_db/all_{yesterday}.csv', index=False)
-
-        print('new articles to db done')
     
 
     except mysql.connector.Error as e:
@@ -466,6 +464,10 @@ def insert_into_articles():
     yesterday = yesterday.strftime('%Y-%m-%d')
     df = pd.read_csv(f'./data_ETL/ready_for_db/all_{yesterday}.csv')
 
+    #df['日期'] = yesterday
+
+    print(df.columns)
+
     db = get_db()
     
     try:
@@ -480,6 +482,7 @@ def insert_into_articles():
                 cursor.execute(sql, row)
             con.commit()
 
+        print('new articles to db done')
 
         return True
 
@@ -519,6 +522,7 @@ def generate_hot_keywords():
         Cursor.execute(resource_type_sql)
         resource_type = Cursor.fetchall()
         resource_type_df = pd.DataFrame(resource_type)
+        print(articles_df.columns)
 
         # nx2 -> nx1
         articles_df['combined_text'] = articles_df.apply(lambda x: ' '.join([x['title'], x['content']]), axis=1)

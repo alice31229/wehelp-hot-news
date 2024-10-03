@@ -29,7 +29,8 @@ def get_businesstoday(pages=5):
     for i in range(pages):
         base_url = str(os.getenv('BUSINESSTODAY_URL')+str(i+1))
         driver.get(base_url)
-        time.sleep(get_random_sleep_time())
+        sleep_time = get_random_sleep_time()
+        time.sleep(sleep_time)
         soup = BeautifulSoup(driver.page_source, "html.parser")
         elements = soup.find_all("a", {"class": "article__item"})
         #elements = soup.find_all("div", {"class": "article__itembox"})
@@ -37,21 +38,22 @@ def get_businesstoday(pages=5):
         for element in elements:
 
             #if 'businesstoday' in element['href']: # 過濾廣告
-            time = element.find("p", {'class': 'article__item-date'}).getText().strip()[:10]
+            time_judge = element.find("p", {'class': 'article__item-date'}).getText().strip()[:10]
             yesterday = datetime.now() - timedelta(days=1)
             #yesterday = datetime.now()
             yesterday = yesterday.strftime('%Y-%m-%d')
             
-            if time == yesterday:
+            if time_judge == yesterday:
 
                 article_title = element.find("h4").getText().strip()
                 title.append(article_title)
                 
-                date.append(time)
+                date.append(time_judge)
                 website = element['href']
                 url.append('https://www.businesstoday.com.tw'+website)
                 driver.get('https://www.businesstoday.com.tw'+website)
-                time.sleep(get_random_sleep_time())
+                sleep_time = get_random_sleep_time()
+                time.sleep(sleep_time)
                 soup = BeautifulSoup(driver.page_source, "html.parser")
                 category = soup.find('p',{'class': 'context__info-item context__info-item--type'}).getText().strip()
                 forum.append(category)

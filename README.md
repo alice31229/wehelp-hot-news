@@ -8,9 +8,10 @@ Use the following techniques:
 3. Python Selenium, BeautifulSoup
 4. Python wordcloud, networkx, langchain
 5. Python boto3
-6. Docker
-7. AWS - EC2, RDS, S3, DynamoDB, Route53, Cloudfront
-8. Nginx
+6. Python pytest
+7. Docker
+8. AWS - EC2, RDS, S3, DynamoDB, Route53, Cloudfront
+9. Nginx
 
 Website: https://aliceta.cloud/
 
