@@ -198,7 +198,7 @@ async function chooseResourceType(resourceID=5) {
 
         var resourceDist = '';
         if (resourceDist == 1) {
-            resourceDist = 'PTT';
+            resourceDist = '東森新聞';
         } else if (resourceDist == 2) {
             resourceDist = '風傳媒';
         } else if (resourceDist == 3) {

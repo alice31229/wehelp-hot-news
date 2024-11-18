@@ -26,69 +26,62 @@ def get_udn(scroll_time=3):
     date = [] # 日期
     forum = [] # 文章類別
 
+    yesterday = datetime.now() - timedelta(days=1)
+    #yesterday = datetime.now()
+    yesterday = yesterday.strftime('%Y-%m-%d')
+
+    # 一次把目標 scroll down 次數拉到底 再抓目標文章
     for current_scroll_time in range(1, scroll_time+1):
 
-        if driver.find_elements(By.XPATH, "//section[@class='story-list__holder--append']//div[@class='story-list__text']//h2")!=[]:
-            #time.sleep(1)
+        js = "window.scrollTo(0, document.body.scrollHeight);"
+        driver.execute_script(js)
+        sleep_time = get_random_sleep_time()
+        time.sleep(sleep_time)
 
-            titles = driver.find_elements(By.XPATH, "//section[@class='story-list__holder--append']//div[@class='story-list__text']//h2")
-            hrefs = driver.find_elements(By.XPATH, "//section[@class='story-list__holder--append']//div[@class='story-list__text']//h2//a")
-            #views = driver.find_elements(By.XPATH, "//section[@class='story-list__holder--append']//div[@class='story-list__info']//span[@class = 'story-list__view']")
-            times = driver.find_elements(By.XPATH, "//section[@class='story-list__holder--append']//div[@class='story-list__info']//time[@class = 'story-list__time']")
-            category = driver.find_elements(By.XPATH, "//section[@class='story-list__holder--append']//div[@class='story-list__info']//a[@class = 'story-list__cate btn btn-blue']")
+    if driver.find_elements(By.XPATH, "//section[@class='story-list__holder--append']//div[@class='story-list__text']//h2")!=[]:
+        #time.sleep(1)
 
+        titles = driver.find_elements(By.XPATH, "//section[@class='story-list__holder--append']//div[@class='story-list__text']//h2")
+        hrefs = driver.find_elements(By.XPATH, "//section[@class='story-list__holder--append']//div[@class='story-list__text']//h2//a")
+        #views = driver.find_elements(By.XPATH, "//section[@class='story-list__holder--append']//div[@class='story-list__info']//span[@class = 'story-list__view']")
+        times = driver.find_elements(By.XPATH, "//section[@class='story-list__holder--append']//div[@class='story-list__info']//time[@class = 'story-list__time']")
+        category = driver.find_elements(By.XPATH, "//section[@class='story-list__holder--append']//div[@class='story-list__info']//a[@class = 'story-list__cate btn btn-blue']")
+        
+        for i in range(len(titles)):
+
+            time_judge = times[i].text[:10]
             
-            for i in range(len(titles)):
+            if time_judge == yesterday:
 
-                time_judge = times[i].text[:10]
-                yesterday = datetime.now() - timedelta(days=1)
-                #yesterday = datetime.now()
-                yesterday = yesterday.strftime('%Y-%m-%d')
-                
-                if time_judge == yesterday:
+                title.append(titles[i].text)
+                link.append(hrefs[i].get_attribute('href'))
+                #view.append(views[i].text)
+                date.append(time_judge)
+                forum.append(category[i].text)
 
-                    title.append(titles[i].text)
-                    link.append(hrefs[i].get_attribute('href'))
-                    #view.append(views[i].text)
-                    date.append(time_judge)
-                    forum.append(category[i].text)
+    else:
 
-            js = "window.scrollTo(0, document.body.scrollHeight);"
-            driver.execute_script(js)
-            sleep_time = get_random_sleep_time()
-            time.sleep(sleep_time)
+        #time.sleep(1)
+        titles = driver.find_elements(By.XPATH, "//div[@class='story-list__text']//h2")
+        hrefs = driver.find_elements(By.XPATH, "//div[@class='story-list__text']//h2//a")
+        #views = driver.find_elements(By.XPATH, "//div[@class='story-list__info']//span[@class = 'story-list__view']")
+        times = driver.find_elements(By.XPATH, "//div[@class='story-list__info']//time[@class = 'story-list__time']")
+        category = driver.find_elements(By.XPATH, "//div[@class='story-list__info']//a[@class = 'story-list__cate btn btn-blue']")
 
-        else:
+        
+        for i in range(len(titles)):
 
-            #time.sleep(1)
-            titles = driver.find_elements(By.XPATH, "//div[@class='story-list__text']//h2")
-            hrefs = driver.find_elements(By.XPATH, "//div[@class='story-list__text']//h2//a")
-            #views = driver.find_elements(By.XPATH, "//div[@class='story-list__info']//span[@class = 'story-list__view']")
-            times = driver.find_elements(By.XPATH, "//div[@class='story-list__info']//time[@class = 'story-list__time']")
-            category = driver.find_elements(By.XPATH, "//div[@class='story-list__info']//a[@class = 'story-list__cate btn btn-blue']")
-
+            time_judge = times[i].text[:10]
             
-            for i in range(len(titles)):
+            if time_judge == yesterday:
 
-                time_judge = times[i].text[:10]
-                yesterday = datetime.now() - timedelta(days=1)
-                #yesterday = datetime.now()
-                yesterday = yesterday.strftime('%Y-%m-%d')
-                
-                if time_judge == yesterday:
-
-                    title.append(titles[i].text)
-                    link.append(hrefs[i].get_attribute('href'))
-                    #view.append(views[i].text)
-                    date.append(time_judge)
-                    forum.append(category[i].text)
-
-
-            js = "window.scrollTo(0, document.body.scrollHeight);"
-            driver.execute_script(js)
-            sleep_time = get_random_sleep_time()
-            time.sleep(sleep_time)
+                title.append(titles[i].text)
+                link.append(hrefs[i].get_attribute('href'))
+                #view.append(views[i].text)
+                date.append(time_judge)
+                forum.append(category[i].text)
     
+    # 文章內容
     content = []
     for url in link:
         driver.get(url)
@@ -134,4 +127,7 @@ def get_udn(scroll_time=3):
     final.to_csv(f'./data_ETL/after_webscrape/udn-test_{yesterday}.csv', index=False)
     print('udn done')
 
-get_udn()
+
+if __name__ == '__main__':
+
+    get_udn()

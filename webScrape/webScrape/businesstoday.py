@@ -26,6 +26,10 @@ def get_businesstoday(pages=5):
     content = []
     forum = []
 
+    yesterday = datetime.now() - timedelta(days=1)
+    #yesterday = datetime.now()
+    yesterday = yesterday.strftime('%Y-%m-%d')
+
     for i in range(pages):
         base_url = str(os.getenv('BUSINESSTODAY_URL')+str(i+1))
         driver.get(base_url)
@@ -39,9 +43,6 @@ def get_businesstoday(pages=5):
 
             #if 'businesstoday' in element['href']: # 過濾廣告
             time_judge = element.find("p", {'class': 'article__item-date'}).getText().strip()[:10]
-            yesterday = datetime.now() - timedelta(days=1)
-            #yesterday = datetime.now()
-            yesterday = yesterday.strftime('%Y-%m-%d')
             
             if time_judge == yesterday:
 
@@ -90,4 +91,7 @@ def get_businesstoday(pages=5):
     final.to_csv(f'./data_ETL/after_webscrape/businesstoday-test_{yesterday}.csv', index=False)
     print('businesstoday done')
 
-get_businesstoday()
+
+if __name__ == '__main__':
+
+    get_businesstoday()

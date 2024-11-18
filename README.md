@@ -1,6 +1,6 @@
 # Overview
 
-It's a platform gathering popular articles from pttbrain, storm, businesstoday and udn.
+It's a platform gathering popular articles from EBC, storm, businesstoday and udn.
 
 Use the following techniques:
 1. HTML/CSS/JavaScript

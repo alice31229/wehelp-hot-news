@@ -314,14 +314,14 @@ def unify_forum_category():
         Cursor.execute(prev_forum_query)
         prev_forum_result = Cursor.fetchall()
 
-        # read csv of ptt, udn, storm, businesstoday
+        # read csv of ebc, udn, storm, businesstoday
         yesterday = datetime.now() - timedelta(days=1)
         yesterday = yesterday.strftime('%Y-%m-%d')
         all = pd.read_csv(f'./data_ETL/wordcloud_network_overview/all_{yesterday}.csv', usecols=['文章類別'])
 
         new_forum_result = all['文章類別'].unique()
 
-        chat_model = ChatOpenAI(model_name=os.getenv('OPENAI_MODEL'), temperature=0.7)
+        chat_model = ChatOpenAI(model_name=os.getenv('OPENAI_MODEL_SUMMARY'), temperature=0.7)
 
         # 創建 PromptTemplate
         prompt_template = PromptTemplate(
@@ -705,7 +705,7 @@ def get_summary_of_article(title, content):
     from langchain_openai import ChatOpenAI
     from langchain.prompts import PromptTemplate
 
-    chat_model = ChatOpenAI(model_name=os.getenv('OPENAI_MODEL'), temperature=0.7)
+    chat_model = ChatOpenAI(model_name=os.getenv('OPENAI_MODEL_CATEGORY'), temperature=0.7)
 
     # 創建 PromptTemplate
     prompt_template = PromptTemplate(
@@ -834,16 +834,24 @@ def handle_wordcloud_network_overview():
     # new articles load here
     yesterday = datetime.now() - timedelta(days=1)
     yesterday = yesterday.strftime('%Y-%m-%d')
-    ptt = pd.read_csv(f'./data_ETL/after_webscrape/ptt-test_{yesterday}.csv')
+    try:
+        ebc = pd.read_csv(f'./data_ETL/after_webscrape/ebc-test_{yesterday}.csv')
+        ebc = ebc.iloc[0:20]
+    except:
+        pass
     storm = pd.read_csv(f'./data_ETL/after_webscrape/storm-test_{yesterday}.csv')
     udn = pd.read_csv(f'./data_ETL/after_webscrape/udn-test_{yesterday}.csv')
     businesstoday = pd.read_csv(f'./data_ETL/after_webscrape/businesstoday-test_{yesterday}.csv')
 
-    ptt = ptt.iloc[0:20]
-    udn = udn.iloc[0:20]
-    storm = storm.iloc[0:20]
+    
+    udn = udn.iloc[0:35]
+    storm = storm.iloc[0:35]
+    ebc = ebc.iloc[0:35]
 
-    df = pd.concat([ptt, storm, udn, businesstoday], ignore_index=True)
+    try:
+        df = pd.concat([ebc, storm, udn, businesstoday], ignore_index=True)
+    except:
+        df = pd.concat([storm, udn, businesstoday], ignore_index=True)
     df = df[df['文章內容'].notnull()]
 
     # wordcloud operations

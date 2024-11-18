@@ -25,6 +25,10 @@ def get_storm(pages=3):
     url = []
     content = []
 
+    #yesterday = datetime.now().date()
+    yesterday = (datetime.now() - timedelta(days=1)).date()
+    #yesterday = yesterday.strftime('%Y-%m-%d')
+
     # page = 1
     # while True:
     for i in range(pages):
@@ -44,9 +48,6 @@ def get_storm(pages=3):
 
             time_date = time_date[:10]
             date_judge = datetime.strptime(time_date, '%Y-%m-%d').date()
-            #yesterday = datetime.now().date()
-            yesterday = (datetime.now() - timedelta(days=1)).date()
-            #yesterday = yesterday.strftime('%Y-%m-%d')
             
             if date_judge == yesterday:
 
@@ -109,4 +110,7 @@ def get_storm(pages=3):
     #final.to_csv(f'./data_ETL/after_webscrape/storm-test_{today}.csv', index=False)
     print('storm done')
 
-get_storm()
+
+if __name__ == '__main__':
+
+    get_storm()

@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 import mysql.connector
-#import uvicorn
+import uvicorn
 from fastapi import *
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -41,6 +41,10 @@ async def attraction(request: Request, id: int):
 async def member(request: Request):
 	return FileResponse("./static/member.html", media_type="text/html")
 
+# for ssl certificate renew
+@app.get("/.well-known/pki-validation/{file}", include_in_schema=False)
+async def ssl(file: str):
+    return FileResponse(f"./static/{file}")
 
 
 # api for other web page data retrieve
@@ -737,6 +741,5 @@ async def delete_collection(collect_info: collect_info):
 
 
 # # python3 app.py <-- version
-# if __name__ == '__main__':
-#     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
-	#uvicorn.run("app:app", port=8000, reload=True)
+if __name__ == '__main__':
+	uvicorn.run("app:app", port=8000, reload=True)
