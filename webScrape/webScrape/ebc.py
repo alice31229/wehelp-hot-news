@@ -41,11 +41,7 @@ def get_ebc(scroll_time=3):
         sleep_time = get_random_sleep_time()
         time.sleep(sleep_time)
 
-    # WebDriverWait(driver, 10).until(
-    #     EC.presence_of_element_located((By.XPATH, '//*[@id="main"]/div[2]/div/div/div[1]/div[3]/div[2]/div[2]/div/div[1]'))
-    # )
-
-    # 開始抓文章連結  //section[@class='story-list__holder--append']//div[@class='story-list__text']//h2
+    # 從每個文章連結開始抓文章內容
     article_urls = driver.find_elements(By.XPATH, "//main[@id='main']//div[@class='tab_content']//div[@class='list m_group']//a")
     #print(len(article_urls))
     
@@ -60,32 +56,32 @@ def get_ebc(scroll_time=3):
 
         driver.get(target_article)
 
-        # WebDriverWait(driver, 10).until(
-        #     EC.presence_of_element_located((By.XPATH, '/html/body/main/div/section[2]/section/article/div/section[1]'))
-        # )
-
         sleep_time = get_random_sleep_time()
         time.sleep(sleep_time)
 
         soup = BeautifulSoup(driver.page_source, "html.parser")
-        article_title = soup.find("div", {'class': 'article_header'}).find('h1').text
-        article_kind = soup.find("div", {'class': 'breadcrumb'}).text.replace('首頁','')
         article_date = soup.find('div', {'class': 'article_date'}).text
-        article_ps = soup.find('div', {'class': 'article_content'}).find_all('p')
-        
-        total_txt = ''
-        for p in article_ps:
-            if '➤' not in p.text: # 廣告
-                article_content = p.text.replace('/n', '')
-                cleaned_article_content = re.sub(r"（圖／.*?）", "", article_content)
-                total_txt += cleaned_article_content
-
-        # print('title', article_title)
-        # print('kind', article_kind)
-        # print('date', article_date)
-        # print('content', total_txt)
 
         if article_date == yesterday:
+
+            article_title = soup.find("div", {'class': 'article_header'}).find('h1').text
+            article_kind = soup.find("div", {'class': 'breadcrumb'}).text.replace('首頁','')
+            article_ps = soup.find('div', {'class': 'article_content'}).find_all('p')
+            
+            total_txt = ''
+            for p in article_ps:
+                if '➤' not in p.text: # 廣告
+                    article_content = p.text.replace('/n', '')
+                    cleaned_article_content = re.sub(r"（圖／.*?）", "", article_content)
+                    total_txt += cleaned_article_content
+
+            total_txt = clean_content(total_txt)
+
+            # print('title', article_title)
+            # print('kind', article_kind)
+            # print('date', article_date)
+            # print('content', total_txt)
+
             title.append(article_title)
             date.append(article_date)
             forum.append(article_kind)
@@ -102,6 +98,8 @@ def get_ebc(scroll_time=3):
     final['文章來源'] = '東森新聞'
     final['日期'] = date
     final['文章網址'] = link
+
+    final['文章類別'] = final['文章類別'].str.replace(r'\n+', '', regex=True)
 
     # make sure the date format at webpage
     final['日期'] = pd.to_datetime(final['日期'], format='%Y-%m-%d', errors='coerce')

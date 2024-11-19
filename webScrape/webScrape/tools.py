@@ -327,7 +327,7 @@ def unify_forum_category():
         prompt_template = PromptTemplate(
             input_variables=["prev_forum_result", "new_forum_result"],
             template="""
-            請根據提供的先前文章類別來對新的文章類別進行歸類。若發現現有類別不適合，可以創建新的類別，
+            請根據提供的先前文章類別來對新的文章類別進行歸類。若發現現有類別不適合，可以創建新的類別，或是保留本來的類別，
             我希望得到一個dictionary，其中key是新的文章類別，value是歸類後的文章類別，歸類後的文章類別不要出現英文。
             回傳範例： {{'風生活 國內 理財 時事話題': '生活', '風生活 財經': '財經', '八卦 ( Gossiping )': '八卦', 'NBA ( NBA )': '運動'}}。
             不用解釋整理過程，我只需要整理結果即可。
@@ -423,20 +423,29 @@ def unify_forum_to_db():
         yesterday = yesterday.strftime('%Y-%m-%d')
         new_df = pd.read_csv(f'./data_ETL/wordcloud_network_overview/all_{yesterday}.csv')
 
+        new_df['文章類別'] = new_df['文章類別'].str.replace(r'\n+', '', regex=True)
+        new_df.loc[new_df['文章類別'] == '體育', '文章類別'] = '運動'
+
         new_df['統一文章類別'] = new_df['文章類別'].map(forum_mapping_dict) 
         #new_df.to_csv('category-test.csv', index=False)
 
-        # new_df.loc[new_df['文章類別'] == 'Oops', '統一文章類別'] = '八卦'
+        new_df.loc[new_df['統一文章類別'] == '', '統一文章類別'] = new_df['文章類別']
+        new_df.loc[new_df['統一文章類別'] == '體育', '統一文章類別'] = '運動'
+        new_df.loc[new_df['統一文章類別'] == '風生活', '統一文章類別'] = '生活'
+        new_df.loc[new_df['統一文章類別'] == '國內 財經', '統一文章類別'] = '財經'
+        new_df.loc[new_df['統一文章類別'] == '國際 財經', '統一文章類別'] = '財經'
+        new_df.loc[new_df['統一文章類別'] == '兩岸', '統一文章類別'] = '政治'
+        new_df.loc[new_df['統一文章類別'] == '科技與職場', '統一文章類別'] = '職場'
+        new_df.loc[new_df['統一文章類別'] == '品味生活', '統一文章類別'] = '生活'
+        
 
         final_df = new_df.merge(category_id_mapping_df, left_on='統一文章類別', right_on='category', how='left')
         final_df = final_df.merge(resource_id_mapping_df, left_on='文章來源', right_on='resource', how='left')
 
         print(final_df['統一文章類別'].unique())
 
-        #final_df.to_csv('category-check-20240912.csv', index=False)
 
         # rename column names
-
         final_df = final_df[['id','文章類別','文章標題','文章內容','resource_id','日期','文章網址','文字雲','關係圖','文章摘要']]
         final_df = final_df.rename(columns={'id': '文章類別編號', 'resource_id': '文章來源編號'})
 
@@ -846,7 +855,6 @@ def handle_wordcloud_network_overview():
     
     udn = udn.iloc[0:35]
     storm = storm.iloc[0:35]
-    ebc = ebc.iloc[0:35]
 
     try:
         df = pd.concat([ebc, storm, udn, businesstoday], ignore_index=True)
