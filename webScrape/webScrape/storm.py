@@ -105,6 +105,7 @@ def get_storm(pages=3):
     final = final[final['日期']!=''] # 排除非會員點擊顯示的行銷文章頁面
 
     final['文章類別'] = final['文章類別'].apply(clean_spaces)
+    final['文章類別'] = final['文章類別'].str.replace('風', '') # 風生活 -> 生活
 
     final.to_csv(f'./data_ETL/after_webscrape/storm-test_{yesterday}.csv', index=False)
     #final.to_csv(f'./data_ETL/after_webscrape/storm-test_{today}.csv', index=False)

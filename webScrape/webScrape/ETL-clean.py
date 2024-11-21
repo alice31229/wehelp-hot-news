@@ -10,7 +10,7 @@ from tools import handle_wordcloud_network_overview, unify_forum_to_db, insert_i
 # 6. delete those not in need data from articles and hotKeywords 7 days ago -> delete_week_ago_data()
 
 # 2. wordcloud, network, overview
-#handle_wordcloud_network_overview()
+handle_wordcloud_network_overview()
 
 # 3. unify articles category from different resource
 unify_forum_to_db()

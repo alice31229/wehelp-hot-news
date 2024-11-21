@@ -429,15 +429,26 @@ def unify_forum_to_db():
         new_df['統一文章類別'] = new_df['文章類別'].map(forum_mapping_dict) 
         #new_df.to_csv('category-test.csv', index=False)
 
+        # 改善文章類別分類
+        category_mapping = {
+            '體育': '運動',
+            '品味生活': '生活',
+            '國內 財經': '財經',
+            '國際 財經': '財經',
+            '兩岸': '政治',
+            '科技與職場': '職場',
+            '生活 品味生活': '生活',
+            '品味生活': '生活',
+            '生活 國內 財經': '財經',
+            '生活 房地產': '房地產',
+            '生活 財經': '財經',
+            '市場動態': '汽車',
+            '生活 旅遊': '旅遊',
+            '國際 軍事': '軍事'
+        }
+
         new_df.loc[new_df['統一文章類別'] == '', '統一文章類別'] = new_df['文章類別']
-        new_df.loc[new_df['統一文章類別'] == '體育', '統一文章類別'] = '運動'
-        new_df.loc[new_df['統一文章類別'] == '風生活', '統一文章類別'] = '生活'
-        new_df.loc[new_df['統一文章類別'] == '國內 財經', '統一文章類別'] = '財經'
-        new_df.loc[new_df['統一文章類別'] == '國際 財經', '統一文章類別'] = '財經'
-        new_df.loc[new_df['統一文章類別'] == '兩岸', '統一文章類別'] = '政治'
-        new_df.loc[new_df['統一文章類別'] == '科技與職場', '統一文章類別'] = '職場'
-        new_df.loc[new_df['統一文章類別'] == '品味生活', '統一文章類別'] = '生活'
-        
+        new_df['統一文章類別'] = new_df['統一文章類別'].replace(category_mapping)
 
         final_df = new_df.merge(category_id_mapping_df, left_on='統一文章類別', right_on='category', how='left')
         final_df = final_df.merge(resource_id_mapping_df, left_on='文章來源', right_on='resource', how='left')

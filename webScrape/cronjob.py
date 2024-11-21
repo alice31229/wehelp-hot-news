@@ -1,8 +1,6 @@
-import sched
-import threading
-import time
+import sched, threading, time
 
-from webScrape.ptt import get_pttbrain
+from webScrape.ebc import get_ebc
 from webScrape.udn import get_udn
 from webScrape.storm import get_storm
 from webScrape.businesstoday import get_businesstoday
@@ -12,7 +10,7 @@ def main():
     scheduler = sched.scheduler(time.time, time.sleep)
 
     # 每晚12點執行四支爬蟲程式
-    scheduler.enter(0, 1, get_pttbrain, ())
+    scheduler.enter(0, 1, get_ebc, ())
     scheduler.enter(0, 1, get_udn, ())
     scheduler.enter(0, 1, get_storm, ())
     scheduler.enter(0, 1, get_businesstoday, ())

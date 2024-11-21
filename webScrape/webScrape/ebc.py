@@ -65,13 +65,16 @@ def get_ebc(scroll_time=3):
         if article_date == yesterday:
 
             article_title = soup.find("div", {'class': 'article_header'}).find('h1').text
-            article_kind = soup.find("div", {'class': 'breadcrumb'}).text.replace('首頁','')
             article_ps = soup.find('div', {'class': 'article_content'}).find_all('p')
+
+            article_kind = soup.find("div", {'class': 'breadcrumb'}).text.replace('首頁','')
+            article_kind = article_kind.replace('\n', '')
             
             total_txt = ''
             for p in article_ps:
-                if '➤' not in p.text: # 廣告
+                if '➤' not in p.text: # 過濾廣告文字
                     article_content = p.text.replace('/n', '')
+                    # 過濾圖片文字說明
                     cleaned_article_content = re.sub(r"（圖／.*?）", "", article_content)
                     total_txt += cleaned_article_content
 

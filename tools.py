@@ -257,10 +257,10 @@ def judge_filter_options(filter_requirements, page):
 def get_12_articles_by_filter(filter_requirements, page):
     
     page = int(page)
-    print(filter_requirements, page)
+    #print(filter_requirements, page)
 
     sql, variables = judge_filter_options(filter_requirements, page)
-    print(sql, variables)
+    #print(sql, variables)
 
     try:
         db = get_db()

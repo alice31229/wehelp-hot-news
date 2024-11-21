@@ -170,7 +170,10 @@ async def get_all_category():
     from tools import get_db
 
     try:
-        sql = '''SELECT * FROM category;'''
+        sql = '''SELECT DISTINCT a.category_id AS id, c.category 
+                 FROM articles AS a 
+                 INNER JOIN category AS c 
+                 ON a.category_id = c.id;'''
         db = get_db()
         con = db.get_connection()
         Cursor = con.cursor(dictionary=True)
@@ -233,7 +236,7 @@ async def get_demanded_articles(articles_requirements: articles_requirements):
         return result
     
 
-# homepage mrt click keyword search api router
+# homepage click keyword search api router
 @app.get("/api/forums")
 async def get_forum_info():
 
