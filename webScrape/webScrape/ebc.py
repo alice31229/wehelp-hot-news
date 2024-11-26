@@ -60,36 +60,41 @@ def get_ebc(scroll_time=3):
         time.sleep(sleep_time)
 
         soup = BeautifulSoup(driver.page_source, "html.parser")
-        article_date = soup.find('div', {'class': 'article_date'}).text
 
-        if article_date == yesterday:
+        try:
+            article_date = soup.find('div', {'class': 'article_date'}).text
 
-            article_title = soup.find("div", {'class': 'article_header'}).find('h1').text
-            article_ps = soup.find('div', {'class': 'article_content'}).find_all('p')
+            if article_date == yesterday:
 
-            article_kind = soup.find("div", {'class': 'breadcrumb'}).text.replace('首頁','')
-            article_kind = article_kind.replace('\n', '')
-            
-            total_txt = ''
-            for p in article_ps:
-                if '➤' not in p.text: # 過濾廣告文字
-                    article_content = p.text.replace('/n', '')
-                    # 過濾圖片文字說明
-                    cleaned_article_content = re.sub(r"（圖／.*?）", "", article_content)
-                    total_txt += cleaned_article_content
+                article_title = soup.find("div", {'class': 'article_header'}).find('h1').text
+                article_ps = soup.find('div', {'class': 'article_content'}).find_all('p')
 
-            total_txt = clean_content(total_txt)
+                article_kind = soup.find("div", {'class': 'breadcrumb'}).text.replace('首頁','')
+                article_kind = article_kind.replace('\n', '')
+                
+                total_txt = ''
+                for p in article_ps:
+                    if '➤' not in p.text: # 過濾廣告文字
+                        article_content = p.text.replace('/n', '')
+                        # 過濾圖片文字說明
+                        cleaned_article_content = re.sub(r"（圖／.*?）", "", article_content)
+                        total_txt += cleaned_article_content
 
-            # print('title', article_title)
-            # print('kind', article_kind)
-            # print('date', article_date)
-            # print('content', total_txt)
+                total_txt = clean_content(total_txt)
 
-            title.append(article_title)
-            date.append(article_date)
-            forum.append(article_kind)
-            content.append(total_txt)
-            link.append(target_article)
+                # print('title', article_title)
+                # print('kind', article_kind)
+                # print('date', article_date)
+                # print('content', total_txt)
+
+                title.append(article_title)
+                date.append(article_date)
+                forum.append(article_kind)
+                content.append(total_txt)
+                link.append(target_article)
+
+        except:
+            pass
     
     driver.quit()
     

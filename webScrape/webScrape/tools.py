@@ -432,6 +432,7 @@ def unify_forum_to_db():
         # 改善文章類別分類
         category_mapping = {
             '體育': '運動',
+            '國內 運動': '運動',
             '品味生活': '生活',
             '國內 財經': '財經',
             '國際 財經': '財經',
@@ -448,7 +449,9 @@ def unify_forum_to_db():
         }
 
         new_df.loc[new_df['統一文章類別'] == '', '統一文章類別'] = new_df['文章類別']
-        new_df['統一文章類別'] = new_df['統一文章類別'].replace(category_mapping)
+        new_df['統一文章類別'] = new_df['統一文章類別'].apply(
+            lambda x: category_mapping.get(x, x)
+        )
 
         final_df = new_df.merge(category_id_mapping_df, left_on='統一文章類別', right_on='category', how='left')
         final_df = final_df.merge(resource_id_mapping_df, left_on='文章來源', right_on='resource', how='left')
