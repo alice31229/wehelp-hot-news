@@ -287,7 +287,12 @@ def clean_content(content):
     url_pattern = r'https?://[^\s]+'
     result_content = re.sub(url_pattern, '', content)
     result_content = result_content.replace('原文連結', '')
-    result_content = result_content.replace('closeAdvertisementstaiwanese_weather [webstory]-20240912-23:00CANCELNEXT VIDEOplay_arrowvolume_mutePausePlay% buffered00:0000:0000:42UnmuteMutePlayPowered by GliaStudio', '')
+    result_content = re.sub(
+        r'closeAdvertisements.*?Powered by GliaStudio',  
+        '',                                              
+        result_content                                   
+    )
+
 
     return result_content
 
@@ -452,6 +457,13 @@ def unify_forum_to_db():
         new_df['統一文章類別'] = new_df['統一文章類別'].apply(
             lambda x: category_mapping.get(x, x)
         )
+
+        new_df['統一文章類別'] = new_df['統一文章類別'].fillna('')
+
+        new_df.loc[
+            (new_df['統一文章類別'] == '') & (new_df['文章類別'].str.contains('金融', na=False)), 
+            '統一文章類別'
+        ] = '金融'
 
         final_df = new_df.merge(category_id_mapping_df, left_on='統一文章類別', right_on='category', how='left')
         final_df = final_df.merge(resource_id_mapping_df, left_on='文章來源', right_on='resource', how='left')
